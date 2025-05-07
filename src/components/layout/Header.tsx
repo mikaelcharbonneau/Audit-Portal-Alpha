@@ -4,12 +4,15 @@ import HPELogo from '../ui/HPELogo';
 import { useTheme } from '../../context/ThemeContext';
 import { useAuth } from '../../context/AuthContext';
 import { useUser } from '../../context/UserContext';
+import { Header as GrommetHeader, Box, Nav, Button, Avatar, Text, ResponsiveContext, DropButton } from 'grommet';
+import { useContext } from 'react';
 
 const Header = () => {
   const location = useLocation();
   const { darkMode } = useTheme();
   const { logout } = useAuth();
   const { user } = useUser();
+  const size = useContext(ResponsiveContext);
 
   const navItems = [
     { path: '/', icon: <Home size={20} />, label: 'Dashboard' },
@@ -17,104 +20,88 @@ const Header = () => {
     { path: '/reports', icon: <BarChart size={20} />, label: 'Reports' },
   ];
 
-  const isActive = (path: string) => {
-    return location.pathname === path;
-  };
+  const isActive = (path: string) => location.pathname === path;
+
+  const userAvatar = (
+    <Avatar background="brand" src={user.avatarUrl} size="medium">
+      {!user.avatarUrl && user.name.charAt(0)}
+    </Avatar>
+  );
 
   return (
-    <header className="bg-white dark:bg-hpe-blue-900 shadow-sm">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-16">
-          <div className="flex items-center space-x-8">
-            <Link to="/" className="flex items-center">
-              <HPELogo className="h-8 w-auto" />
-              <span className="ml-3 text-lg font-medium text-hpe-blue-700 dark:text-white">Walkthrough App</span>
-            </Link>
-            
-            <nav className="hidden md:flex space-x-1">
-              {navItems.map((item) => (
-                <Link
-                  key={item.path}
-                  to={item.path}
-                  className={`flex items-center px-3 py-2 rounded-md text-sm font-medium transition-colors ${
-                    isActive(item.path)
-                      ? 'text-hpe-green-500 bg-hpe-green-50 dark:bg-hpe-green-900 dark:bg-opacity-30'
-                      : 'text-hpe-blue-500 dark:text-white hover:bg-gray-50 dark:hover:bg-hpe-blue-800'
-                  }`}
+    <GrommetHeader background={darkMode ? 'background-back' : 'background-front'} pad={{ horizontal: 'large', vertical: 'small' }} elevation="small">
+      <Box direction="row" align="center" gap="medium">
+        <Link to="/" style={{ display: 'flex', alignItems: 'center', textDecoration: 'none' }}>
+          <HPELogo height={32} />
+          <Text margin={{ left: 'small' }} weight="bold" color="text-strong" size="large">Walkthrough App</Text>
+        </Link>
+        {size !== 'small' && (
+          <Nav direction="row" gap="small">
+            {navItems.map((item) => (
+              <Link key={item.path} to={item.path} style={{ textDecoration: 'none' }}>
+                <Box
+                  direction="row"
+                  align="center"
+                  pad={{ horizontal: 'small', vertical: 'xsmall' }}
+                  background={isActive(item.path) ? { color: 'brand', opacity: 'weak' } : undefined}
+                  round="small"
+                  gap="xsmall"
                 >
-                  <span className="mr-2">{item.icon}</span>
-                  {item.label}
-                </Link>
-              ))}
-            </nav>
-          </div>
-
-          <div className="flex items-center space-x-4">
-            <button
-              type="button"
-              className="p-2 rounded-full text-hpe-blue-500 dark:text-white hover:bg-gray-100 dark:hover:bg-hpe-blue-800"
-              aria-label="Notifications"
-            >
-              <Bell className="h-5 w-5" />
-            </button>
-            <Link
-              to="/profile"
-              className="p-2 rounded-full text-hpe-blue-500 dark:text-white hover:bg-gray-100 dark:hover:bg-hpe-blue-800"
-              aria-label="Settings"
-            >
-              <Settings className="h-5 w-5" />
-            </Link>
-            <div className="relative">
-              <Link
-                to="/profile"
-                className="flex items-center space-x-3 p-1 rounded-full hover:bg-gray-100 dark:hover:bg-hpe-blue-800"
-              >
-                <div className="avatar w-8 h-8 bg-hpe-green text-white overflow-hidden">
-                  {user.avatarUrl ? (
-                    <img 
-                      src={user.avatarUrl} 
-                      alt={user.name}
-                      className="w-full h-full object-cover"
-                    />
-                  ) : (
-                    <span className="flex items-center justify-center w-full h-full">
-                      {user.name.charAt(0)}
-                    </span>
-                  )}
-                </div>
-                <span className="hidden md:inline-block text-sm font-medium dark:text-white">{user.name}</span>
+                  {item.icon}
+                  <Text color={isActive(item.path) ? 'brand' : 'text'} weight={isActive(item.path) ? 'bold' : undefined}>
+                    {item.label}
+                  </Text>
+                </Box>
               </Link>
-            </div>
-            <button
-              onClick={logout}
-              className="p-2 rounded-full text-hpe-blue-500 dark:text-white hover:bg-gray-100 dark:hover:bg-hpe-blue-800"
-              aria-label="Logout"
-              title="Logout"
-            >
-              <LogOut className="h-5 w-5" />
-            </button>
-          </div>
-        </div>
-
-        {/* Mobile Navigation */}
-        <nav className="md:hidden pb-3 overflow-x-auto flex space-x-2">
-          {navItems.map((item) => (
-            <Link
-              key={item.path}
-              to={item.path}
-              className={`flex items-center px-3 py-2 rounded-md text-sm font-medium whitespace-nowrap transition-colors ${
-                isActive(item.path)
-                  ? 'text-hpe-green-500 bg-hpe-green-50 dark:bg-hpe-green-900 dark:bg-opacity-30'
-                  : 'text-hpe-blue-500 dark:text-white hover:bg-gray-50 dark:hover:bg-hpe-blue-800'
-              }`}
-            >
-              <span className="mr-2">{item.icon}</span>
-              {item.label}
-            </Link>
-          ))}
-        </nav>
-      </div>
-    </header>
+            ))}
+          </Nav>
+        )}
+      </Box>
+      <Box direction="row" align="center" gap="small">
+        <Button plain icon={<Bell size={20} />} a11yTitle="Notifications" />
+        <Link to="/profile" style={{ display: 'flex', alignItems: 'center' }}>
+          <Box pad="xsmall" round="full" hoverIndicator>
+            <Settings size={20} />
+          </Box>
+        </Link>
+        <DropButton
+          dropAlign={{ top: 'bottom', right: 'right' }}
+          icon={userAvatar}
+          label={<Text size="small">{user.name}</Text>}
+          dropContent={
+            <Box pad="small" background="background-front" gap="small">
+              <Link to="/profile" style={{ textDecoration: 'none' }}>
+                <Text>Profile</Text>
+              </Link>
+              <Button onClick={logout} label="Logout" icon={<LogOut size={18} />} plain />
+            </Box>
+          }
+        />
+      </Box>
+      {size === 'small' && (
+        <Box direction="row" gap="xsmall" margin={{ top: 'small' }} overflow="auto">
+          <Nav direction="row" gap="xsmall">
+            {navItems.map((item) => (
+              <Link key={item.path} to={item.path} style={{ textDecoration: 'none' }}>
+                <Box
+                  direction="row"
+                  align="center"
+                  pad={{ horizontal: 'small', vertical: 'xsmall' }}
+                  background={isActive(item.path) ? { color: 'brand', opacity: 'weak' } : undefined}
+                  round="small"
+                  gap="xsmall"
+                >
+                  {item.icon}
+                  <Text color={isActive(item.path) ? 'brand' : 'text'} weight={isActive(item.path) ? 'bold' : undefined}>
+                    {item.label}
+                  </Text>
+                </Box>
+              </Link>
+            ))}
+          </Nav>
+        </Box>
+      )}
+    </GrommetHeader>
   );
 };
 

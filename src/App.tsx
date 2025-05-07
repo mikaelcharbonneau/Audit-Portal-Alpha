@@ -12,30 +12,34 @@ import ProtectedRoute from './components/ProtectedRoute';
 import { AuthProvider } from './context/AuthContext';
 import { UserProvider } from './context/UserContext';
 import { ThemeProvider } from './context/ThemeContext';
+import { Grommet } from 'grommet';
+import { hpe } from 'grommet-theme-hpe';
 
 function App() {
   return (
-    <AuthProvider>
-      <UserProvider>
-        <ThemeProvider>
-          <Routes>
-            <Route path="/login" element={<Login />} />
-            
-            <Route element={<ProtectedRoute />}>
-              <Route path="/" element={<Layout />}>
-                <Route index element={<Dashboard />} />
-                <Route path="inspections" element={<Inspections />} />
-                <Route path="inspection" element={<InspectionFlow />} />
-                <Route path="confirmation" element={<Confirmation />} />
-                <Route path="reports" element={<Reports />} />
-                <Route path="profile" element={<Profile />} />
-                <Route path="*" element={<NotFound />} />
+    <Grommet theme={hpe} full>
+      <AuthProvider>
+        <UserProvider>
+          <ThemeProvider>
+            <Routes>
+              <Route path="/login" element={<Login />} />
+              
+              <Route element={<ProtectedRoute />}>
+                <Route path="/" element={<Layout />}>
+                  <Route index element={<Dashboard />} />
+                  <Route path="inspections" element={<Inspections />} />
+                  <Route path="inspection" element={<InspectionFlow />} />
+                  <Route path="confirmation" element={<Confirmation />} />
+                  <Route path="reports" element={<Reports />} />
+                  <Route path="profile" element={<Profile />} />
+                  <Route path="*" element={<NotFound />} />
+                </Route>
               </Route>
-            </Route>
-          </Routes>
-        </ThemeProvider>
-      </UserProvider>
-    </AuthProvider>
+            </Routes>
+          </ThemeProvider>
+        </UserProvider>
+      </AuthProvider>
+    </Grommet>
   );
 }
 

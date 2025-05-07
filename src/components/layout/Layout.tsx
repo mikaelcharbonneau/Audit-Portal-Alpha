@@ -1,19 +1,20 @@
 import { Outlet } from 'react-router-dom';
 import Header from './Header';
 import { useTheme } from '../../context/ThemeContext';
+import { Box } from 'grommet';
 
 const Layout = () => {
   const { darkMode } = useTheme();
   
   return (
-    <div className={`min-h-screen flex flex-col ${darkMode ? 'dark' : ''}`}>
+    <Box fill direction="column" background={darkMode ? 'background-back' : 'background-front'}>
       <Header />
-      <main className="flex-1 p-4 md:p-6 bg-gray-50 dark:bg-hpe-blue-950">
-        <div className="max-w-7xl mx-auto">
+      <Box as="main" flex pad={{ vertical: 'medium', horizontal: 'large' }}>
+        <Box width="xlarge" alignSelf="center">
           <Outlet />
-        </div>
-      </main>
-    </div>
+        </Box>
+      </Box>
+    </Box>
   );
 };
 

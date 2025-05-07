@@ -1,3 +1,116 @@
+@font-face {
+  font-family: 'MetricHPE';
+  src: url('/fonts/MetricHPE-Web-Regular.woff') format('woff'),
+       url('/fonts/MetricHPE-Web-Regular.eot');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'MetricHPE';
+  src: url('/fonts/MetricHPE-Web-RegularItalic.woff') format('woff'),
+       url('/fonts/MetricHPE-Web-RegularItalic.eot');
+  font-weight: 400;
+  font-style: italic;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'MetricHPE';
+  src: url('/fonts/MetricHPE-Web-Medium.woff') format('woff'),
+       url('/fonts/MetricHPE-Web-Medium.eot');
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'MetricHPE';
+  src: url('/fonts/MetricHPE-Web-MediumItalic.woff') format('woff'),
+       url('/fonts/MetricHPE-Web-MediumItalic.eot');
+  font-weight: 500;
+  font-style: italic;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'MetricHPE';
+  src: url('/fonts/MetricHPE-Web-Semibold.woff') format('woff'),
+       url('/fonts/MetricHPE-Web-Semibold.eot');
+  font-weight: 600;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'MetricHPE';
+  src: url('/fonts/MetricHPE-Web-SemiboldItalic.woff') format('woff'),
+       url('/fonts/MetricHPE-Web-SemiboldItalic.eot');
+  font-weight: 600;
+  font-style: italic;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'MetricHPE';
+  src: url('/fonts/MetricHPE-Web-Bold.woff') format('woff'),
+       url('/fonts/MetricHPE-Web-Bold.eot');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'MetricHPE';
+  src: url('/fonts/MetricHPE-Web-BoldItalic.woff') format('woff'),
+       url('/fonts/MetricHPE-Web-BoldItalic.eot');
+  font-weight: 700;
+  font-style: italic;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'MetricHPE';
+  src: url('/fonts/MetricHPE-Web-Black.woff') format('woff'),
+       url('/fonts/MetricHPE-Web-Black.eot');
+  font-weight: 900;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'MetricHPE';
+  src: url('/fonts/MetricHPE-Web-BlackItalic.woff') format('woff'),
+       url('/fonts/MetricHPE-Web-BlackItalic.eot');
+  font-weight: 900;
+  font-style: italic;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'MetricHPE';
+  src: url('/fonts/MetricHPE-Web-Light.woff') format('woff'),
+       url('/fonts/MetricHPE-Web-Light.eot');
+  font-weight: 300;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'MetricHPE';
+  src: url('/fonts/MetricHPE-Web-LightItalic.woff') format('woff'),
+       url('/fonts/MetricHPE-Web-LightItalic.eot');
+  font-weight: 300;
+  font-style: italic;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'MetricHPE';
+  src: url('/fonts/MetricHPE-Web-Thin.woff') format('woff'),
+       url('/fonts/MetricHPE-Web-Thin.eot');
+  font-weight: 100;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'MetricHPE';
+  src: url('/fonts/MetricHPE-Web-ThinItalic.woff') format('woff'),
+       url('/fonts/MetricHPE-Web-ThinItalic.eot');
+  font-weight: 100;
+  font-style: italic;
+  font-display: swap;
+}
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -6,6 +119,7 @@
   html {
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    font-family: 'MetricHPE', Arial, Helvetica, sans-serif;
   }
   
   body {
