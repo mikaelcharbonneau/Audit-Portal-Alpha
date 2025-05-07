@@ -1,18 +1,19 @@
 import { Link, useLocation } from 'react-router-dom';
-import { Bell, User, Home, Clipboard, BarChart, Settings, LogOut } from 'lucide-react';
+import { Bell, Home, Clipboard, BarChart, Settings, LogOut } from 'lucide-react';
 import HPELogo from '../ui/HPELogo';
-import { currentUser } from '../../data/mockData';
 import { useTheme } from '../../context/ThemeContext';
 import { useAuth } from '../../context/AuthContext';
+import { useUser } from '../../context/UserContext';
 
 const Header = () => {
   const location = useLocation();
   const { darkMode } = useTheme();
   const { logout } = useAuth();
+  const { user } = useUser();
 
   const navItems = [
     { path: '/', icon: <Home size={20} />, label: 'Dashboard' },
-    { path: '/inspection', icon: <Clipboard size={20} />, label: 'Inspection' },
+    { path: '/inspections', icon: <Clipboard size={20} />, label: 'Inspections' },
     { path: '/reports', icon: <BarChart size={20} />, label: 'Reports' },
   ];
 
@@ -68,14 +69,20 @@ const Header = () => {
                 to="/profile"
                 className="flex items-center space-x-3 p-1 rounded-full hover:bg-gray-100 dark:hover:bg-hpe-blue-800"
               >
-                <div className="avatar w-8 h-8 bg-hpe-green text-white">
-                  {currentUser.avatar ? (
-                    <img src={currentUser.avatar} alt={currentUser.name} />
+                <div className="avatar w-8 h-8 bg-hpe-green text-white overflow-hidden">
+                  {user.avatarUrl ? (
+                    <img 
+                      src={user.avatarUrl} 
+                      alt={user.name}
+                      className="w-full h-full object-cover"
+                    />
                   ) : (
-                    <span>{currentUser.name.charAt(0)}</span>
+                    <span className="flex items-center justify-center w-full h-full">
+                      {user.name.charAt(0)}
+                    </span>
                   )}
                 </div>
-                <span className="hidden md:inline-block text-sm font-medium dark:text-white">{currentUser.name}</span>
+                <span className="hidden md:inline-block text-sm font-medium dark:text-white">{user.name}</span>
               </Link>
             </div>
             <button

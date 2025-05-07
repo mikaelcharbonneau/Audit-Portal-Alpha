@@ -1,18 +1,33 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { Save, AlertCircle, Plus, ChevronUp, ChevronDown, X, Server } from 'lucide-react';
 import FormField from '../components/inspection/FormField';
 import { formSections } from '../data/mockData';
+import { racksByDatahall } from '../data/mockData';
 
 const InspectionFlow = () => {
   const navigate = useNavigate();
+  const location = useLocation();
+  const datahallId = location.state?.datahallId;
   const [formData, setFormData] = useState<Record<string, any>>({});
   const [lastSaved, setLastSaved] = useState<Date | null>(null);
   const [errors, setErrors] = useState<string[]>([]);
-  const [racks, setRacks] = useState([0]); // Track rack indices
+  const [racks, setRacks] = useState([0]);
   const [foundIssues, setFoundIssues] = useState<boolean | null>(null);
   const [openRacks, setOpenRacks] = useState<number[]>([0]);
   const [selectedDevices, setSelectedDevices] = useState<Record<number, string[]>>({});
+
+  // Redirect if no datahall is selected
+  if (!datahallId) {
+    navigate('/');
+    return null;
+  }
+
+  const datahallName = datahallId.split('-').map(word => 
+    word.charAt(0).toUpperCase() + word.slice(1)
+  ).join(' ');
+
+  const availableRacks = racksByDatahall[datahallId] || [];
 
   const toggleRack = (rackIndex: number) => {
     setOpenRacks(prev => 
@@ -153,7 +168,7 @@ const InspectionFlow = () => {
     const isOpen = openRacks.includes(rackIndex);
     const rackDevices = selectedDevices[rackIndex] || [];
     const hasSelectedDevices = rackDevices.length > 0;
-    const rackLocation = formData[`rack-location-${rackIndex}`];
+    const selectedRack = formData[`rack-location-${rackIndex}`];
 
     return (
       <div key={rackIndex} className="card mb-6 overflow-hidden">
@@ -164,7 +179,7 @@ const InspectionFlow = () => {
           <div className="flex items-center text-hpe-blue-700">
             <Server size={18} className="text-hpe-green mr-2" />
             <span className="font-medium">
-              Rack{rackLocation ? `: ${rackLocation}` : ''}
+              Rack{selectedRack ? `: ${selectedRack}` : ''}
             </span>
           </div>
           <div className="flex items-center">
@@ -190,13 +205,16 @@ const InspectionFlow = () => {
               <label className="form-label">
                 Rack Location <span className="text-hpe-error-500">*</span>
               </label>
-              <input
-                type="text"
-                value={rackLocation || ''}
+              <select
+                value={formData[`rack-location-${rackIndex}`] || ''}
                 onChange={(e) => handleFieldChange('rack-location', e.target.value, rackIndex)}
                 className="form-input"
-                placeholder="Enter rack location"
-              />
+              >
+                <option value="">Select a rack</option>
+                {availableRacks.map((rack) => (
+                  <option key={rack} value={rack}>{rack}</option>
+                ))}
+              </select>
             </div>
             
             <div className="mb-4">
@@ -263,7 +281,10 @@ const InspectionFlow = () => {
   return (
     <div className="max-w-5xl mx-auto">
       <div className="flex items-center justify-between mb-4">
-        <h1 className="text-2xl font-bold text-hpe-blue-700">Inspection Walkthrough</h1>
+        <div>
+          <h1 className="text-2xl font-bold text-hpe-blue-700">Inspection Walkthrough</h1>
+          <p className="text-hpe-blue-500 mt-1">Location: {datahallName}</p>
+        </div>
         {renderSaveStatus()}
       </div>
 

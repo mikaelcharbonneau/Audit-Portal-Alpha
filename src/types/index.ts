@@ -5,6 +5,7 @@ export type User = {
   role: string;
   avatar?: string;
   lastInspectionDate?: string;
+  avatarUrl?: string;
 };
 
 export type InspectionStatus = 'in-progress' | 'completed';

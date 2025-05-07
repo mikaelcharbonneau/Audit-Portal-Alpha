@@ -1,7 +1,8 @@
 import { format } from 'date-fns';
 import { Settings, Mail, Phone, Building, Clock, Download, Moon, Sun } from 'lucide-react';
-import { currentUser } from '../data/mockData';
+import AvatarUpload from '../components/profile/AvatarUpload';
 import { useTheme } from '../context/ThemeContext';
+import { useUser } from '../context/UserContext';
 
 const ProfileActivity = [
   { type: 'inspection', date: '2023-04-15', description: 'Completed walkthrough of Data Center A' },
@@ -14,6 +15,11 @@ const ProfileActivity = [
 
 const Profile = () => {
   const { darkMode, toggleDarkMode } = useTheme();
+  const { user, updateUser } = useUser();
+
+  const handleAvatarUpload = (url: string) => {
+    updateUser({ avatarUrl: url });
+  };
 
   return (
     <div className="max-w-4xl mx-auto">
@@ -24,28 +30,37 @@ const Profile = () => {
         <div className="px-6 pb-6 pt-16 md:pt-0 md:flex relative">
           {/* Avatar */}
           <div className="absolute -top-16 md:relative md:-top-12 md:mr-6">
-            <div className="avatar w-32 h-32 border-4 border-white dark:border-hpe-blue-900 text-white bg-hpe-green text-4xl">
-              {currentUser.avatar ? (
-                <img src={currentUser.avatar} alt={currentUser.name} />
-              ) : (
-                <span>{currentUser.name.charAt(0)}</span>
-              )}
+            <div className="relative group w-32 h-32">
+              <div className="avatar w-full h-full border-4 border-white dark:border-hpe-blue-900 text-white bg-hpe-green text-4xl overflow-hidden">
+                {user.avatarUrl ? (
+                  <img 
+                    src={user.avatarUrl} 
+                    alt={user.name}
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  <span className="flex items-center justify-center w-full h-full">
+                    {user.name.charAt(0)}
+                  </span>
+                )}
+              </div>
+              <AvatarUpload onUpload={handleAvatarUpload} size={128} />
             </div>
           </div>
           
           {/* Info */}
           <div className="md:flex-1 md:pt-12">
             <h1 className="text-2xl font-bold text-hpe-blue-800 dark:text-white mb-1">
-              {currentUser.name}
+              {user.name}
             </h1>
             <p className="text-hpe-blue-600 dark:text-hpe-blue-100 mb-4">
-              {currentUser.role}
+              {user.role}
             </p>
             
             <div className="space-y-2 max-w-md">
               <div className="flex items-center">
                 <Mail className="h-4 w-4 text-hpe-blue-400 dark:text-hpe-blue-300 mr-2" />
-                <span className="text-sm dark:text-gray-200">{currentUser.email}</span>
+                <span className="text-sm dark:text-gray-200">{user.email}</span>
               </div>
               <div className="flex items-center">
                 <Phone className="h-4 w-4 text-hpe-blue-400 dark:text-hpe-blue-300 mr-2" />
