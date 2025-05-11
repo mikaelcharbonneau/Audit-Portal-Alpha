@@ -1,6 +1,5 @@
 import { format } from 'date-fns';
 import { Settings, Mail, Phone, Building, Clock, Download, Moon, Sun } from 'lucide-react';
-import AvatarUpload from '../components/profile/AvatarUpload';
 import { useTheme } from '../context/ThemeContext';
 import { useUser } from '../context/UserContext';
 
@@ -13,13 +12,11 @@ const ProfileActivity = [
   { type: 'inspection', date: '2023-04-01', description: 'Completed walkthrough of Data Center B' },
 ];
 
+type ProfileProps = {};
+
 const Profile = () => {
   const { darkMode, toggleDarkMode } = useTheme();
   const { user, updateUser } = useUser();
-
-  const handleAvatarUpload = (url: string) => {
-    updateUser({ avatarUrl: url });
-  };
 
   return (
     <div className="max-w-4xl mx-auto">
@@ -44,7 +41,6 @@ const Profile = () => {
                   </span>
                 )}
               </div>
-              <AvatarUpload onUpload={handleAvatarUpload} size={128} />
             </div>
           </div>
           
@@ -155,10 +151,6 @@ const Profile = () => {
                     className="toggle-checkbox absolute block w-6 h-6 rounded-full bg-white border-4 appearance-none cursor-pointer"
                     aria-label="Toggle email notifications"
                     title="Toggle email notifications"
-                    onChange={(e) => {
-                      const checked = e.target.checked;
-                      setEmailNotifications(checked);
-                    }}
                   />
                   <label 
                     htmlFor="toggle-1" 
@@ -176,10 +168,6 @@ const Profile = () => {
                     className="toggle-checkbox absolute block w-6 h-6 rounded-full bg-white border-4 appearance-none cursor-pointer"
                     aria-label="Toggle push notifications"
                     title="Toggle push notifications"
-                    onChange={(e) => {
-                      const checked = e.target.checked;
-                      setPushNotifications(checked);
-                    }}
                   />
                   <label 
                     htmlFor="toggle-2" 
@@ -196,11 +184,15 @@ const Profile = () => {
                     id="toggle-3"
                     defaultChecked 
                     className="toggle-checkbox absolute block w-6 h-6 rounded-full bg-white border-4 appearance-none cursor-pointer" 
+                    aria-label="Toggle auto-save reports"
+                    title="Toggle auto-save reports"
                   />
                   <label 
                     htmlFor="toggle-3" 
                     className="toggle-label block overflow-hidden h-6 rounded-full bg-gray-300 dark:bg-hpe-blue-800 cursor-pointer"
-                  ></label>
+                  >
+                    <span className="sr-only">Toggle auto-save reports</span>
+                  </label>
                 </div>
               </div>
             </div>
