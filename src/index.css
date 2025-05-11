@@ -124,10 +124,12 @@
   
   body {
     @apply bg-gray-50 text-hpe-blue-500;
+    background-color: #fff;
   }
   
   .dark body {
-    @apply bg-hpe-blue-950 text-hpe-blue-100;
+    background-color: #181A20 !important;
+    color: #F5F6FA;
   }
 
   h1 {

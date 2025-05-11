@@ -59,7 +59,7 @@ const ReportFilters = ({ onFilterChange }: ReportFiltersProps) => {
   };
 
   return (
-    <div className="bg-white rounded-lg shadow-sm p-4 mb-6">
+    <div className="bg-[var(--grommet-background-back,#181A20)] rounded-lg shadow-sm p-4 mb-6">
       <div className="flex flex-col md:flex-row space-y-4 md:space-y-0 md:space-x-4">
         {/* Search */}
         <div className="flex-1 relative">
@@ -71,7 +71,8 @@ const ReportFilters = ({ onFilterChange }: ReportFiltersProps) => {
             placeholder="Search reports"
             value={searchText}
             onChange={handleSearchChange}
-            className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md text-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-hpe-green-300 focus:border-hpe-green-300"
+            className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md text-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-hpe-green-300 focus:border-hpe-green-300 dark:bg-[var(--grommet-background-back,#181A20)] text-[var(--grommet-text,#222)] dark:text-[var(--grommet-text,#F5F6FA)]"
+            style={{ backgroundColor: 'white' }}
           />
         </div>
 
@@ -80,7 +81,8 @@ const ReportFilters = ({ onFilterChange }: ReportFiltersProps) => {
           <select
             value={selectedLocation}
             onChange={handleLocationChange}
-            className="block w-full border border-gray-300 rounded-md py-2 pl-3 pr-10 text-sm focus:outline-none focus:ring-2 focus:ring-hpe-green-300 focus:border-hpe-green-300"
+            className="block w-full border border-gray-300 rounded-md py-2 pl-3 pr-10 text-sm focus:outline-none focus:ring-2 focus:ring-hpe-green-300 focus:border-hpe-green-300 dark:bg-[var(--grommet-background-back,#181A20)] text-[var(--grommet-text,#222)] dark:text-[var(--grommet-text,#F5F6FA)]"
+            style={{ backgroundColor: 'white' }}
           >
             <option value="">All Locations</option>
             {locations.map(location => (
@@ -96,7 +98,8 @@ const ReportFilters = ({ onFilterChange }: ReportFiltersProps) => {
           <select
             value={severity}
             onChange={handleSeverityChange}
-            className="block w-full border border-gray-300 rounded-md py-2 pl-3 pr-10 text-sm focus:outline-none focus:ring-2 focus:ring-hpe-green-300 focus:border-hpe-green-300"
+            className="block w-full border border-gray-300 rounded-md py-2 pl-3 pr-10 text-sm focus:outline-none focus:ring-2 focus:ring-hpe-green-300 focus:border-hpe-green-300 dark:bg-[var(--grommet-background-back,#181A20)] text-[var(--grommet-text,#222)] dark:text-[var(--grommet-text,#F5F6FA)]"
+            style={{ backgroundColor: 'white' }}
           >
             <option value="">All Severities</option>
             <option value="low">Low</option>
