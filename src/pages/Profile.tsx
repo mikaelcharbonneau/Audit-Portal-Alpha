@@ -152,7 +152,13 @@ const Profile = () => {
                     type="checkbox" 
                     id="toggle-1" 
                     defaultChecked 
-                    className="toggle-checkbox absolute block w-6 h-6 rounded-full bg-white border-4 appearance-none cursor-pointer" 
+                    className="toggle-checkbox absolute block w-6 h-6 rounded-full bg-white border-4 appearance-none cursor-pointer"
+                    aria-label="Toggle email notifications"
+                    title="Toggle email notifications"
+                    onChange={(e) => {
+                      const checked = e.target.checked;
+                      setEmailNotifications(checked);
+                    }}
                   />
                   <label 
                     htmlFor="toggle-1" 
@@ -167,7 +173,13 @@ const Profile = () => {
                   <input 
                     type="checkbox" 
                     id="toggle-2" 
-                    className="toggle-checkbox absolute block w-6 h-6 rounded-full bg-white border-4 appearance-none cursor-pointer" 
+                    className="toggle-checkbox absolute block w-6 h-6 rounded-full bg-white border-4 appearance-none cursor-pointer"
+                    aria-label="Toggle push notifications"
+                    title="Toggle push notifications"
+                    onChange={(e) => {
+                      const checked = e.target.checked;
+                      setPushNotifications(checked);
+                    }}
                   />
                   <label 
                     htmlFor="toggle-2" 

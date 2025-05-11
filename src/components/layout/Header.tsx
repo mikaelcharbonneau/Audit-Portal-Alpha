@@ -2,7 +2,6 @@ import { Link, useLocation } from 'react-router-dom';
 import { Bell, Home, Clipboard, BarChart, Settings, LogOut } from 'lucide-react';
 import HPELogo from '../ui/HPELogo';
 import { useTheme } from '../../context/ThemeContext';
-import { useAuth } from '../../context/AuthContext';
 import { useUser } from '../../context/UserContext';
 import { Header as GrommetHeader, Box, Nav, Button, Avatar, Text, ResponsiveContext, DropButton } from 'grommet';
 import { useContext } from 'react';
@@ -10,7 +9,6 @@ import { useContext } from 'react';
 const Header = () => {
   const location = useLocation();
   const { darkMode } = useTheme();
-  const { logout } = useAuth();
   const { user } = useUser();
   const size = useContext(ResponsiveContext);
 
@@ -74,7 +72,7 @@ const Header = () => {
                 <Link to="/profile" style={{ textDecoration: 'none' }}>
                   <Text>Profile</Text>
                 </Link>
-                <Button onClick={logout} label="Logout" icon={<LogOut size={18} />} plain />
+                <Button onClick={() => signOut()} label="Logout" icon={<LogOut size={18} />} plain />
               </Box>
             }
           />

@@ -7,9 +7,6 @@ import Confirmation from './pages/Confirmation';
 import Reports from './pages/Reports';
 import Profile from './pages/Profile';
 import NotFound from './pages/NotFound';
-import Login from './pages/Login';
-import ProtectedRoute from './components/ProtectedRoute';
-import { AuthProvider } from './context/AuthContext';
 import { UserProvider } from './context/UserContext';
 import { ThemeProvider, useTheme } from './context/ThemeContext';
 import { Grommet } from 'grommet';
@@ -89,24 +86,19 @@ function AppContent() {
   const { darkMode } = useTheme();
   return (
     <Grommet theme={modernDarkTheme} full themeMode={darkMode ? 'dark' : 'light'}>
-      <AuthProvider>
-        <UserProvider>
-          <Routes>
-            <Route path="/login" element={<Login />} />
-            <Route element={<ProtectedRoute />}>
-              <Route path="/" element={<Layout />}>
-                <Route index element={<Dashboard />} />
-                <Route path="inspections" element={<Inspections />} />
-                <Route path="inspection" element={<InspectionFlow />} />
-                <Route path="confirmation" element={<Confirmation />} />
-                <Route path="reports" element={<Reports />} />
-                <Route path="profile" element={<Profile />} />
-                <Route path="*" element={<NotFound />} />
-              </Route>
-            </Route>
-          </Routes>
-        </UserProvider>
-      </AuthProvider>
+      <UserProvider>
+        <Routes>
+          <Route path="/" element={<Layout />}>
+            <Route index element={<Dashboard />} />
+            <Route path="inspections" element={<Inspections />} />
+            <Route path="inspection" element={<InspectionFlow />} />
+            <Route path="confirmation" element={<Confirmation />} />
+            <Route path="reports" element={<Reports />} />
+            <Route path="profile" element={<Profile />} />
+            <Route path="*" element={<NotFound />} />
+          </Route>
+        </Routes>
+      </UserProvider>
     </Grommet>
   );
 }
