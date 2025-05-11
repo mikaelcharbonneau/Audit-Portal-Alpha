@@ -1,7 +1,7 @@
 import { format } from 'date-fns';
 import { Settings, Mail, Phone, Building, Clock, Download, Moon, Sun } from 'lucide-react';
 import { useTheme } from '../context/ThemeContext';
-import { useUser } from '../context/UserContext';
+import { currentUser } from '../data/mockData';
 
 const ProfileActivity = [
   { type: 'inspection', date: '2023-04-15', description: 'Completed walkthrough of Data Center A' },
@@ -12,11 +12,10 @@ const ProfileActivity = [
   { type: 'inspection', date: '2023-04-01', description: 'Completed walkthrough of Data Center B' },
 ];
 
-type ProfileProps = {};
-
 const Profile = () => {
   const { darkMode, toggleDarkMode } = useTheme();
-  const { user, updateUser } = useUser();
+  // Use mockData instead of UserContext
+  const user = currentUser;
 
   return (
     <div className="max-w-4xl mx-auto">
