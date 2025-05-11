@@ -1,0 +1,10 @@
+{
+  "$schema": "https://aka.ms/azure/static-web-apps/database-config-schema",
+  "connections": [
+    {
+      "name": "aicloudworkspace",
+      "databaseType": "mssql",
+      "connectionStringSetting": "SQL_CONNECTION_STRING"
+    }
+  ]
+}
