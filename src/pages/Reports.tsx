@@ -63,21 +63,21 @@ const Reports = () => {
       </div>
 
       {/* Filters */}
-      <div className="bg-[var(--grommet-background-back,#fff)] rounded-lg shadow-sm p-4 mb-6">
+      <div className="bg-gray-50 rounded-lg p-4 mb-6">
         <ReportFilters onFilterChange={handleFilterChange} />
       </div>
 
       {/* Carousel Navigation */}
       <div className="flex justify-center items-center mb-4 gap-4">
         <button
-          className="p-2 rounded-full bg-[var(--grommet-background-front,#f5f5f5)] hover:bg-hpe-green-100 text-hpe-blue-700"
+          className="p-2 rounded-full bg-gray-50 hover:bg-hpe-green-100 text-hpe-blue-700"
           onClick={() => instanceRef.current?.prev()}
           aria-label="Previous"
         >
           <ArrowLeft size={20} />
         </button>
         <button
-          className="p-2 rounded-full bg-[var(--grommet-background-front,#f5f5f5)] hover:bg-hpe-green-100 text-hpe-blue-700"
+          className="p-2 rounded-full bg-gray-50 hover:bg-hpe-green-100 text-hpe-blue-700"
           onClick={() => instanceRef.current?.next()}
           aria-label="Next"
         >
@@ -90,18 +90,18 @@ const Reports = () => {
         {filteredReports.map((report, idx) => (
           <div
             key={report.id}
-            className="keen-slider__slide flex flex-col items-stretch justify-between bg-[var(--grommet-background-back,#fff)] rounded-xl shadow-lg p-6 transition-transform duration-300"
+            className="keen-slider__slide flex flex-col items-stretch justify-between bg-white rounded-xl shadow-lg p-6 transition-transform duration-300"
             style={{ minHeight: 420, minWidth: 320, maxWidth: 400 }}
           >
             <div className="flex-1 flex flex-col">
-              <h2 className="text-lg font-bold mb-2 text-hpe-blue-900 dark:text-white">{report.title}</h2>
-              <p className="text-sm text-hpe-blue-700 dark:text-hpe-blue-200 mb-3">{report.location} • {new Date(report.date).toLocaleDateString()}</p>
+              <h2 className="text-lg font-bold mb-2 text-hpe-blue-900">{report.title}</h2>
+              <p className="text-sm text-hpe-blue-700 mb-3">{report.location} • {new Date(report.date).toLocaleDateString()}</p>
               <div className="mb-3">
                 <span className="font-semibold text-hpe-green-400">Issues:</span>
                 <ul className="mt-1 space-y-1">
                   {report.issues.length > 0 ? (
                     report.issues.slice(0, 3).map((issue) => (
-                      <li key={issue.id} className="flex items-center text-sm text-hpe-blue-900 dark:text-white">
+                      <li key={issue.id} className="flex items-center text-sm text-hpe-blue-900">
                         <span className="inline-block w-2 h-2 rounded-full mr-2" style={{ backgroundColor: issue.severity === 'critical' ? '#FF0000' : issue.severity === 'high' ? '#FFA500' : issue.severity === 'medium' ? '#FFCC00' : '#00CC00' }}></span>
                         {issue.description}
                       </li>
@@ -114,7 +114,7 @@ const Reports = () => {
               {report.recommendations && (
                 <div className="mb-3">
                   <span className="font-semibold text-hpe-green-400">Recommendations:</span>
-                  <p className="text-sm text-hpe-blue-900 dark:text-white mt-1">{report.recommendations}</p>
+                  <p className="text-sm text-hpe-blue-900 mt-1">{report.recommendations}</p>
                 </div>
               )}
             </div>
