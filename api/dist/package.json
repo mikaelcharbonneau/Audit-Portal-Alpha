@@ -1,0 +1,17 @@
+{
+  "name": "goodwalkthrough-api",
+  "version": "1.0.0",
+  "description": "Azure Functions API for GoodWalkthrough app",
+  "main": "index.js",
+  "scripts": {
+    "build": "tsc",
+    "start": "func start"
+  },
+  "dependencies": {
+    "@azure/functions": "^4.7.0",
+    "mssql": "^10.0.0"
+  },
+  "devDependencies": {
+    "typescript": "^5.0.0"
+  }
+}
