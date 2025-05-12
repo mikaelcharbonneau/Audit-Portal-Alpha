@@ -79,7 +79,10 @@ app.post('/api/SubmitInspection', function (req, res) {
 
 // Serve static files from the frontend build (dist at project root)
 import path from 'path';
-app.use(express.static(path.join(__dirname, '../../dist')));
+
+// Serve static files from the frontend build
+const distPath = path.join(__dirname, '../../dist');
+app.use(express.static(distPath));
 
 // Health check endpoint for /api
 app.get('/api', (req, res) => {
@@ -87,13 +90,12 @@ app.get('/api', (req, res) => {
 });
 
 // SPA fallback: serve index.html for any non-API route
-app.get(/^\/(?!api).*/, (req, res) => {
-  res.sendFile(path.join(__dirname, '../../dist', 'index.html'));
-});
-
-// Serve index.html for root route
-app.get('/', (req, res) => {
-  res.sendFile(path.join(__dirname, '../../dist', 'index.html'));
+app.get('*', (req, res) => {
+  if (!req.path.startsWith('/api')) {
+    res.sendFile(path.join(distPath, 'index.html'));
+  } else {
+    res.status(404).send('API endpoint not found');
+  }
 });
 
 app.listen(port, () => {
