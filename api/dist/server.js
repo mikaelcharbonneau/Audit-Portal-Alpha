@@ -87,8 +87,15 @@ app.post('/api/SubmitInspection', function (req, res) {
         res.status(500).send(`Error storing inspection: ${error.message}`);
     });
 });
-// Health check endpoint
-app.get('/', (req, res) => {
+// Serve static files from the frontend build (dist at project root)
+const path_1 = __importDefault(require("path"));
+app.use(express_1.default.static(path_1.default.join(__dirname, '../../dist')));
+// SPA fallback: serve index.html for any non-API route
+app.get(/^\/(?!api).*/, (req, res) => {
+    res.sendFile(path_1.default.join(__dirname, '../../dist', 'index.html'));
+});
+// Health check endpoint (keep for /api/ or debugging)
+app.get('/api', (req, res) => {
     res.send('API is running');
 });
 app.listen(port, () => {

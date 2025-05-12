@@ -77,8 +77,17 @@ app.post('/api/SubmitInspection', function (req, res) {
   });
 });
 
-// Health check endpoint
-app.get('/', (req, res) => {
+// Serve static files from the frontend build (dist at project root)
+import path from 'path';
+app.use(express.static(path.join(__dirname, '../../dist')));
+
+// SPA fallback: serve index.html for any non-API route
+app.get(/^\/(?!api).*/, (req, res) => {
+  res.sendFile(path.join(__dirname, '../../dist', 'index.html'));
+});
+
+// Health check endpoint (keep for /api/ or debugging)
+app.get('/api', (req, res) => {
   res.send('API is running');
 });
 
