@@ -81,14 +81,19 @@ app.post('/api/SubmitInspection', function (req, res) {
 import path from 'path';
 app.use(express.static(path.join(__dirname, '../../dist')));
 
+// Health check endpoint for /api
+app.get('/api', (req, res) => {
+  res.send('API is running');
+});
+
 // SPA fallback: serve index.html for any non-API route
 app.get(/^\/(?!api).*/, (req, res) => {
   res.sendFile(path.join(__dirname, '../../dist', 'index.html'));
 });
 
-// Health check endpoint (keep for /api/ or debugging)
-app.get('/api', (req, res) => {
-  res.send('API is running');
+// Serve index.html for root route
+app.get('/', (req, res) => {
+  res.sendFile(path.join(__dirname, '../../dist', 'index.html'));
 });
 
 app.listen(port, () => {
