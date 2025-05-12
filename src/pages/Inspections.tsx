@@ -53,7 +53,7 @@ const Inspections = () => {
       </div>
 
       {/* Filters */}
-      <div className="bg-[var(--grommet-background-back,#181A20)] rounded-lg shadow-sm p-4 mb-6">
+      <div className="bg-white dark:bg-hpe-blue-900 rounded-lg shadow-sm p-4 mb-6">
         <div className="flex flex-col md:flex-row space-y-4 md:space-y-0 md:space-x-4">
           <div className="flex-1 relative">
             <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -62,12 +62,11 @@ const Inspections = () => {
             <input
               type="text"
               placeholder="Search inspections"
-              className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md text-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-hpe-green-300 focus:border-hpe-green-300 dark:bg-[var(--grommet-background-back,#181A20)] text-[var(--grommet-text,#222)] dark:text-[var(--grommet-text,#F5F6FA)]"
-              style={{ backgroundColor: 'white' }}
+              className="block w-full pl-10 pr-3 py-2 border border-gray-300 dark:border-hpe-blue-800 rounded-md text-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-hpe-green-300 focus:border-hpe-green-300 bg-white dark:bg-hpe-blue-950 text-hpe-blue-900 dark:text-white"
             />
           </div>
           <div className="w-full md:w-48">
-            <select className="block w-full border border-gray-300 rounded-md py-2 pl-3 pr-10 text-sm focus:outline-none focus:ring-2 focus:ring-hpe-green-300 focus:border-hpe-green-300 dark:bg-[var(--grommet-background-back,#181A20)] text-[var(--grommet-text,#222)] dark:text-[var(--grommet-text,#F5F6FA)]" style={{ backgroundColor: 'white' }}>
+            <select className="block w-full border border-gray-300 dark:border-hpe-blue-800 rounded-md py-2 pl-3 pr-10 text-sm focus:outline-none focus:ring-2 focus:ring-hpe-green-300 focus:border-hpe-green-300 bg-white dark:bg-hpe-blue-950 text-hpe-blue-900 dark:text-white">
               <option value="">All Statuses</option>
               <option value="completed">Completed</option>
               <option value="in-progress">In Progress</option>
