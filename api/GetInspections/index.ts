@@ -1,7 +1,7 @@
-import { AzureFunction, Context, HttpRequest } from "@azure/functions";
+import type { Context, HttpRequest } from "@azure/functions";
 import { getConnection } from "../db";
 
-const httpTrigger: AzureFunction = async (context: Context, _req: HttpRequest): Promise<void> => {
+export default async function (context: Context, req: HttpRequest): Promise<void> {
   try {
     const pool = await getConnection();
     const result = await pool.request().query(
@@ -17,6 +17,4 @@ const httpTrigger: AzureFunction = async (context: Context, _req: HttpRequest): 
       body: `Error fetching inspections: ${error.message}`,
     };
   }
-};
-
-export default httpTrigger;
+}

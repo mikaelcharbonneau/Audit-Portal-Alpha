@@ -1,7 +1,7 @@
-import { AzureFunction, Context, HttpRequest } from "@azure/functions";
+import type { Context, HttpRequest } from "@azure/functions";
 import { getConnection } from "../db";
 
-const httpTrigger: AzureFunction = async function (context: Context, req: HttpRequest): Promise<void> {
+export default async function (context: Context, req: HttpRequest): Promise<void> {
   try {
     const { id } = req.query || {};
     
@@ -44,6 +44,4 @@ const httpTrigger: AzureFunction = async function (context: Context, req: HttpRe
       body: `Error generating report: ${error.message}`
     };
   }
-};
-
-export default httpTrigger;
+}
