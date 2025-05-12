@@ -8,8 +8,8 @@
     "start": "func start"
   },
   "dependencies": {
-    "mssql": "^10.0.0",
-    "@azure/functions": "^4.7.0"
+    "@azure/functions": "^4.7.0",
+    "mssql": "^10.0.0"
   },
   "devDependencies": {
     "typescript": "^5.0.0"
