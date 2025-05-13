@@ -39,22 +39,39 @@ interface ReportData {
   };
 }
 
-const Report = () => {
+const Reports = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const [report, setReport] = useState<ReportData | null>(null);
+  const [reports, setReports] = useState<ReportData[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     if (id) {
-      fetchReport(id);
+      fetchSingleReport(id);
+    } else {
+      fetchAllReports();
     }
   }, [id]);
 
-  const fetchReport = async (reportId: string) => {
-    setLoading(true);
-    setError(null);
+  const fetchAllReports = async () => {
+    try {
+      const { data, error: supabaseError } = await supabase
+        .from('AuditReports')
+        .select('*')
+        .order('Timestamp', { ascending: false });
+
+      if (supabaseError) throw supabaseError;
+      setReports(data || []);
+    } catch (error: any) {
+      console.error('Error fetching reports:', error);
+      setError(error.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const fetchSingleReport = async (reportId: string) => {
     try {
       const { data, error: supabaseError } = await supabase
         .from('AuditReports')
@@ -62,12 +79,9 @@ const Report = () => {
         .eq('Id', reportId)
         .single();
       
-      if (supabaseError) {
-        throw supabaseError;
-      }
-      
+      if (supabaseError) throw supabaseError;
       if (data) {
-        setReport(data);
+        setReports([data]);
       } else {
         throw new Error('Report not found');
       }
@@ -79,36 +93,7 @@ const Report = () => {
     }
   };
 
-  const getStatusColor = (status: string) => {
-    switch (status?.toLowerCase()) {
-      case 'operational':
-        return 'status-ok';
-      case 'maintenance':
-        return 'status-warning';
-      case 'alert':
-        return 'status-critical';
-      case 'offline':
-        return 'status-disabled';
-      default:
-        return 'status-unknown';
-    }
-  };
-
-  const getTemperatureStatus = (temp: number) => {
-    if (temp < 18) return 'status-warning';
-    if (temp > 27) return 'status-critical';
-    return 'status-ok';
-  };
-
-  const getHumidityStatus = (humidity: number) => {
-    if (humidity < 30) return 'status-warning';
-    if (humidity > 70) return 'status-critical';
-    return 'status-ok';
-  };
-
-  const downloadReport = () => {
-    if (!report) return;
-    
+  const downloadReport = (report: ReportData) => {
     const reportData = JSON.stringify(report, null, 2);
     const blob = new Blob([reportData], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
@@ -125,7 +110,7 @@ const Report = () => {
     return (
       <Box align="center" justify="center" height="medium" pad="large">
         <Spinner size="medium" />
-        <Text margin={{ top: 'small' }}>Loading report...</Text>
+        <Text margin={{ top: 'small' }}>Loading reports...</Text>
       </Box>
     );
   }
@@ -135,8 +120,8 @@ const Report = () => {
       <Box pad="medium">
         <Button
           icon={<FormPrevious />}
-          label="Back to Inspections"
-          onClick={() => navigate('/inspections')}
+          label="Back"
+          onClick={() => navigate(-1)}
           margin={{ bottom: 'medium' }}
         />
         <Box
@@ -148,19 +133,56 @@ const Report = () => {
           align="center"
         >
           <StatusWarning color="white" />
-          <Text color="white">Error loading report: {error}</Text>
+          <Text color="white">Error loading reports: {error}</Text>
         </Box>
       </Box>
     );
   }
 
+  // Show all reports if no ID is provided
+  if (!id) {
+    return (
+      <Box pad="medium">
+        <Heading level={2} margin={{ bottom: 'medium' }}>Reports</Heading>
+        <Grid columns={{ count: 'fit', size: 'medium' }} gap="medium">
+          {reports.map((report) => (
+            <Card key={report.Id} background="light-1" onClick={() => navigate(`/reports/${report.Id}`)}>
+              <CardHeader pad="medium">
+                <Text weight="bold">{report.ReportData.datahall}</Text>
+              </CardHeader>
+              <CardBody pad="medium">
+                <Box gap="small">
+                  <Text size="small">Submitted by: {report.UserEmail}</Text>
+                  <Text size="small">Date: {format(new Date(report.Timestamp), 'PPp')}</Text>
+                  <Box 
+                    background={report.ReportData.isUrgent ? 'status-critical' : 'status-ok'}
+                    pad={{ horizontal: 'small', vertical: 'xsmall' }}
+                    round="small"
+                    width="fit-content"
+                  >
+                    <Text size="small">{report.ReportData.isUrgent ? 'Urgent' : 'Normal'}</Text>
+                  </Box>
+                </Box>
+              </CardBody>
+              <CardFooter pad="medium" background="light-2">
+                <Button label="View Details" onClick={() => navigate(`/reports/${report.Id}`)} />
+              </CardFooter>
+            </Card>
+          ))}
+        </Grid>
+      </Box>
+    );
+  }
+
+  // Show single report details
+  const report = reports[0];
   if (!report) {
     return (
       <Box pad="medium">
         <Button
           icon={<FormPrevious />}
-          label="Back to Inspections"
-          onClick={() => navigate('/inspections')}
+          label="Back to Reports"
+          onClick={() => navigate('/reports')}
           margin={{ bottom: 'medium' }}
         />
         <Box
@@ -186,13 +208,13 @@ const Report = () => {
       <Box direction="row" justify="between" align="center" margin={{ bottom: 'medium' }}>
         <Button
           icon={<FormPrevious />}
-          label="Back to Inspections"
-          onClick={() => navigate('/inspections')}
+          label="Back to Reports"
+          onClick={() => navigate('/reports')}
         />
         <Button
           icon={<Download />}
           label="Download Report"
-          onClick={downloadReport}
+          onClick={() => downloadReport(report)}
           primary
         />
       </Box>
@@ -232,16 +254,12 @@ const Report = () => {
               <Box direction="row" justify="between">
                 <Text weight="bold">Status:</Text>
                 <Box
-                  background={getStatusColor(report.ReportData.status)}
+                  background={report.ReportData.isUrgent ? 'status-critical' : 'status-ok'}
                   pad={{ horizontal: 'small', vertical: 'xsmall' }}
                   round="small"
                 >
-                  <Text size="small">{report.ReportData.status}</Text>
+                  <Text size="small">{report.ReportData.isUrgent ? 'Urgent' : 'Normal'}</Text>
                 </Box>
-              </Box>
-              <Box direction="row" justify="between">
-                <Text weight="bold">Marked as Urgent:</Text>
-                <Text>{report.ReportData.isUrgent ? 'Yes' : 'No'}</Text>
               </Box>
             </Box>
           </CardBody>
@@ -261,8 +279,11 @@ const Report = () => {
                   <Meter
                     type="bar"
                     background="light-2"
-                    color={getTemperatureStatus(temperatureValue)}
-                    value={temperatureValue}
+                    values={[{
+                      value: temperatureValue,
+                      color: temperatureValue > 27 ? 'status-critical' :
+                             temperatureValue < 18 ? 'status-warning' : 'status-ok'
+                    }]}
                     max={40}
                     size="small"
                   />
@@ -275,8 +296,11 @@ const Report = () => {
                   <Meter
                     type="bar"
                     background="light-2"
-                    color={getHumidityStatus(humidityValue)}
-                    value={humidityValue}
+                    values={[{
+                      value: humidityValue,
+                      color: humidityValue > 70 ? 'status-critical' :
+                             humidityValue < 30 ? 'status-warning' : 'status-ok'
+                    }]}
                     max={100}
                     size="small"
                   />
@@ -316,7 +340,7 @@ const Report = () => {
                     background={report.ReportData.securityPassed ? 'status-ok' : 'status-critical'}
                     pad={{ horizontal: 'small', vertical: 'xsmall' }}
                     round="small"
-                    width="max-content"
+                    width="fit-content"
                   >
                     <Text size="small">{report.ReportData.securityPassed ? 'PASSED' : 'FAILED'}</Text>
                   </Box>
@@ -331,7 +355,7 @@ const Report = () => {
                     background={report.ReportData.coolingSystemCheck ? 'status-ok' : 'status-critical'}
                     pad={{ horizontal: 'small', vertical: 'xsmall' }}
                     round="small"
-                    width="max-content"
+                    width="fit-content"
                   >
                     <Text size="small">{report.ReportData.coolingSystemCheck ? 'OPERATIONAL' : 'ISSUE DETECTED'}</Text>
                   </Box>
@@ -358,4 +382,4 @@ const Report = () => {
   );
 };
 
-export default Report;
+export default Reports;
