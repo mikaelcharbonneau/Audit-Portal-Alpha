@@ -4,6 +4,7 @@ import { Settings, Mail, Phone, Building, Clock, Download, Moon, Sun } from 'luc
 import { useTheme } from '../context/ThemeContext';
 import { useAuth } from '../context/AuthContext';
 import { supabase } from '../lib/supabaseClient';
+import { Box, Spinner } from 'grommet';
 
 interface Activity {
   id: string;
@@ -28,11 +29,14 @@ const Profile = () => {
     reports_generated: 0
   });
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     if (user) {
-      fetchUserActivities();
-      fetchUserStats();
+      Promise.all([
+        fetchUserActivities(),
+        fetchUserStats()
+      ]).finally(() => setLoading(false));
     }
   }, [user]);
 
@@ -47,8 +51,9 @@ const Profile = () => {
 
       if (error) throw error;
       setActivities(data || []);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error fetching activities:', error);
+      setError('Failed to load activities');
     }
   };
 
@@ -60,21 +65,52 @@ const Profile = () => {
         .eq('user_id', user?.id)
         .single();
 
-      if (error) throw error;
+      if (error) {
+        if (error.code === 'PGRST116') {
+          // No stats found, use defaults
+          return;
+        }
+        throw error;
+      }
       if (data) {
         setStats(data);
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error fetching stats:', error);
-    } finally {
-      setLoading(false);
+      setError('Failed to load statistics');
     }
+  };
+
+  const calculateProgressPercentage = (value: number, type: keyof UserStats) => {
+    const maxValues = {
+      walkthroughs_completed: 50,
+      issues_resolved: 100,
+      reports_generated: 30
+    };
+    return Math.min((value / maxValues[type]) * 100, 100);
   };
 
   if (!user) return null;
 
+  if (loading) {
+    return (
+      <Box fill align="center" justify="center" pad="large">
+        <Spinner size="medium" />
+        <Box margin={{ top: 'medium' }}>
+          <p className="text-gray-600">Loading profile...</p>
+        </Box>
+      </Box>
+    );
+  }
+
   return (
     <div className="max-w-4xl mx-auto p-6">
+      {error && (
+        <div className="mb-6 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg">
+          {error}
+        </div>
+      )}
+
       {/* Profile Header */}
       <div className="bg-white rounded-lg shadow-sm overflow-hidden mb-6">
         <div className="px-6 py-6 flex items-center">
@@ -106,31 +142,39 @@ const Profile = () => {
               <h2 className="text-lg font-medium text-gray-900">Activity Log</h2>
             </div>
             <div className="divide-y divide-gray-100">
-              {activities.map((activity) => (
-                <div key={activity.id} className="px-6 py-4">
-                  <div className="flex justify-between mb-1">
-                    <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                      activity.type === 'inspection' 
-                        ? 'bg-emerald-100 text-emerald-800'
-                        : activity.type === 'issue'
-                        ? 'bg-amber-100 text-amber-800'
-                        : 'bg-blue-100 text-blue-800'
-                    }`}>
-                      {activity.type.charAt(0).toUpperCase() + activity.type.slice(1)}
-                    </span>
-                    <span className="text-xs text-gray-500">
-                      {format(new Date(activity.created_at), 'MMM d, yyyy')}
-                    </span>
-                  </div>
-                  <p className="text-sm text-gray-600">{activity.description}</p>
+              {activities.length === 0 ? (
+                <div className="px-6 py-8 text-center text-gray-500">
+                  No activities recorded yet
                 </div>
-              ))}
+              ) : (
+                activities.map((activity) => (
+                  <div key={activity.id} className="px-6 py-4">
+                    <div className="flex justify-between mb-1">
+                      <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                        activity.type === 'inspection' 
+                          ? 'bg-emerald-100 text-emerald-800'
+                          : activity.type === 'issue'
+                          ? 'bg-amber-100 text-amber-800'
+                          : 'bg-blue-100 text-blue-800'
+                      }`}>
+                        {activity.type.charAt(0).toUpperCase() + activity.type.slice(1)}
+                      </span>
+                      <span className="text-xs text-gray-500">
+                        {format(new Date(activity.created_at), 'MMM d, yyyy')}
+                      </span>
+                    </div>
+                    <p className="text-sm text-gray-600">{activity.description}</p>
+                  </div>
+                ))
+              )}
             </div>
-            <div className="px-6 py-4 border-t border-gray-100 text-center">
-              <button className="text-sm text-[#01A982] font-medium hover:text-[#018768]">
-                View All Activity
-              </button>
-            </div>
+            {activities.length > 0 && (
+              <div className="px-6 py-4 border-t border-gray-100 text-center">
+                <button className="text-sm text-[#01A982] font-medium hover:text-[#018768]">
+                  View All Activity
+                </button>
+              </div>
+            )}
           </div>
         </div>
 
@@ -208,7 +252,9 @@ const Profile = () => {
                   <div className="w-full bg-gray-200 rounded-full h-2">
                     <div 
                       className="bg-[#01A982] h-2 rounded-full" 
-                      style={{ width: `${(stats.walkthroughs_completed / 100) * 100}%` }}
+                      style={{ 
+                        width: `${calculateProgressPercentage(stats.walkthroughs_completed, 'walkthroughs_completed')}%` 
+                      }}
                     />
                   </div>
                 </div>
@@ -223,7 +269,9 @@ const Profile = () => {
                   <div className="w-full bg-gray-200 rounded-full h-2">
                     <div 
                       className="bg-[#425563] h-2 rounded-full" 
-                      style={{ width: `${(stats.issues_resolved / 100) * 100}%` }}
+                      style={{ 
+                        width: `${calculateProgressPercentage(stats.issues_resolved, 'issues_resolved')}%` 
+                      }}
                     />
                   </div>
                 </div>
@@ -238,7 +286,9 @@ const Profile = () => {
                   <div className="w-full bg-gray-200 rounded-full h-2">
                     <div 
                       className="bg-[#FF8D6D] h-2 rounded-full" 
-                      style={{ width: `${(stats.reports_generated / 100) * 100}%` }}
+                      style={{ 
+                        width: `${calculateProgressPercentage(stats.reports_generated, 'reports_generated')}%` 
+                      }}
                     />
                   </div>
                 </div>
