@@ -1,30 +1,22 @@
-import { defineConfig } from 'vite';
-import react from '@vitejs/plugin-react';
+import { defineConfig } from 'vite'
+import react from '@vitejs/plugin-react'
+import path from 'path'
 
-// https://vitejs.dev/config/
 export default defineConfig({
   plugins: [react()],
-  optimizeDeps: {
-    exclude: ['lucide-react'],
-  },
-  build: {
-    outDir: 'dist',
-    sourcemap: true,
-    rollupOptions: {
-      output: {
-        manualChunks: {
-          'vendor': ['react', 'react-dom', 'react-router-dom', 'grommet', 'grommet-theme-hpe'],
-          'supabase': ['@supabase/supabase-js']
-        }
-      }
-    }
-  },
   resolve: {
     alias: {
-      '@': '/src',
+      '@': path.resolve(__dirname, './src'),
+    },
+  },
+  // Exclude the api directory from being processed by Vite
+  build: {
+    rollupOptions: {
+      external: ['api/**']
     }
   },
-  server: {
-    host: true
+  // Prevent Vite from trying to resolve API imports during development
+  optimizeDeps: {
+    exclude: ['api']
   }
-});
+})
