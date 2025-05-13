@@ -1,57 +1,31 @@
-export type User = {
+export interface User {
   id: string;
-  name: string;
   email: string;
-  role: string;
-  lastInspectionDate?: string;
-};
-
-export type InspectionStatus = 'in-progress' | 'completed';
-
-export type IssueStatus = 'open' | 'in-progress' | 'resolved';
-
-export type Issue = {
-  id: string;
-  description: string;
-  status: IssueStatus;
-  severity: 'low' | 'medium' | 'high' | 'critical';
-  location: string;
-  createdAt: string;
-  updatedAt: string;
-  assignedTo?: string;
-};
-
-export type Inspection = {
-  id: string;
-  status: InspectionStatus;
-  location: string;
-  date: string;
-  issueCount: number;
-  completedBy?: string;
-};
-
-export type Report = {
-  id: string;
-  title: string;
-  location: string;
-  date: string;
-  thumbnail?: string;
-  issues: Issue[];
-  summary?: string;
-  recommendations?: string;
-};
-
-export interface FormSection {
-  id: string;
-  title: string;
-  fields: FormField[];
+  name: string;
 }
 
-export interface FormField {
-  id: string;
-  label: string;
-  type: 'text' | 'textarea' | 'select' | 'checkbox' | 'radio' | 'file' | 'location';
-  placeholder?: string;
-  required?: boolean;
-  options?: { value: string; label: string }[];
+export interface Inspection {
+  Id: string;
+  UserEmail: string;
+  Timestamp: string;
+  ReportData: InspectionData;
+}
+
+export interface InspectionData {
+  datahall: string;
+  status: string;
+  isUrgent: boolean;
+  temperatureReading: string;
+  humidityReading: string;
+  comments?: string;
+  securityPassed: boolean;
+  coolingSystemCheck: boolean;
+  [key: string]: any;
+}
+
+export interface Report {
+  Id: string;
+  UserEmail: string;
+  Timestamp: string;
+  ReportData: InspectionData;
 }

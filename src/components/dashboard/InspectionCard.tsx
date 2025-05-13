@@ -1,36 +1,80 @@
+import React from 'react';
+import { Card, CardBody, CardFooter, Box, Text, Button } from 'grommet';
+import { FormView } from 'grommet-icons';
 import { format } from 'date-fns';
-import { MapPin, AlertCircle } from 'lucide-react';
-import { Inspection } from '../../types';
-import StatusChip from '../ui/StatusChip';
 
 interface InspectionCardProps {
-  inspection: Inspection;
+  id: string;
+  datahall: string;
+  status: string;
+  userEmail: string;
+  timestamp: string;
+  onClick: () => void;
 }
 
-const InspectionCard = ({ inspection }: InspectionCardProps) => {
-  const formattedDate = format(new Date(inspection.date), 'MMM d, yyyy');
+export const InspectionCard = ({
+  id,
+  datahall,
+  status,
+  userEmail,
+  timestamp,
+  onClick,
+}: InspectionCardProps) => {
+  const getStatusColor = (status: string) => {
+    switch (status?.toLowerCase()) {
+      case 'operational':
+        return 'status-ok';
+      case 'maintenance':
+        return 'status-warning';
+      case 'alert':
+        return 'status-critical';
+      case 'offline':
+        return 'status-disabled';
+      default:
+        return 'status-unknown';
+    }
+  };
 
   return (
-    <div className="card p-4 hover:bg-gray-50 transition-colors">
-      <div className="flex justify-between items-start mb-2">
-        <StatusChip status={inspection.status} />
-        <span className="text-sm text-gray-500">{formattedDate}</span>
-      </div>
-      <div className="mb-2">
-        <div className="flex items-start mt-1">
-          <MapPin size={16} className="text-hpe-blue-400 mt-0.5 mr-1.5 flex-shrink-0" />
-          <p className="text-sm text-hpe-blue-700 font-medium">{inspection.location}</p>
-        </div>
-      </div>
-      <div className="flex items-center mt-3 text-sm">
-        <AlertCircle size={16} className="text-hpe-blue-400 mr-1.5" />
-        <span className="font-medium">{inspection.issueCount}</span>
-        <span className="ml-1 text-gray-600">
-          {inspection.issueCount === 1 ? 'issue' : 'issues'} reported
-        </span>
-      </div>
-    </div>
+    <Card background="light-1" onClick={onClick} hoverIndicator>
+      <CardBody pad="medium">
+        <Box gap="small">
+          <Box direction="row" justify="between" align="center">
+            <Box direction="row" gap="small" align="center">
+              <Text weight="bold">{datahall}</Text>
+              <Box
+                background={getStatusColor(status)}
+                pad={{ horizontal: 'small', vertical: 'xxsmall' }}
+                round="small"
+              >
+                <Text size="xsmall">{status}</Text>
+              </Box>
+            </Box>
+            <Text size="small" color="dark-5">
+              {format(new Date(timestamp), 'MMM d, yyyy')}
+            </Text>
+          </Box>
+          <Box>
+            <Text size="small" color="dark-3">
+              Submitted by:
+            </Text>
+            <Text size="small">{userEmail}</Text>
+          </Box>
+        </Box>
+      </CardBody>
+      <CardFooter pad={{ horizontal: 'medium', vertical: 'small' }} background="light-2">
+        <Text size="small" truncate>
+          ID: {id.substring(0, 8)}...
+        </Text>
+        <Button
+          icon={<FormView size="small" />}
+          hoverIndicator
+          onClick={(e) => {
+            e.stopPropagation();
+            onClick();
+          }}
+        />
+      </CardFooter>
+    </Card>
   );
 };
-
-export default InspectionCard;

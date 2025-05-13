@@ -1,142 +1,359 @@
-import { useState } from 'react';
-import { Download, Filter, Printer, Share2, Eye, ArrowLeft, ArrowRight } from 'lucide-react';
-import ReportFilters from '../components/reports/ReportFilters';
-import { reports } from '../data/mockData';
-import StatusChip from '../components/ui/StatusChip';
+import React, { useState, useEffect } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
+import {
+  Box,
+  Button,
+  Heading,
+  Text,
+  Spinner,
+  Grid,
+  Card,
+  CardHeader,
+  CardBody,
+  CardFooter,
+  Meter,
+  Table,
+  TableHeader,
+  TableRow,
+  TableCell,
+  TableBody
+} from 'grommet';
+import { StatusWarning, FormPrevious, Download } from 'grommet-icons';
 import { format } from 'date-fns';
-import 'keen-slider/keen-slider.min.css';
-import { useKeenSlider } from 'keen-slider/react';
+import { supabase } from '../lib/supabaseClient';
 
-const Reports = () => {
-  const [filters, setFilters] = useState({});
-  const [filteredReports, setFilteredReports] = useState(reports);
-  const [selectedReport, setSelectedReport] = useState<string | null>(null);
-  const [currentSlide, setCurrentSlide] = useState(0);
-  const [sliderRef, instanceRef] = useKeenSlider<HTMLDivElement>({
-    slides: {
-      perView: 3,
-      spacing: 32,
-      origin: 'center',
-    },
-    loop: true,
-    mode: 'free-snap',
-    slideChanged(s) {
-      setCurrentSlide(s.track.details.rel);
-    },
-    breakpoints: {
-      '(max-width: 900px)': {
-        slides: { perView: 2, spacing: 16 },
-      },
-      '(max-width: 600px)': {
-        slides: { perView: 1, spacing: 8 },
-      },
-    },
-  });
+interface ReportData {
+  Id: string;
+  UserEmail: string;
+  Timestamp: string;
+  ReportData: {
+    datahall: string;
+    status: string;
+    isUrgent: boolean;
+    temperatureReading: string;
+    humidityReading: string;
+    comments?: string;
+    securityPassed: boolean;
+    coolingSystemCheck: boolean;
+    [key: string]: any;
+  };
+}
 
-  const handleFilterChange = (newFilters: any) => {
-    setFilters(newFilters);
-    setFilteredReports(reports);
+const Report = () => {
+  const { id } = useParams<{ id: string }>();
+  const navigate = useNavigate();
+  const [report, setReport] = useState<ReportData | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (id) {
+      fetchReport(id);
+    }
+  }, [id]);
+
+  const fetchReport = async (reportId: string) => {
+    setLoading(true);
+    setError(null);
+    try {
+      const response = await fetch(`/api/GenerateReport?id=${reportId}`);
+      
+      if (!response.ok) {
+        throw new Error(`Failed to fetch report: ${response.statusText}`);
+      }
+      
+      const result = await response.json();
+      
+      if (result.success) {
+        setReport(result.data);
+      } else {
+        throw new Error(result.message || 'Failed to fetch report data');
+      }
+    } catch (error: any) {
+      console.error('Error fetching report:', error);
+      setError(error.message);
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const toggleReportSelection = (reportId: string) => {
-    setSelectedReport(selectedReport === reportId ? null : reportId);
+  const getStatusColor = (status: string) => {
+    switch (status?.toLowerCase()) {
+      case 'operational':
+        return 'status-ok';
+      case 'maintenance':
+        return 'status-warning';
+      case 'alert':
+        return 'status-critical';
+      case 'offline':
+        return 'status-disabled';
+      default:
+        return 'status-unknown';
+    }
   };
+
+  const getTemperatureStatus = (temp: number) => {
+    if (temp < 18) return 'status-warning';
+    if (temp > 27) return 'status-critical';
+    return 'status-ok';
+  };
+
+  const getHumidityStatus = (humidity: number) => {
+    if (humidity < 30) return 'status-warning';
+    if (humidity > 70) return 'status-critical';
+    return 'status-ok';
+  };
+
+  const downloadReport = () => {
+    if (!report) return;
+    
+    const reportData = JSON.stringify(report, null, 2);
+    const blob = new Blob([reportData], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `audit-report-${report.Id}.json`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  };
+
+  if (loading) {
+    return (
+      <Box align="center" justify="center" height="medium" pad="large">
+        <Spinner size="medium" />
+        <Text margin={{ top: 'small' }}>Loading report...</Text>
+      </Box>
+    );
+  }
+
+  if (error) {
+    return (
+      <Box pad="medium">
+        <Button
+          icon={<FormPrevious />}
+          label="Back to Inspections"
+          onClick={() => navigate('/inspections')}
+          margin={{ bottom: 'medium' }}
+        />
+        <Box
+          background="status-error"
+          pad="medium"
+          round="small"
+          direction="row"
+          gap="small"
+          align="center"
+        >
+          <StatusWarning color="white" />
+          <Text color="white">Error loading report: {error}</Text>
+        </Box>
+      </Box>
+    );
+  }
+
+  if (!report) {
+    return (
+      <Box pad="medium">
+        <Button
+          icon={<FormPrevious />}
+          label="Back to Inspections"
+          onClick={() => navigate('/inspections')}
+          margin={{ bottom: 'medium' }}
+        />
+        <Box
+          background="light-2"
+          pad="large"
+          round="small"
+          align="center"
+          justify="center"
+          height="medium"
+        >
+          <Text size="xlarge">Report not found</Text>
+          <Text>The requested report could not be found or has been deleted.</Text>
+        </Box>
+      </Box>
+    );
+  }
+
+  const temperatureValue = parseFloat(report.ReportData.temperatureReading);
+  const humidityValue = parseFloat(report.ReportData.humidityReading);
 
   return (
-    <div>
-      <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-bold text-hpe-blue-700">Reports</h1>
-        <div className="flex space-x-2">
-          <button className="btn-secondary">
-            <Download className="h-4 w-4 mr-1" />
-            Export
-          </button>
-          <button className="btn-secondary">
-            <Printer className="h-4 w-4 mr-1" />
-            Print
-          </button>
-          <button className="btn-secondary">
-            <Share2 className="h-4 w-4 mr-1" />
-            Share
-          </button>
-        </div>
-      </div>
+    <Box pad="medium">
+      <Box direction="row" justify="between" align="center" margin={{ bottom: 'medium' }}>
+        <Button
+          icon={<FormPrevious />}
+          label="Back to Inspections"
+          onClick={() => navigate('/inspections')}
+        />
+        <Button
+          icon={<Download />}
+          label="Download Report"
+          onClick={downloadReport}
+          primary
+        />
+      </Box>
 
-      {/* Filters */}
-      <div className="bg-gray-50 rounded-lg p-4 mb-6">
-        <ReportFilters onFilterChange={handleFilterChange} />
-      </div>
+      <Heading level={2}>
+        Audit Report - {report.ReportData.datahall}
+      </Heading>
+      <Text margin={{ bottom: 'medium' }}>
+        Generated on {format(new Date(report.Timestamp), 'PPp')}
+      </Text>
 
-      {/* Carousel Navigation */}
-      <div className="flex justify-center items-center mb-4 gap-4">
-        <button
-          className="p-2 rounded-full bg-gray-50 hover:bg-hpe-green-100 text-hpe-blue-700"
-          onClick={() => instanceRef.current?.prev()}
-          aria-label="Previous"
-        >
-          <ArrowLeft size={20} />
-        </button>
-        <button
-          className="p-2 rounded-full bg-gray-50 hover:bg-hpe-green-100 text-hpe-blue-700"
-          onClick={() => instanceRef.current?.next()}
-          aria-label="Next"
-        >
-          <ArrowRight size={20} />
-        </button>
-      </div>
+      <Grid columns={['1/2', '1/2']} gap="medium" margin={{ bottom: 'medium' }}>
+        <Card background="light-1" pad="medium">
+          <CardHeader>
+            <Heading level={3} margin="none">
+              General Information
+            </Heading>
+          </CardHeader>
+          <CardBody>
+            <Box gap="small">
+              <Box direction="row" justify="between">
+                <Text weight="bold">Report ID:</Text>
+                <Text>{report.Id}</Text>
+              </Box>
+              <Box direction="row" justify="between">
+                <Text weight="bold">Submitted By:</Text>
+                <Text>{report.UserEmail}</Text>
+              </Box>
+              <Box direction="row" justify="between">
+                <Text weight="bold">Date & Time:</Text>
+                <Text>{format(new Date(report.Timestamp), 'PPp')}</Text>
+              </Box>
+              <Box direction="row" justify="between">
+                <Text weight="bold">Data Hall:</Text>
+                <Text>{report.ReportData.datahall}</Text>
+              </Box>
+              <Box direction="row" justify="between">
+                <Text weight="bold">Status:</Text>
+                <Box
+                  background={getStatusColor(report.ReportData.status)}
+                  pad={{ horizontal: 'small', vertical: 'xsmall' }}
+                  round="small"
+                >
+                  <Text size="small">{report.ReportData.status}</Text>
+                </Box>
+              </Box>
+              <Box direction="row" justify="between">
+                <Text weight="bold">Marked as Urgent:</Text>
+                <Text>{report.ReportData.isUrgent ? 'Yes' : 'No'}</Text>
+              </Box>
+            </Box>
+          </CardBody>
+        </Card>
 
-      {/* Reports Carousel */}
-      <div ref={sliderRef} className="keen-slider py-8">
-        {filteredReports.map((report, idx) => (
-          <div
-            key={report.id}
-            className="keen-slider__slide flex flex-col items-stretch justify-between bg-white rounded-xl shadow-lg p-6 transition-transform duration-300"
-            style={{ minHeight: 420, minWidth: 320, maxWidth: 400 }}
-          >
-            <div className="flex-1 flex flex-col">
-              <h2 className="text-lg font-bold mb-2 text-hpe-blue-900">{report.title}</h2>
-              <p className="text-sm text-hpe-blue-700 mb-3">{report.location} • {new Date(report.date).toLocaleDateString()}</p>
-              <div className="mb-3">
-                <span className="font-semibold text-hpe-green-400">Issues:</span>
-                <ul className="mt-1 space-y-1">
-                  {report.issues.length > 0 ? (
-                    report.issues.slice(0, 3).map((issue) => (
-                      <li key={issue.id} className="flex items-center text-sm text-hpe-blue-900">
-                        <span className="inline-block w-2 h-2 rounded-full mr-2" style={{ backgroundColor: issue.severity === 'critical' ? '#FF0000' : issue.severity === 'high' ? '#FFA500' : issue.severity === 'medium' ? '#FFCC00' : '#00CC00' }}></span>
-                        {issue.description}
-                      </li>
-                    ))
-                  ) : (
-                    <li className="text-xs text-gray-400 italic">No issues found</li>
-                  )}
-                </ul>
-              </div>
-              {report.recommendations && (
-                <div className="mb-3">
-                  <span className="font-semibold text-hpe-green-400">Recommendations:</span>
-                  <p className="text-sm text-hpe-blue-900 mt-1">{report.recommendations}</p>
-                </div>
-              )}
-            </div>
-            <div className="flex justify-between items-center mt-4">
-              <button className="btn-secondary py-1.5 px-2.5 text-xs flex-1 mr-2" onClick={() => toggleReportSelection(report.id)}>
-                <Eye className="h-3.5 w-3.5 mr-1" />
-                View
-              </button>
-              <button className="btn-secondary py-1.5 px-2.5 text-xs flex-1 mr-2">
-                <Download className="h-3.5 w-3.5 mr-1" />
-                Download
-              </button>
-              <button className="btn-secondary py-1.5 px-2.5 text-xs flex-1">
-                <Share2 className="h-3.5 w-3.5 mr-1" />
-                Share
-              </button>
-            </div>
-          </div>
-        ))}
-      </div>
-    </div>
+        <Card background="light-1" pad="medium">
+          <CardHeader>
+            <Heading level={3} margin="none">
+              Environmental Readings
+            </Heading>
+          </CardHeader>
+          <CardBody>
+            <Box gap="medium" pad={{ vertical: 'small' }}>
+              <Box>
+                <Text weight="bold" margin={{ bottom: 'xsmall' }}>Temperature</Text>
+                <Box align="center" direction="row" gap="small">
+                  <Meter
+                    type="bar"
+                    background="light-2"
+                    color={getTemperatureStatus(temperatureValue)}
+                    value={temperatureValue}
+                    max={40}
+                    size="small"
+                  />
+                  <Text>{temperatureValue}°C</Text>
+                </Box>
+              </Box>
+              <Box>
+                <Text weight="bold" margin={{ bottom: 'xsmall' }}>Humidity</Text>
+                <Box align="center" direction="row" gap="small">
+                  <Meter
+                    type="bar"
+                    background="light-2"
+                    color={getHumidityStatus(humidityValue)}
+                    value={humidityValue}
+                    max={100}
+                    size="small"
+                  />
+                  <Text>{humidityValue}%</Text>
+                </Box>
+              </Box>
+            </Box>
+          </CardBody>
+        </Card>
+      </Grid>
+
+      <Card background="light-1" pad="medium" margin={{ bottom: 'medium' }}>
+        <CardHeader>
+          <Heading level={3} margin="none">
+            System Checks
+          </Heading>
+        </CardHeader>
+        <CardBody>
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableCell scope="col">
+                  <Text weight="bold">Check Item</Text>
+                </TableCell>
+                <TableCell scope="col">
+                  <Text weight="bold">Status</Text>
+                </TableCell>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              <TableRow>
+                <TableCell>
+                  <Text>Security Systems</Text>
+                </TableCell>
+                <TableCell>
+                  <Box
+                    background={report.ReportData.securityPassed ? 'status-ok' : 'status-critical'}
+                    pad={{ horizontal: 'small', vertical: 'xsmall' }}
+                    round="small"
+                    width="max-content"
+                  >
+                    <Text size="small">{report.ReportData.securityPassed ? 'PASSED' : 'FAILED'}</Text>
+                  </Box>
+                </TableCell>
+              </TableRow>
+              <TableRow>
+                <TableCell>
+                  <Text>Cooling System</Text>
+                </TableCell>
+                <TableCell>
+                  <Box
+                    background={report.ReportData.coolingSystemCheck ? 'status-ok' : 'status-critical'}
+                    pad={{ horizontal: 'small', vertical: 'xsmall' }}
+                    round="small"
+                    width="max-content"
+                  >
+                    <Text size="small">{report.ReportData.coolingSystemCheck ? 'OPERATIONAL' : 'ISSUE DETECTED'}</Text>
+                  </Box>
+                </TableCell>
+              </TableRow>
+            </TableBody>
+          </Table>
+        </CardBody>
+      </Card>
+
+      {report.ReportData.comments && (
+        <Card background="light-1" pad="medium">
+          <CardHeader>
+            <Heading level={3} margin="none">
+              Additional Comments
+            </Heading>
+          </CardHeader>
+          <CardBody>
+            <Text>{report.ReportData.comments}</Text>
+          </CardBody>
+        </Card>
+      )}
+    </Box>
   );
 };
 
-export default Reports;
+export default Report;

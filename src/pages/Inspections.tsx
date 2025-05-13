@@ -1,91 +1,319 @@
-import { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ClipboardCheck, ChevronDown, Filter, Search } from 'lucide-react';
-import { recentInspections, datacenters } from '../data/mockData';
-import InspectionCard from '../components/dashboard/InspectionCard';
+import {
+  Box,
+  Button,
+  DataTable,
+  Heading,
+  Pagination,
+  Spinner,
+  Text,
+  Layer,
+  Card
+} from 'grommet';
+import { FormAdd, FormView, FormTrash, StatusWarning } from 'grommet-icons';
+import { format } from 'date-fns';
+import { supabase } from '../lib/supabaseClient';
+
+interface Inspection {
+  Id: string;
+  UserEmail: string;
+  Timestamp: string;
+  ReportData: {
+    datahall: string;
+    status: string;
+    isUrgent: boolean;
+    [key: string]: any;
+  };
+}
 
 const Inspections = () => {
   const navigate = useNavigate();
-  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [inspections, setInspections] = useState<Inspection[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [page, setPage] = useState(1);
+  const [selectedInspection, setSelectedInspection] = useState<Inspection | null>(null);
+  const pageSize = 10;
 
-  const startWalkthrough = (datahallId: string) => {
-    navigate('/inspection', { state: { datahallId } });
-    setIsDropdownOpen(false);
+  useEffect(() => {
+    fetchInspections();
+  }, []);
+
+  const fetchInspections = async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const response = await fetch('/api/GetInspections');
+      
+      if (!response.ok) {
+        throw new Error(`Failed to fetch inspections: ${response.statusText}`);
+      }
+      
+      const data = await response.json();
+      setInspections(data);
+    } catch (error: any) {
+      console.error('Error fetching inspections:', error);
+      setError(error.message);
+    } finally {
+      setLoading(false);
+    }
   };
 
+  const viewReport = (id: string) => {
+    navigate(`/reports/${id}`);
+  };
+
+  const getStatusColor = (status: string) => {
+    switch (status?.toLowerCase()) {
+      case 'operational':
+        return 'status-ok';
+      case 'maintenance':
+        return 'status-warning';
+      case 'alert':
+        return 'status-critical';
+      case 'offline':
+        return 'status-disabled';
+      default:
+        return 'status-unknown';
+    }
+  };
+
+  const paginatedInspections = inspections.slice(
+    (page - 1) * pageSize,
+    page * pageSize
+  );
+
   return (
-    <div>
-      <div className="flex flex-col sm:flex-row items-center justify-between mb-6">
-        <h1 className="text-2xl font-bold text-hpe-blue-700">Inspections</h1>
-        <div className="relative mt-4 sm:mt-0">
-          <button
-            onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-            className="btn-primary flex items-center"
+    <Box pad="medium" fill>
+      <Box direction="row" justify="between" align="center" margin={{ bottom: 'medium' }}>
+        <Heading level={2} margin="none">
+          Inspections
+        </Heading>
+        <Button
+          primary
+          label="New Inspection"
+          icon={<FormAdd />}
+          onClick={() => navigate('/inspection')}
+        />
+      </Box>
+
+      {loading ? (
+        <Box align="center" justify="center" height="medium">
+          <Spinner size="medium" />
+          <Text margin={{ top: 'small' }}>Loading inspections...</Text>
+        </Box>
+      ) : error ? (
+        <Box
+          background="status-error"
+          pad="medium"
+          round="small"
+          direction="row"
+          gap="small"
+          align="center"
+        >
+          <StatusWarning color="white" />
+          <Text color="white">Error loading inspections: {error}</Text>
+        </Box>
+      ) : inspections.length === 0 ? (
+        <Box
+          background="light-2"
+          pad="large"
+          round="small"
+          align="center"
+          justify="center"
+          height="medium"
+        >
+          <Text size="xlarge">No inspections found</Text>
+          <Text margin={{ bottom: 'medium' }}>Submit a new inspection to get started</Text>
+          <Button
+            primary
+            label="New Inspection"
+            icon={<FormAdd />}
+            onClick={() => navigate('/inspection')}
+          />
+        </Box>
+      ) : (
+        <>
+          <DataTable
+            columns={[
+              {
+                property: 'Id',
+                header: <Text weight="bold">ID</Text>,
+                render: (data: Inspection) => (
+                  <Text size="small">{data.Id.substring(0, 8)}...</Text>
+                ),
+              },
+              {
+                property: 'UserEmail',
+                header: <Text weight="bold">User Email</Text>,
+                render: (data: Inspection) => <Text>{data.UserEmail}</Text>,
+              },
+              {
+                property: 'Timestamp',
+                header: <Text weight="bold">Date & Time</Text>,
+                render: (data: Inspection) => (
+                  <Text>{format(new Date(data.Timestamp), 'PPp')}</Text>
+                ),
+              },
+              {
+                property: 'datahall',
+                header: <Text weight="bold">Data Hall</Text>,
+                render: (data: Inspection) => (
+                  <Text>{data.ReportData.datahall}</Text>
+                ),
+              },
+              {
+                property: 'status',
+                header: <Text weight="bold">Status</Text>,
+                render: (data: Inspection) => (
+                  <Box
+                    background={getStatusColor(data.ReportData.status)}
+                    pad={{ horizontal: 'small', vertical: 'xsmall' }}
+                    round="small"
+                    width="max-content"
+                  >
+                    <Text size="small">{data.ReportData.status}</Text>
+                  </Box>
+                ),
+              },
+              {
+                property: 'urgent',
+                header: <Text weight="bold">Urgent</Text>,
+                render: (data: Inspection) => (
+                  <Text>{data.ReportData.isUrgent ? 'Yes' : 'No'}</Text>
+                ),
+              },
+              {
+                property: 'actions',
+                header: <Text weight="bold">Actions</Text>,
+                render: (data: Inspection) => (
+                  <Box direction="row" gap="small">
+                    <Button
+                      icon={<FormView />}
+                      tip="View report"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        viewReport(data.Id);
+                      }}
+                      plain
+                      hoverIndicator
+                    />
+                  </Box>
+                ),
+              },
+            ]}
+            data={paginatedInspections}
+            onClickRow={({ datum }) => setSelectedInspection(datum)}
+            border={{ side: 'horizontal', color: 'light-3' }}
+            background={{
+              header: { color: 'light-1' },
+              body: ['white', 'light-1'],
+            }}
+          />
+
+          <Box
+            direction="row"
+            justify="between"
+            align="center"
+            margin={{ top: 'medium' }}
           >
-            <ClipboardCheck className="mr-2 h-5 w-5" />
-            Start Walkthrough
-            <ChevronDown className="ml-2 h-4 w-4" />
-          </button>
-          
-          {isDropdownOpen && (
-            <>
-              <div 
-                className="fixed inset-0 z-10"
-                onClick={() => setIsDropdownOpen(false)}
-              ></div>
-              <div className="absolute right-0 mt-2 w-64 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 z-20">
-                <div className="py-1">
-                  {datacenters.map((datacenter) => (
-                    <button
-                      key={datacenter.id}
-                      className="w-full text-left px-4 py-2 text-sm text-hpe-blue-600 hover:bg-hpe-green-50 hover:text-hpe-green-600"
-                      onClick={() => startWalkthrough(datacenter.id)}
-                    >
-                      <div className="font-medium">{datacenter.name}</div>
-                      <div className="text-xs text-gray-500">{datacenter.location}</div>
-                    </button>
-                  ))}
-                </div>
-              </div>
-            </>
-          )}
-        </div>
-      </div>
-
-      {/* Filters */}
-      <div className="bg-gray-50 rounded-lg p-4 mb-6">
-        <div className="flex flex-col md:flex-row space-y-4 md:space-y-0 md:space-x-4">
-          <div className="flex-1 relative">
-            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-              <Search size={18} className="text-gray-400" />
-            </div>
-            <input
-              type="text"
-              placeholder="Search inspections"
-              className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md text-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-hpe-green-300 focus:border-hpe-green-300 bg-white"
+            <Text size="small">
+              Showing {Math.min(inspections.length, pageSize)} of {inspections.length} inspections
+            </Text>
+            <Pagination
+              numberItems={inspections.length}
+              step={pageSize}
+              page={page}
+              onChange={({ page: nextPage }) => setPage(nextPage)}
             />
-          </div>
-          <div className="w-full md:w-48">
-            <select className="block w-full border border-gray-300 rounded-md py-2 pl-3 pr-10 text-sm focus:outline-none focus:ring-2 focus:ring-hpe-green-300 focus:border-hpe-green-300 bg-white">
-              <option value="">All Statuses</option>
-              <option value="completed">Completed</option>
-              <option value="in-progress">In Progress</option>
-            </select>
-          </div>
-          <button className="btn-secondary">
-            <Filter size={18} className="mr-2" />
-            More Filters
-          </button>
-        </div>
-      </div>
+          </Box>
+        </>
+      )}
 
-      {/* Inspections Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-        {recentInspections.map((inspection) => (
-          <InspectionCard key={inspection.id} inspection={inspection} />
-        ))}
-      </div>
-    </div>
+      {selectedInspection && (
+        <Layer
+          position="center"
+          onEsc={() => setSelectedInspection(null)}
+          onClickOutside={() => setSelectedInspection(null)}
+        >
+          <Card width="large" pad="medium">
+            <Box direction="row" justify="between" align="center">
+              <Heading level={3} margin="none">
+                Inspection Details
+              </Heading>
+              <Button
+                plain
+                label="Close"
+                onClick={() => setSelectedInspection(null)}
+              />
+            </Box>
+            <Box gap="medium" margin={{ top: 'medium' }}>
+              <Box direction="row" gap="medium">
+                <Box basis="1/2">
+                  <Text weight="bold">ID:</Text>
+                  <Text>{selectedInspection.Id}</Text>
+                </Box>
+                <Box basis="1/2">
+                  <Text weight="bold">Date:</Text>
+                  <Text>
+                    {format(new Date(selectedInspection.Timestamp), 'PPp')}
+                  </Text>
+                </Box>
+              </Box>
+              <Box direction="row" gap="medium">
+                <Box basis="1/2">
+                  <Text weight="bold">User Email:</Text>
+                  <Text>{selectedInspection.UserEmail}</Text>
+                </Box>
+                <Box basis="1/2">
+                  <Text weight="bold">Data Hall:</Text>
+                  <Text>{selectedInspection.ReportData.datahall}</Text>
+                </Box>
+              </Box>
+              <Box direction="row" gap="medium">
+                <Box basis="1/2">
+                  <Text weight="bold">Status:</Text>
+                  <Box
+                    background={getStatusColor(selectedInspection.ReportData.status)}
+                    pad={{ horizontal: 'small', vertical: 'xsmall' }}
+                    round="small"
+                    width="max-content"
+                    margin={{ top: 'xsmall' }}
+                  >
+                    <Text size="small">{selectedInspection.ReportData.status}</Text>
+                  </Box>
+                </Box>
+                <Box basis="1/2">
+                  <Text weight="bold">Urgent:</Text>
+                  <Text>{selectedInspection.ReportData.isUrgent ? 'Yes' : 'No'}</Text>
+                </Box>
+              </Box>
+              {selectedInspection.ReportData.comments && (
+                <Box>
+                  <Text weight="bold">Comments:</Text>
+                  <Text>{selectedInspection.ReportData.comments}</Text>
+                </Box>
+              )}
+              <Box direction="row" gap="small" margin={{ top: 'medium' }}>
+                <Button
+                  primary
+                  label="View Full Report"
+                  onClick={() => {
+                    setSelectedInspection(null);
+                    viewReport(selectedInspection.Id);
+                  }}
+                />
+                <Button
+                  label="Close"
+                  onClick={() => setSelectedInspection(null)}
+                />
+              </Box>
+            </Box>
+          </Card>
+        </Layer>
+      )}
+    </Box>
   );
 };
 

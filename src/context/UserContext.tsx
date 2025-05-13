@@ -1,33 +1,44 @@
-import { createContext, useContext, ReactNode } from 'react';
+import React, { createContext, useContext, ReactNode, useState, useEffect } from 'react';
 import { User } from '../types';
 
-// Default user data since login is not required
-const defaultUser: User = {
-  id: '1',
-  name: 'Technician',
-  email: 'tech@example.com',
-  role: 'Datacenter Technician',
-  lastInspectionDate: new Date().toISOString().split('T')[0],
+interface UserContextType {
+  user: User | null;
+  loading: boolean;
+}
+
+const defaultContext: UserContextType = {
+  user: null,
+  loading: false
 };
 
-type UserContextType = {
-  user: User;
-};
+const UserContext = createContext<UserContextType>(defaultContext);
 
-const UserContext = createContext<UserContextType | undefined>(undefined);
+export const useUser = () => useContext(UserContext);
 
-export const UserProvider = ({ children }: { children: ReactNode }) => {
+interface UserProviderProps {
+  children: ReactNode;
+}
+
+export const UserProvider = ({ children }: UserProviderProps) => {
+  const [loading, setLoading] = useState(true);
+
+  // Since we don't need authentication, we'll just create a default user
+  const defaultUser: User = {
+    id: '1',
+    email: '',
+    name: 'HPE Technician',
+  };
+
+  useEffect(() => {
+    // Simulate loading the user
+    setTimeout(() => {
+      setLoading(false);
+    }, 500);
+  }, []);
+
   return (
-    <UserContext.Provider value={{ user: defaultUser }}>
+    <UserContext.Provider value={{ user: defaultUser, loading }}>
       {children}
     </UserContext.Provider>
   );
-};
-
-export const useUser = () => {
-  const context = useContext(UserContext);
-  if (context === undefined) {
-    throw new Error('useUser must be used within a UserProvider');
-  }
-  return context;
 };

@@ -1,36 +1,56 @@
-import { ArrowUpRight } from 'lucide-react';
+import React from 'react';
+import { Card, CardBody, Box, Text, Meter } from 'grommet';
 
 interface StatusCardProps {
   title: string;
   count: number;
-  icon: React.ReactNode;
-  color: string;
-  onClick?: () => void;
+  status: 'ok' | 'warning' | 'critical' | 'disabled' | 'unknown';
 }
 
-const StatusCard = ({ title, count, icon, color, onClick }: StatusCardProps) => {
+export const StatusCard = ({ title, count, status }: StatusCardProps) => {
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case 'ok':
+        return 'status-ok';
+      case 'warning':
+        return 'status-warning';
+      case 'critical':
+        return 'status-critical';
+      case 'disabled':
+        return 'status-disabled';
+      default:
+        return 'status-unknown';
+    }
+  };
+
   return (
-    <div 
-      className="card p-6 flex flex-col cursor-pointer group"
-      onClick={onClick}
+    <Card
+      background="light-1"
+      pad="medium"
+      gap="small"
+      width={{ min: '150px' }}
     >
-      <div className="flex justify-between items-start mb-4">
-        <div
-          className={`w-12 h-12 rounded-lg flex items-center justify-center ${color}`}
+      <Box direction="row" justify="between" align="center">
+        <Text size="small" color="dark-3">
+          {title}
+        </Text>
+        <Box
+          background={getStatusColor(status)}
+          pad={{ horizontal: 'xsmall', vertical: 'xxsmall' }}
+          round="small"
         >
-          {icon}
-        </div>
-        <ArrowUpRight 
-          size={20} 
-          className="text-gray-400 group-hover:text-hpe-green-500 transition-colors" 
-        />
-      </div>
-      <div className="mt-2">
-        <h3 className="text-lg font-medium text-hpe-blue-700">{title}</h3>
-        <p className="text-3xl font-semibold mt-1">{count}</p>
-      </div>
-    </div>
+          <Text size="xsmall" color="white">
+            {status.toUpperCase()}
+          </Text>
+        </Box>
+      </Box>
+      <CardBody>
+        <Box align="center" justify="center" pad={{ vertical: 'small' }}>
+          <Text size="xlarge" weight="bold">
+            {count}
+          </Text>
+        </Box>
+      </CardBody>
+    </Card>
   );
 };
-
-export default StatusCard;

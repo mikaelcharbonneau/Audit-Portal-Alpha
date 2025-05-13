@@ -1,133 +1,236 @@
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ClipboardCheck, AlertCircle, CheckCircle, ArrowRight, ChevronDown } from 'lucide-react';
-import StatusCard from '../components/dashboard/StatusCard';
-import InspectionCard from '../components/dashboard/InspectionCard';
-import ReportCard from '../components/dashboard/ReportCard';
-import { recentInspections, reports, issues, datacenters } from '../data/mockData';
-import { useState } from 'react';
-import { useUser } from '../context/UserContext';
+import {
+  Box,
+  Button,
+  Grid,
+  Heading,
+  Text,
+  Card,
+  CardHeader,
+  CardBody,
+  CardFooter,
+  Spinner
+} from 'grommet';
+import { FormAdd, StatusWarning } from 'grommet-icons';
+import { format } from 'date-fns';
+import { StatusCard } from '../components/dashboard/StatusCard';
+import { InspectionCard } from '../components/dashboard/InspectionCard';
+import { ReportCard } from '../components/dashboard/ReportCard';
+import { supabase } from '../lib/supabaseClient';
+
+interface Inspection {
+  Id: string;
+  UserEmail: string;
+  Timestamp: string;
+  ReportData: {
+    datahall: string;
+    status: string;
+    isUrgent: boolean;
+    temperatureReading: string;
+    humidityReading: string;
+    [key: string]: any;
+  };
+}
 
 const Dashboard = () => {
   const navigate = useNavigate();
-  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-  const { user } = useUser();
-  
-  const completedInspections = recentInspections.filter(i => i.status === 'completed').length;
-  const activeIssues = issues.filter(i => i.status === 'open' || i.status === 'in-progress').length;
-  const resolvedIssues = issues.filter(i => i.status === 'resolved').length;
+  const [inspections, setInspections] = useState<Inspection[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  const startWalkthrough = (datahallId: string) => {
-    navigate('/inspection', { state: { datahallId } });
-    setIsDropdownOpen(false);
+  useEffect(() => {
+    fetchInspections();
+  }, []);
+
+  const fetchInspections = async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const response = await fetch('/api/GetInspections');
+      
+      if (!response.ok) {
+        throw new Error(`Failed to fetch inspections: ${response.statusText}`);
+      }
+      
+      const data = await response.json();
+      setInspections(data);
+    } catch (error: any) {
+      console.error('Error fetching inspections:', error);
+      setError(error.message);
+    } finally {
+      setLoading(false);
+    }
   };
 
-  return (
-    <div>
-      <div className="flex flex-col sm:flex-row items-center justify-between mb-6">
-        <div>
-          <h1 className="text-2xl font-bold text-hpe-blue-700">Dashboard</h1>
-          <p className="text-hpe-blue-500 mt-1">
-            Welcome back, {user.name}
-          </p>
-        </div>
-        <div className="relative mt-4 sm:mt-0">
-          <button
-            onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-            className="btn-primary flex items-center"
-          >
-            <ClipboardCheck className="mr-2 h-5 w-5" />
-            Start Walkthrough
-            <ChevronDown className="ml-2 h-4 w-4" />
-          </button>
-          
-          {isDropdownOpen && (
-            <>
-              <div 
-                className="fixed inset-0 z-10"
-                onClick={() => setIsDropdownOpen(false)}
-              ></div>
-              <div className="absolute right-0 mt-2 w-64 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 z-20">
-                <div className="py-1">
-                  {datacenters.map((datacenter) => (
-                    <button
-                      key={datacenter.id}
-                      className="w-full text-left px-4 py-2 text-sm text-hpe-blue-600 hover:bg-hpe-green-50 hover:text-hpe-green-600"
-                      onClick={() => startWalkthrough(datacenter.id)}
-                    >
-                      <div className="font-medium">{datacenter.name}</div>
-                      <div className="text-xs text-gray-500">{datacenter.location}</div>
-                    </button>
-                  ))}
-                </div>
-              </div>
-            </>
-          )}
-        </div>
-      </div>
+  // Count inspections by status
+  const statusCounts = {
+    operational: 0,
+    maintenance: 0,
+    alert: 0,
+    offline: 0,
+  };
 
-      {/* Status Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-        <StatusCard
-          title="Completed Walkthroughs"
-          count={completedInspections}
-          icon={<ClipboardCheck className="h-6 w-6 text-white" />}
-          color="bg-hpe-green"
+  inspections.forEach((inspection) => {
+    const status = inspection.ReportData.status?.toLowerCase();
+    if (status && status in statusCounts) {
+      statusCounts[status as keyof typeof statusCounts]++;
+    }
+  });
+
+  // Get urgent inspections
+  const urgentInspections = inspections.filter(
+    (inspection) => inspection.ReportData.isUrgent
+  );
+
+  // Get recent inspections (last 5)
+  const recentInspections = [...inspections]
+    .sort((a, b) => new Date(b.Timestamp).getTime() - new Date(a.Timestamp).getTime())
+    .slice(0, 5);
+
+  return (
+    <Box pad="medium">
+      <Box direction="row" justify="between" align="center" margin={{ bottom: 'medium' }}>
+        <Heading level={2} margin="none">
+          Dashboard
+        </Heading>
+        <Button
+          primary
+          label="Start Walkthrough"
+          icon={<FormAdd />}
           onClick={() => navigate('/inspection')}
         />
-        <StatusCard
-          title="Active Issues"
-          count={activeIssues}
-          icon={<AlertCircle className="h-6 w-6 text-white" />}
-          color="bg-hpe-warning"
-          onClick={() => navigate('/reports')}
-        />
-        <StatusCard
-          title="Resolved Issues"
-          count={resolvedIssues}
-          icon={<CheckCircle className="h-6 w-6 text-white" />}
-          color="bg-hpe-blue-500"
-          onClick={() => navigate('/reports')}
-        />
-      </div>
+      </Box>
 
-      {/* Recent Inspections */}
-      <div className="mb-8">
-        <div className="flex items-center justify-between mb-4">
-          <h2 className="section-title">Recent Inspections</h2>
-          <button
-            onClick={() => navigate('/inspection')}
-            className="text-sm text-hpe-green hover:text-hpe-green-600 font-medium flex items-center"
-          >
-            View All
-            <ArrowRight className="ml-1 h-4 w-4" />
-          </button>
-        </div>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          {recentInspections.map((inspection) => (
-            <InspectionCard key={inspection.id} inspection={inspection} />
-          ))}
-        </div>
-      </div>
+      {loading ? (
+        <Box align="center" justify="center" height="medium">
+          <Spinner size="medium" />
+          <Text margin={{ top: 'small' }}>Loading dashboard data...</Text>
+        </Box>
+      ) : error ? (
+        <Box
+          background="status-error"
+          pad="medium"
+          round="small"
+          direction="row"
+          gap="small"
+          align="center"
+          margin={{ bottom: 'medium' }}
+        >
+          <StatusWarning color="white" />
+          <Text color="white">Error loading dashboard data: {error}</Text>
+        </Box>
+      ) : (
+        <>
+          <Box margin={{ bottom: 'medium' }}>
+            <Heading level={3} margin={{ vertical: 'small' }}>
+              Data Hall Status
+            </Heading>
+            <Grid columns={{ count: 'fit', size: 'small' }} gap="medium">
+              <StatusCard
+                title="Operational"
+                count={statusCounts.operational}
+                status="ok"
+              />
+              <StatusCard
+                title="Maintenance"
+                count={statusCounts.maintenance}
+                status="warning"
+              />
+              <StatusCard
+                title="Alert"
+                count={statusCounts.alert}
+                status="critical"
+              />
+              <StatusCard
+                title="Offline"
+                count={statusCounts.offline}
+                status="disabled"
+              />
+            </Grid>
+          </Box>
 
-      {/* Reports */}
-      <div>
-        <div className="flex items-center justify-between mb-4">
-          <h2 className="section-title">Reports</h2>
-          <button
-            onClick={() => navigate('/reports')}
-            className="text-sm text-hpe-green hover:text-hpe-green-600 font-medium flex items-center"
-          >
-            View All
-            <ArrowRight className="ml-1 h-4 w-4" />
-          </button>
-        </div>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          {reports.map((report) => (
-            <ReportCard key={report.id} report={report} />
-          ))}
-        </div>
-      </div>
-    </div>
+          <Grid columns={['1/2', '1/2']} gap="medium">
+            <Box>
+              <Heading level={3} margin={{ vertical: 'small' }}>
+                Recent Inspections
+              </Heading>
+              {recentInspections.length > 0 ? (
+                <Box gap="medium">
+                  {recentInspections.map((inspection) => (
+                    <InspectionCard
+                      key={inspection.Id}
+                      id={inspection.Id}
+                      datahall={inspection.ReportData.datahall}
+                      status={inspection.ReportData.status}
+                      userEmail={inspection.UserEmail}
+                      timestamp={inspection.Timestamp}
+                      onClick={() => navigate(`/reports/${inspection.Id}`)}
+                    />
+                  ))}
+                  <Box align="center" margin={{ top: 'small' }}>
+                    <Button
+                      label="View All Inspections"
+                      onClick={() => navigate('/inspections')}
+                    />
+                  </Box>
+                </Box>
+              ) : (
+                <Box
+                  background="light-2"
+                  pad="medium"
+                  round="small"
+                  align="center"
+                  justify="center"
+                  height="small"
+                >
+                  <Text>No recent inspections found</Text>
+                  <Button
+                    margin={{ top: 'small' }}
+                    primary
+                    label="Start First Walkthrough"
+                    icon={<FormAdd />}
+                    onClick={() => navigate('/inspection')}
+                  />
+                </Box>
+              )}
+            </Box>
+
+            <Box>
+              <Heading level={3} margin={{ vertical: 'small' }}>
+                Urgent Issues
+              </Heading>
+              {urgentInspections.length > 0 ? (
+                <Box gap="medium">
+                  {urgentInspections.slice(0, 5).map((inspection) => (
+                    <ReportCard
+                      key={inspection.Id}
+                      id={inspection.Id}
+                      datahall={inspection.ReportData.datahall}
+                      status={inspection.ReportData.status}
+                      issue={inspection.ReportData.comments || 'Urgent issue flagged'}
+                      timestamp={inspection.Timestamp}
+                      onClick={() => navigate(`/reports/${inspection.Id}`)}
+                    />
+                  ))}
+                </Box>
+              ) : (
+                <Box
+                  background="light-2"
+                  pad="medium"
+                  round="small"
+                  align="center"
+                  justify="center"
+                  height="small"
+                >
+                  <Text>No urgent issues at this time</Text>
+                </Box>
+              )}
+            </Box>
+          </Grid>
+        </>
+      )}
+    </Box>
   );
 };
 

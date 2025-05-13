@@ -1,18 +1,32 @@
 import { app } from '@azure/functions';
-import { getConnection } from "../db";
+import { supabase } from "../db";
 
 export default app.http('GetInspections', {
   methods: ['GET'],
   authLevel: 'anonymous',
   handler: async (request, context) => {
     try {
-      const pool = await getConnection();
-      const result = await pool.request().query(
-        "SELECT TOP 50 Id, UserEmail, Timestamp, ReportData FROM AuditReports ORDER BY Timestamp DESC"
-      );
-      return { status: 200, jsonBody: result.recordset };
+      const { data, error } = await supabase
+        .from('AuditReports')
+        .select('*')
+        .order('Timestamp', { ascending: false })
+        .limit(50);
+      
+      if (error) throw error;
+      
+      return { 
+        status: 200, 
+        jsonBody: data
+      };
     } catch (error: any) {
-      return { status: 500, body: `Error fetching inspections: ${error.message}` };
+      context.log.error(`Error fetching inspections: ${error.message}`);
+      return { 
+        status: 500, 
+        jsonBody: { 
+          success: false, 
+          message: `Error fetching inspections: ${error.message}` 
+        } 
+      };
     }
   }
 });

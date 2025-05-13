@@ -1,10 +1,11 @@
-import sql from 'mssql';
+import { createClient } from '@supabase/supabase-js';
 
-export async function getConnection() {
-    if (!sql.pool) {
-        sql.pool = await sql.connect(process.env.SQL_CONNECTION_STRING as string);
-    }
-    return sql.pool;
+// Environment variables should be set in Vercel's project settings
+const supabaseUrl = process.env.SUPABASE_URL || '';
+const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || '';
+
+if (!supabaseUrl || !supabaseKey) {
+  console.error('Missing Supabase environment variables');
 }
 
-export default sql;
+export const supabase = createClient(supabaseUrl, supabaseKey);

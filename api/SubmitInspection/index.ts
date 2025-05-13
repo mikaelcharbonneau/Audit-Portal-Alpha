@@ -1,5 +1,5 @@
 import { app } from '@azure/functions';
-import { getConnection } from "../db";
+import { supabase } from "../db";
 
 export default app.http('SubmitInspection', {
   methods: ['POST'],
@@ -11,17 +11,39 @@ export default app.http('SubmitInspection', {
     } catch (err) {
       // If parsing fails, body stays as {}
     }
-    const { userEmail = "unknown", ...data } = body;
+    
+    const { userEmail = "unknown", ...reportData } = body;
+    
     try {
-      const pool = await getConnection();
-      await pool.request()
-        .input("UserEmail", userEmail)
-        .input("Timestamp", new Date())
-        .input("ReportData", JSON.stringify(data))
-        .query("INSERT INTO AuditReports (UserEmail, Timestamp, ReportData) VALUES (@UserEmail, @Timestamp, @ReportData)");
-      return { status: 200, body: "Inspection saved" };
+      const { data, error } = await supabase
+        .from('AuditReports')
+        .insert([
+          { 
+            UserEmail: userEmail,
+            ReportData: reportData
+          }
+        ])
+        .select();
+      
+      if (error) throw error;
+      
+      return { 
+        status: 200, 
+        jsonBody: { 
+          success: true, 
+          message: "Inspection saved",
+          data: data[0]
+        } 
+      };
     } catch (error: any) {
-      return { status: 500, body: `Error storing inspection: ${error.message}` };
+      context.log.error(`Error storing inspection: ${error.message}`);
+      return { 
+        status: 500, 
+        jsonBody: { 
+          success: false, 
+          message: `Error storing inspection: ${error.message}` 
+        } 
+      };
     }
   }
 });
