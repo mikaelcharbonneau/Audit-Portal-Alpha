@@ -48,9 +48,9 @@ A web application designed to facilitate, record, and report on audit workflows 
 
 3. Create a `.env.local` file in the root directory with your Supabase credentials:
    ```
-   VITE_SUPABASE_URL=your_supabase_url
-   VITE_SUPABASE_ANON_KEY=your_supabase_anon_key
-   SUPABASE_URL=your_supabase_url
+   VITE_SUPABASE_URL=https://osovotilbxkrurqbbrxx.supabase.co
+   VITE_SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9zb3ZvdGlsYnhrcnVycWJicnh4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDcxMDIyNDksImV4cCI6MjA2MjY3ODI0OX0.oCH9U2z4GpIOoLZpxJ0Li124idiWrV6nbbOKdO6NMtE
+   SUPABASE_URL=https://osovotilbxkrurqbbrxx.supabase.co
    SUPABASE_SERVICE_ROLE_KEY=your_supabase_service_role_key
    ```
 
@@ -75,6 +75,17 @@ CREATE TABLE "AuditReports" (
 ALTER TABLE "AuditReports" ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "Allow anonymous select" ON "AuditReports" FOR SELECT USING (true);
 CREATE POLICY "Allow anonymous insert" ON "AuditReports" FOR INSERT WITH CHECK (true);
+```
+
+### Test Data
+
+A test record has been added to the database to verify connectivity:
+
+```sql
+-- ID: e03d35dd-0f4d-4762-a5c4-a7bc2adefcf1
+-- UserEmail: test@example.com
+-- Timestamp: 2025-05-13T03:59:41.1802Z
+-- ReportData: Contains sample inspection data for Hall A
 ```
 
 ## Deployment
