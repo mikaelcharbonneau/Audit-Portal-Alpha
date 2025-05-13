@@ -12,7 +12,6 @@ import Confirmation from './pages/Confirmation';
 import Reports from './pages/Reports';
 import Profile from './pages/Profile';
 import Login from './pages/Login';
-import Register from './pages/Register';
 import NotFound from './pages/NotFound';
 import ProtectedRoute from './components/ProtectedRoute';
 import ErrorBoundaryComponent from './components/ErrorBoundaryComponent';
@@ -28,7 +27,6 @@ const App = () => {
               <Routes>
                 {/* Public Routes */}
                 <Route path="/login" element={<Login />} />
-                <Route path="/register" element={<Register />} />
 
                 {/* Protected Routes */}
                 <Route element={<ProtectedRoute />}>

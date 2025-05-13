@@ -1,8 +1,9 @@
 import { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { Box, Button, Form, FormField, TextInput, Text, Heading } from 'grommet';
 import { supabase } from '../lib/supabaseClient';
 import { Mail, Lock } from 'lucide-react';
+import HPELogo from '../components/ui/HPELogo';
 
 const Login = () => {
   const navigate = useNavigate();
@@ -44,15 +45,24 @@ const Login = () => {
         round="small"
         elevation="small"
       >
-        <Heading level={2} margin={{ top: 'none', bottom: 'medium' }} textAlign="center">
-          Welcome Back
-        </Heading>
+        <Box align="center" margin={{ bottom: 'medium' }}>
+          <HPELogo height={40} />
+          <Text 
+            margin={{ top: 'small' }} 
+            size="xlarge" 
+            weight="bold"
+            color="text-strong"
+            style={{ fontFamily: 'MetricHPE' }}
+          >
+            Hewlett Packard Enterprise
+          </Text>
+        </Box>
         
         <Form onSubmit={({ value }) => handleSubmit(value)}>
           <FormField name="email" label="Email">
             <TextInput
               name="email"
-              icon={<Mail size={20} />}
+              icon={<Mail size={20} color="#666666" />}
               placeholder="Enter your email"
               type="email"
               required
@@ -62,7 +72,7 @@ const Login = () => {
           <FormField name="password" label="Password">
             <TextInput
               name="password"
-              icon={<Lock size={20} />}
+              icon={<Lock size={20} color="#666666" />}
               placeholder="Enter your password"
               type="password"
               required
@@ -80,18 +90,9 @@ const Login = () => {
             primary
             label={loading ? 'Signing in...' : 'Sign In'}
             disabled={loading}
-            margin={{ top: 'medium', bottom: 'small' }}
+            margin={{ top: 'medium' }}
           />
         </Form>
-
-        <Box align="center" margin={{ top: 'medium' }}>
-          <Text size="small">
-            Don't have an account?{' '}
-            <Link to="/register" className="text-brand-500 hover:underline">
-              Sign up
-            </Link>
-          </Text>
-        </Box>
       </Box>
     </Box>
   );
