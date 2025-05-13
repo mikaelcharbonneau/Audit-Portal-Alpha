@@ -41,9 +41,9 @@ const Dashboard = () => {
   };
 
   const stats = {
-    completed: inspections.filter(i => i.ReportData.status === 'completed').length,
+    completed: inspections.length, // All submitted inspections are considered completed
     active: inspections.filter(i => i.ReportData.isUrgent).length,
-    resolved: inspections.filter(i => i.ReportData.status === 'resolved').length
+    resolved: inspections.filter(i => !i.ReportData.isUrgent).length
   };
 
   return (
