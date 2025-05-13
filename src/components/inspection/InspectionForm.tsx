@@ -15,6 +15,7 @@ import {
   Spinner
 } from 'grommet';
 import { FormNext } from 'grommet-icons';
+import { supabase } from '../../lib/supabaseClient';
 
 const dataHallOptions = ['Hall A', 'Hall B', 'Hall C', 'Hall D'];
 const statusOptions = ['Operational', 'Maintenance', 'Alert', 'Offline'];
@@ -37,34 +38,32 @@ export const InspectionForm = () => {
   const handleSubmit = async ({ value }: { value: any }) => {
     setLoading(true);
     try {
-      const response = await fetch('http://localhost:3001/api/SubmitInspection', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'application/json'
-        },
-        body: JSON.stringify({
-          userEmail: value.userEmail,
-          datahall: value.datahall,
-          status: value.status,
-          temperatureReading: value.temperatureReading,
-          humidityReading: value.humidityReading,
-          comments: value.comments,
-          isUrgent: value.isUrgent,
-          securityPassed: value.securityPassed,
-          coolingSystemCheck: value.coolingSystemCheck
-        }),
-      });
+      const { data, error } = await supabase
+        .from('AuditReports')
+        .insert([
+          { 
+            UserEmail: value.userEmail,
+            ReportData: {
+              datahall: value.datahall,
+              status: value.status,
+              temperatureReading: value.temperatureReading,
+              humidityReading: value.humidityReading,
+              comments: value.comments,
+              isUrgent: value.isUrgent,
+              securityPassed: value.securityPassed,
+              coolingSystemCheck: value.coolingSystemCheck
+            }
+          }
+        ])
+        .select();
 
-      if (!response.ok) {
-        throw new Error('Failed to submit inspection');
+      if (error) {
+        throw error;
       }
-
-      const data = await response.json();
       
       navigate('/confirmation', { 
         state: { 
-          inspectionId: data.data?.Id,
+          inspectionId: data?.[0]?.Id,
           success: true 
         } 
       });
