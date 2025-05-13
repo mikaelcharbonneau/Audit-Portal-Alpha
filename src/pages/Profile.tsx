@@ -14,229 +14,175 @@ const ProfileActivity = [
 
 const Profile = () => {
   const { darkMode, toggleDarkMode } = useTheme();
-  // Use mockData instead of UserContext
   const user = currentUser;
 
   return (
-    <div className="max-w-4xl mx-auto">
-      {/* Header */}
-      <div className="bg-white dark:bg-hpe-blue-900 rounded-lg shadow-sm overflow-hidden mb-6">
-        <div className="h-12 md:h-16 bg-gray-50 dark:bg-hpe-blue-800 dark:bg-opacity-50"></div>
-        
-        <div className="px-6 pb-6 pt-16 md:pt-0 md:flex relative">
-          {/* Avatar */}
-          <div className="absolute -top-16 md:relative md:-top-12 md:mr-6">
-            <div className="relative group w-32 h-32">
-              <div className="avatar w-full h-full border-4 border-white dark:border-hpe-blue-900 text-white bg-hpe-green text-4xl overflow-hidden">
-                {user.avatarUrl ? (
-                  <img 
-                    src={user.avatarUrl} 
-                    alt={user.name}
-                    className="w-full h-full object-cover"
-                  />
-                ) : (
-                  <span className="flex items-center justify-center w-full h-full">
-                    {user.name.charAt(0)}
-                  </span>
-                )}
-              </div>
-            </div>
+    <div className="max-w-4xl mx-auto p-6">
+      {/* Profile Header */}
+      <div className="bg-white rounded-lg shadow-sm overflow-hidden mb-6">
+        <div className="bg-[#01A982] h-32"></div>
+        <div className="px-6 py-4 flex items-center">
+          <div className="w-24 h-24 bg-[#01A982] rounded-full -mt-16 flex items-center justify-center text-white text-3xl font-medium">
+            {user.name.charAt(0)}
           </div>
-          
-          {/* Info */}
-          <div className="md:flex-1 md:pt-12">
-            <h1 className="text-2xl font-bold text-hpe-blue-800 dark:text-white mb-1">
-              {user.name}
-            </h1>
-            <p className="text-hpe-blue-600 dark:text-hpe-blue-100 mb-4">
-              {user.role}
-            </p>
-            
-            <div className="space-y-2 max-w-md">
-              <div className="flex items-center">
-                <Mail className="h-4 w-4 text-hpe-blue-400 dark:text-hpe-blue-300 mr-2" />
-                <span className="text-sm dark:text-gray-200">{user.email}</span>
+          <div className="ml-6">
+            <h1 className="text-2xl font-semibold text-gray-900">{user.name}</h1>
+            <p className="text-gray-600">{user.role}</p>
+            <div className="mt-4 space-y-2">
+              <div className="flex items-center text-gray-600">
+                <Mail className="w-4 h-4 mr-2" />
+                <span className="text-sm">{user.email}</span>
               </div>
-              <div className="flex items-center">
-                <Phone className="h-4 w-4 text-hpe-blue-400 dark:text-hpe-blue-300 mr-2" />
-                <span className="text-sm dark:text-gray-200">+1 (555) 123-4567</span>
+              <div className="flex items-center text-gray-600">
+                <Phone className="w-4 h-4 mr-2" />
+                <span className="text-sm">+1 (555) 123-4567</span>
               </div>
-              <div className="flex items-center">
-                <Building className="h-4 w-4 text-hpe-blue-400 dark:text-hpe-blue-300 mr-2" />
-                <span className="text-sm dark:text-gray-200">Data Center Operations</span>
+              <div className="flex items-center text-gray-600">
+                <Building className="w-4 h-4 mr-2" />
+                <span className="text-sm">Data Center Operations</span>
               </div>
-              <div className="flex items-center">
-                <Clock className="h-4 w-4 text-hpe-blue-400 dark:text-hpe-blue-300 mr-2" />
-                <span className="text-sm dark:text-gray-200">Last active: Today at 10:45 AM</span>
+              <div className="flex items-center text-gray-600">
+                <Clock className="w-4 h-4 mr-2" />
+                <span className="text-sm">Last active: Today at 10:45 AM</span>
               </div>
             </div>
           </div>
         </div>
       </div>
-      
-      {/* Sections */}
+
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         {/* Activity Log */}
         <div className="md:col-span-2">
-          <div className="card dark:bg-hpe-blue-900">
-            <div className="px-6 py-4 border-b border-gray-100 dark:border-hpe-blue-800">
-              <h2 className="text-lg font-medium text-hpe-blue-700 dark:text-white">Activity Log</h2>
+          <div className="bg-white rounded-lg shadow-sm">
+            <div className="px-6 py-4 border-b border-gray-100">
+              <h2 className="text-lg font-medium text-gray-900">Activity Log</h2>
             </div>
-            <div className="divide-y divide-gray-100 dark:divide-hpe-blue-800">
+            <div className="divide-y divide-gray-100">
               {ProfileActivity.map((activity, index) => (
                 <div key={index} className="px-6 py-4">
                   <div className="flex justify-between mb-1">
-                    <span 
-                      className={`chip ${
-                        activity.type === 'inspection' 
-                          ? 'chip-green' 
-                          : activity.type === 'issue' 
-                            ? 'chip-amber' 
-                            : 'chip-blue bg-hpe-blue-100 text-hpe-blue-800 dark:bg-hpe-blue-900 dark:text-hpe-blue-100'
-                      }`}
-                    >
+                    <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                      activity.type === 'inspection' 
+                        ? 'bg-emerald-100 text-emerald-800'
+                        : activity.type === 'issue'
+                        ? 'bg-amber-100 text-amber-800'
+                        : 'bg-blue-100 text-blue-800'
+                    }`}>
                       {activity.type.charAt(0).toUpperCase() + activity.type.slice(1)}
                     </span>
-                    <span className="text-xs text-gray-500 dark:text-gray-400">
+                    <span className="text-xs text-gray-500">
                       {format(new Date(activity.date), 'MMM d, yyyy')}
                     </span>
                   </div>
-                  <p className="text-sm text-hpe-blue-600 dark:text-hpe-blue-100">{activity.description}</p>
+                  <p className="text-sm text-gray-600">{activity.description}</p>
                 </div>
               ))}
             </div>
-            <div className="px-6 py-4 border-t border-gray-100 dark:border-hpe-blue-800 text-center">
-              <button className="text-sm text-hpe-green-500 font-medium hover:text-hpe-green-600 dark:text-hpe-green-400 dark:hover:text-hpe-green-300">
+            <div className="px-6 py-4 border-t border-gray-100 text-center">
+              <button className="text-sm text-[#01A982] font-medium hover:text-[#018768]">
                 View All Activity
               </button>
             </div>
           </div>
         </div>
-        
+
         {/* Settings and Stats */}
         <div className="space-y-6">
           {/* Settings */}
-          <div className="card dark:bg-hpe-blue-900">
-            <div className="px-6 py-4 border-b border-gray-100 dark:border-hpe-blue-800">
-              <h2 className="text-lg font-medium text-hpe-blue-700 dark:text-white">Settings</h2>
+          <div className="bg-white rounded-lg shadow-sm">
+            <div className="px-6 py-4 border-b border-gray-100">
+              <h2 className="text-lg font-medium text-gray-900">Settings</h2>
             </div>
             <div className="px-6 py-4 space-y-4">
               <div className="flex items-center justify-between">
-                <span className="text-sm text-hpe-blue-600 dark:text-hpe-blue-100">Dark Theme</span>
+                <span className="text-sm text-gray-600">Dark Theme</span>
                 <button 
                   onClick={toggleDarkMode}
-                  className={`relative inline-flex items-center h-6 rounded-full w-11 transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-hpe-green-500 ${darkMode ? 'bg-hpe-green-500' : 'bg-gray-200'}`}
+                  className={`relative inline-flex items-center h-6 rounded-full w-11 transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#01A982] ${
+                    darkMode ? 'bg-[#01A982]' : 'bg-gray-200'
+                  }`}
                 >
                   <span className="sr-only">Toggle dark mode</span>
                   <span 
-                    className={`inline-block w-5 h-5 transform transition-transform bg-white rounded-full ${darkMode ? 'translate-x-6' : 'translate-x-1'} flex items-center justify-center`}
-                  >
-                    {darkMode ? (
-                      <Moon size={12} className="text-hpe-blue-600" />
-                    ) : (
-                      <Sun size={12} className="text-hpe-blue-600" />
-                    )}
-                  </span>
+                    className={`inline-block w-5 h-5 transform transition-transform bg-white rounded-full ${
+                      darkMode ? 'translate-x-6' : 'translate-x-1'
+                    }`}
+                  />
                 </button>
               </div>
-              
+
               <div className="flex items-center justify-between">
-                <span className="text-sm text-hpe-blue-600 dark:text-hpe-blue-100">Email Notifications</span>
-                <div className="relative inline-block w-10 mr-2 align-middle select-none">
-                  <input 
-                    type="checkbox" 
-                    id="toggle-1" 
-                    defaultChecked 
-                    className="toggle-checkbox absolute block w-6 h-6 rounded-full bg-white border-4 appearance-none cursor-pointer"
-                    aria-label="Toggle email notifications"
-                    title="Toggle email notifications"
-                  />
-                  <label 
-                    htmlFor="toggle-1" 
-                    className="toggle-label block overflow-hidden h-6 rounded-full bg-gray-300 dark:bg-hpe-blue-800 cursor-pointer"
-                  ></label>
-                </div>
+                <span className="text-sm text-gray-600">Email Notifications</span>
+                <button 
+                  className={`relative inline-flex items-center h-6 rounded-full w-11 bg-[#01A982]`}
+                >
+                  <span className="sr-only">Toggle email notifications</span>
+                  <span className="inline-block w-5 h-5 transform translate-x-6 bg-white rounded-full" />
+                </button>
               </div>
-              
+
               <div className="flex items-center justify-between">
-                <span className="text-sm text-hpe-blue-600 dark:text-hpe-blue-100">Push Notifications</span>
-                <div className="relative inline-block w-10 mr-2 align-middle select-none">
-                  <input 
-                    type="checkbox" 
-                    id="toggle-2" 
-                    className="toggle-checkbox absolute block w-6 h-6 rounded-full bg-white border-4 appearance-none cursor-pointer"
-                    aria-label="Toggle push notifications"
-                    title="Toggle push notifications"
-                  />
-                  <label 
-                    htmlFor="toggle-2" 
-                    className="toggle-label block overflow-hidden h-6 rounded-full bg-gray-300 dark:bg-hpe-blue-800 cursor-pointer"
-                  ></label>
-                </div>
+                <span className="text-sm text-gray-600">Push Notifications</span>
+                <button 
+                  className={`relative inline-flex items-center h-6 rounded-full w-11 bg-gray-200`}
+                >
+                  <span className="sr-only">Toggle push notifications</span>
+                  <span className="inline-block w-5 h-5 transform translate-x-1 bg-white rounded-full" />
+                </button>
               </div>
-              
+
               <div className="flex items-center justify-between">
-                <span className="text-sm text-hpe-blue-600 dark:text-hpe-blue-100">Auto-save Reports</span>
-                <div className="relative inline-block w-10 mr-2 align-middle select-none">
-                  <input 
-                    type="checkbox" 
-                    id="toggle-3"
-                    defaultChecked 
-                    className="toggle-checkbox absolute block w-6 h-6 rounded-full bg-white border-4 appearance-none cursor-pointer" 
-                    aria-label="Toggle auto-save reports"
-                    title="Toggle auto-save reports"
-                  />
-                  <label 
-                    htmlFor="toggle-3" 
-                    className="toggle-label block overflow-hidden h-6 rounded-full bg-gray-300 dark:bg-hpe-blue-800 cursor-pointer"
-                  >
-                    <span className="sr-only">Toggle auto-save reports</span>
-                  </label>
-                </div>
+                <span className="text-sm text-gray-600">Auto-save Reports</span>
+                <button 
+                  className={`relative inline-flex items-center h-6 rounded-full w-11 bg-[#01A982]`}
+                >
+                  <span className="sr-only">Toggle auto-save reports</span>
+                  <span className="inline-block w-5 h-5 transform translate-x-6 bg-white rounded-full" />
+                </button>
               </div>
             </div>
           </div>
-          
+
           {/* Statistics */}
-          <div className="card dark:bg-hpe-blue-900">
-            <div className="px-6 py-4 border-b border-gray-100 dark:border-hpe-blue-800">
-              <h2 className="text-lg font-medium text-hpe-blue-700 dark:text-white">Statistics</h2>
+          <div className="bg-white rounded-lg shadow-sm">
+            <div className="px-6 py-4 border-b border-gray-100">
+              <h2 className="text-lg font-medium text-gray-900">Statistics</h2>
             </div>
             <div className="p-6">
               <div className="space-y-4">
                 <div>
                   <div className="flex justify-between mb-1">
-                    <span className="text-sm text-hpe-blue-600 dark:text-hpe-blue-100">Walkthroughs Completed</span>
-                    <span className="text-sm font-medium dark:text-white">28</span>
+                    <span className="text-sm text-gray-600">Walkthroughs Completed</span>
+                    <span className="text-sm font-medium text-gray-900">28</span>
                   </div>
-                  <div className="w-full bg-gray-200 dark:bg-hpe-blue-800 rounded-full h-2">
-                    <div className="bg-hpe-green h-2 rounded-full" style={{ width: '80%' }}></div>
-                  </div>
-                </div>
-                
-                <div>
-                  <div className="flex justify-between mb-1">
-                    <span className="text-sm text-hpe-blue-600 dark:text-hpe-blue-100">Issues Resolved</span>
-                    <span className="text-sm font-medium dark:text-white">42</span>
-                  </div>
-                  <div className="w-full bg-gray-200 dark:bg-hpe-blue-800 rounded-full h-2">
-                    <div className="bg-hpe-blue-500 h-2 rounded-full" style={{ width: '65%' }}></div>
+                  <div className="w-full bg-gray-200 rounded-full h-2">
+                    <div className="bg-[#01A982] h-2 rounded-full w-[80%]"></div>
                   </div>
                 </div>
-                
+
                 <div>
                   <div className="flex justify-between mb-1">
-                    <span className="text-sm text-hpe-blue-600 dark:text-hpe-blue-100">Reports Generated</span>
-                    <span className="text-sm font-medium dark:text-white">15</span>
+                    <span className="text-sm text-gray-600">Issues Resolved</span>
+                    <span className="text-sm font-medium text-gray-900">42</span>
                   </div>
-                  <div className="w-full bg-gray-200 dark:bg-hpe-blue-800 rounded-full h-2">
-                    <div className="bg-hpe-accent h-2 rounded-full" style={{ width: '45%' }}></div>
+                  <div className="w-full bg-gray-200 rounded-full h-2">
+                    <div className="bg-[#425563] h-2 rounded-full w-[65%]"></div>
+                  </div>
+                </div>
+
+                <div>
+                  <div className="flex justify-between mb-1">
+                    <span className="text-sm text-gray-600">Reports Generated</span>
+                    <span className="text-sm font-medium text-gray-900">15</span>
+                  </div>
+                  <div className="w-full bg-gray-200 rounded-full h-2">
+                    <div className="bg-[#FF8D6D] h-2 rounded-full w-[45%]"></div>
                   </div>
                 </div>
               </div>
-              
-              <button className="w-full mt-6 btn-secondary text-sm dark:bg-hpe-blue-800 dark:border-hpe-blue-700 dark:text-white dark:hover:bg-hpe-blue-700">
-                <Download className="h-4 w-4 mr-1" />
+
+              <button className="w-full mt-6 flex items-center justify-center px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50">
+                <Download className="w-4 h-4 mr-2" />
                 Download Full Report
               </button>
             </div>
