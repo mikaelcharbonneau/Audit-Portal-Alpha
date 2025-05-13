@@ -1,20 +1,77 @@
+import { useState, useEffect } from 'react';
 import { format } from 'date-fns';
 import { Settings, Mail, Phone, Building, Clock, Download, Moon, Sun } from 'lucide-react';
 import { useTheme } from '../context/ThemeContext';
-import { currentUser } from '../data/mockData';
+import { useAuth } from '../context/AuthContext';
+import { supabase } from '../lib/supabaseClient';
 
-const ProfileActivity = [
-  { type: 'inspection', date: '2023-04-15', description: 'Completed walkthrough of Data Center A' },
-  { type: 'issue', date: '2023-04-12', description: 'Resolved cooling issue in Rack B3' },
-  { type: 'report', date: '2023-04-10', description: 'Generated monthly report for Data Center B' },
-  { type: 'inspection', date: '2023-04-08', description: 'Started walkthrough of Data Center C' },
-  { type: 'issue', date: '2023-04-05', description: 'Identified network issue in Rack D1' },
-  { type: 'inspection', date: '2023-04-01', description: 'Completed walkthrough of Data Center B' },
-];
+interface Activity {
+  id: string;
+  type: 'inspection' | 'issue' | 'report';
+  description: string;
+  created_at: string;
+}
+
+interface UserStats {
+  walkthroughs_completed: number;
+  issues_resolved: number;
+  reports_generated: number;
+}
 
 const Profile = () => {
   const { darkMode, toggleDarkMode } = useTheme();
-  const user = currentUser;
+  const { user } = useAuth();
+  const [activities, setActivities] = useState<Activity[]>([]);
+  const [stats, setStats] = useState<UserStats>({
+    walkthroughs_completed: 0,
+    issues_resolved: 0,
+    reports_generated: 0
+  });
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    if (user) {
+      fetchUserActivities();
+      fetchUserStats();
+    }
+  }, [user]);
+
+  const fetchUserActivities = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('user_activities')
+        .select('*')
+        .eq('user_id', user?.id)
+        .order('created_at', { ascending: false })
+        .limit(10);
+
+      if (error) throw error;
+      setActivities(data || []);
+    } catch (error) {
+      console.error('Error fetching activities:', error);
+    }
+  };
+
+  const fetchUserStats = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('user_stats')
+        .select('*')
+        .eq('user_id', user?.id)
+        .single();
+
+      if (error) throw error;
+      if (data) {
+        setStats(data);
+      }
+    } catch (error) {
+      console.error('Error fetching stats:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (!user) return null;
 
   return (
     <div className="max-w-4xl mx-auto p-6">
@@ -22,27 +79,19 @@ const Profile = () => {
       <div className="bg-white rounded-lg shadow-sm overflow-hidden mb-6">
         <div className="px-6 py-6 flex items-center">
           <div className="w-24 h-24 bg-[#01A982] rounded-full flex items-center justify-center text-white text-3xl font-medium">
-            {user.name.charAt(0)}
+            {user.email?.charAt(0).toUpperCase()}
           </div>
           <div className="ml-6">
-            <h1 className="text-2xl font-semibold text-gray-900">{user.name}</h1>
-            <p className="text-gray-600">{user.role}</p>
+            <h1 className="text-2xl font-semibold text-gray-900">{user.email}</h1>
+            <p className="text-gray-600">Data Center Technician</p>
             <div className="mt-4 space-y-2">
               <div className="flex items-center text-gray-600">
                 <Mail className="w-4 h-4 mr-2" />
                 <span className="text-sm">{user.email}</span>
               </div>
               <div className="flex items-center text-gray-600">
-                <Phone className="w-4 h-4 mr-2" />
-                <span className="text-sm">+1 (555) 123-4567</span>
-              </div>
-              <div className="flex items-center text-gray-600">
-                <Building className="w-4 h-4 mr-2" />
-                <span className="text-sm">Data Center Operations</span>
-              </div>
-              <div className="flex items-center text-gray-600">
                 <Clock className="w-4 h-4 mr-2" />
-                <span className="text-sm">Last active: Today at 10:45 AM</span>
+                <span className="text-sm">Last active: {format(new Date(), 'PPp')}</span>
               </div>
             </div>
           </div>
@@ -57,8 +106,8 @@ const Profile = () => {
               <h2 className="text-lg font-medium text-gray-900">Activity Log</h2>
             </div>
             <div className="divide-y divide-gray-100">
-              {ProfileActivity.map((activity, index) => (
-                <div key={index} className="px-6 py-4">
+              {activities.map((activity) => (
+                <div key={activity.id} className="px-6 py-4">
                   <div className="flex justify-between mb-1">
                     <span className={`px-2 py-1 rounded-full text-xs font-medium ${
                       activity.type === 'inspection' 
@@ -70,7 +119,7 @@ const Profile = () => {
                       {activity.type.charAt(0).toUpperCase() + activity.type.slice(1)}
                     </span>
                     <span className="text-xs text-gray-500">
-                      {format(new Date(activity.date), 'MMM d, yyyy')}
+                      {format(new Date(activity.created_at), 'MMM d, yyyy')}
                     </span>
                   </div>
                   <p className="text-sm text-gray-600">{activity.description}</p>
@@ -152,30 +201,45 @@ const Profile = () => {
                 <div>
                   <div className="flex justify-between mb-1">
                     <span className="text-sm text-gray-600">Walkthroughs Completed</span>
-                    <span className="text-sm font-medium text-gray-900">28</span>
+                    <span className="text-sm font-medium text-gray-900">
+                      {stats.walkthroughs_completed}
+                    </span>
                   </div>
                   <div className="w-full bg-gray-200 rounded-full h-2">
-                    <div className="bg-[#01A982] h-2 rounded-full w-[80%]"></div>
+                    <div 
+                      className="bg-[#01A982] h-2 rounded-full" 
+                      style={{ width: `${(stats.walkthroughs_completed / 100) * 100}%` }}
+                    />
                   </div>
                 </div>
 
                 <div>
                   <div className="flex justify-between mb-1">
                     <span className="text-sm text-gray-600">Issues Resolved</span>
-                    <span className="text-sm font-medium text-gray-900">42</span>
+                    <span className="text-sm font-medium text-gray-900">
+                      {stats.issues_resolved}
+                    </span>
                   </div>
                   <div className="w-full bg-gray-200 rounded-full h-2">
-                    <div className="bg-[#425563] h-2 rounded-full w-[65%]"></div>
+                    <div 
+                      className="bg-[#425563] h-2 rounded-full" 
+                      style={{ width: `${(stats.issues_resolved / 100) * 100}%` }}
+                    />
                   </div>
                 </div>
 
                 <div>
                   <div className="flex justify-between mb-1">
                     <span className="text-sm text-gray-600">Reports Generated</span>
-                    <span className="text-sm font-medium text-gray-900">15</span>
+                    <span className="text-sm font-medium text-gray-900">
+                      {stats.reports_generated}
+                    </span>
                   </div>
                   <div className="w-full bg-gray-200 rounded-full h-2">
-                    <div className="bg-[#FF8D6D] h-2 rounded-full w-[45%]"></div>
+                    <div 
+                      className="bg-[#FF8D6D] h-2 rounded-full" 
+                      style={{ width: `${(stats.reports_generated / 100) * 100}%` }}
+                    />
                   </div>
                 </div>
               </div>
