@@ -1,23 +1,27 @@
 import { createContext, useContext, useState, ReactNode } from 'react';
 import { User } from '../types';
-import { currentUser as initialUser } from '../data/mockData';
+
+// Default user data since login is not required
+const defaultUser: User = {
+  id: '1',
+  name: 'Technician',
+  email: 'tech@example.com',
+  role: 'Datacenter Technician',
+  lastInspectionDate: new Date().toISOString().split('T')[0],
+};
 
 type UserContextType = {
   user: User;
-  updateUser: (updates: Partial<User>) => void;
 };
 
 const UserContext = createContext<UserContextType | undefined>(undefined);
 
 export const UserProvider = ({ children }: { children: ReactNode }) => {
-  const [user, setUser] = useState<User>(initialUser);
-
-  const updateUser = (updates: Partial<User>) => {
-    setUser(prev => ({ ...prev, ...updates }));
-  };
+  // No need for updateUser since login functionality is not required
+  const user = defaultUser;
 
   return (
-    <UserContext.Provider value={{ user, updateUser }}>
+    <UserContext.Provider value={{ user }}>
       {children}
     </UserContext.Provider>
   );
