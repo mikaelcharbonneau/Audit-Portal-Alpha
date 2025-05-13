@@ -29,3 +29,7 @@ export interface Report {
   Timestamp: string;
   ReportData: InspectionData;
 }
+
+export interface RackMapping {
+  [datahall: string]: string[];
+}

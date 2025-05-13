@@ -3,6 +3,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { Box, Text } from 'grommet';
 import { ChevronDown, ChevronUp, Server } from 'lucide-react';
 import { supabase } from '../../lib/supabaseClient';
+import { rackLocations } from '../../utils/rackLocations';
 
 interface RackForm {
   id: string;
@@ -46,6 +47,8 @@ export const InspectionForm = () => {
   const [racks, setRacks] = useState<RackForm[]>([]);
   const [expandedRacks, setExpandedRacks] = useState<string[]>([]);
 
+  const availableRacks = selectedDataHall ? rackLocations[selectedDataHall] || [] : [];
+
   const toggleRackExpansion = (rackId: string) => {
     setExpandedRacks(prev => 
       prev.includes(rackId) 
@@ -56,7 +59,6 @@ export const InspectionForm = () => {
 
   const handleYesIssuesClick = () => {
     setHasIssues(true);
-    // Automatically add first rack and expand it
     const newRack: RackForm = {
       id: `rack-${Date.now()}`,
       location: '',
@@ -169,13 +171,16 @@ export const InspectionForm = () => {
                       <label className="block text-sm font-medium text-gray-700 mb-2">
                         Rack Location
                       </label>
-                      <input
-                        type="text"
+                      <select
                         value={rack.location}
                         onChange={(e) => updateRack(rack.id, { location: e.target.value })}
                         className="w-full px-4 py-2.5 border border-gray-300 rounded-md focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
-                        placeholder="Enter rack location"
-                      />
+                      >
+                        <option value="">Select rack location</option>
+                        {availableRacks.map(rackId => (
+                          <option key={rackId} value={rackId}>{rackId}</option>
+                        ))}
+                      </select>
                     </div>
 
                     <div>
