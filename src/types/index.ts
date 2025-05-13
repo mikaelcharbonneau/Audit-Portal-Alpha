@@ -3,9 +3,7 @@ export type User = {
   name: string;
   email: string;
   role: string;
-  avatar?: string;
   lastInspectionDate?: string;
-  avatarUrl?: string;
 };
 
 export type InspectionStatus = 'in-progress' | 'completed';
@@ -52,7 +50,7 @@ export interface FormSection {
 export interface FormField {
   id: string;
   label: string;
-  type: 'text' | 'textarea' | 'select' | 'checkbox' | 'radio' | 'barcode' | 'file' | 'location';
+  type: 'text' | 'textarea' | 'select' | 'checkbox' | 'radio' | 'file' | 'location';
   placeholder?: string;
   required?: boolean;
   options?: { value: string; label: string }[];
