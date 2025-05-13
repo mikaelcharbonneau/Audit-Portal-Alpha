@@ -54,7 +54,9 @@ export const InspectionForm = () => {
     );
   };
 
-  const addRack = () => {
+  const handleYesIssuesClick = () => {
+    setHasIssues(true);
+    // Automatically add first rack and expand it
     const newRack: RackForm = {
       id: `rack-${Date.now()}`,
       location: '',
@@ -64,8 +66,8 @@ export const InspectionForm = () => {
         rearDoorHeatExchanger: false
       }
     };
-    setRacks([...racks, newRack]);
-    setExpandedRacks([...expandedRacks, newRack.id]);
+    setRacks([newRack]);
+    setExpandedRacks([newRack.id]);
   };
 
   const updateRack = (rackId: string, updates: Partial<RackForm>) => {
@@ -125,7 +127,7 @@ export const InspectionForm = () => {
           </h2>
           <div className="flex gap-4">
             <button
-              onClick={() => setHasIssues(true)}
+              onClick={handleYesIssuesClick}
               className="px-6 py-2.5 bg-red-500 text-white rounded-md hover:bg-red-600 transition-colors"
             >
               Yes, I found issues
@@ -298,7 +300,19 @@ export const InspectionForm = () => {
           ))}
 
           <button
-            onClick={addRack}
+            onClick={() => {
+              const newRack: RackForm = {
+                id: `rack-${Date.now()}`,
+                location: '',
+                devices: {
+                  powerSupplyUnit: false,
+                  powerDistributionUnit: false,
+                  rearDoorHeatExchanger: false
+                }
+              };
+              setRacks([...racks, newRack]);
+              setExpandedRacks([...expandedRacks, newRack.id]);
+            }}
             className="w-full py-3 text-emerald-600 border border-emerald-200 rounded-md hover:bg-emerald-50 hover:border-emerald-300 transition-colors mb-8"
           >
             Add Another Rack
