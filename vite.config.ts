@@ -10,6 +10,21 @@ export default defineConfig({
   build: {
     outDir: 'dist',
     sourcemap: true,
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          'vendor': ['react', 'react-dom', 'react-router-dom', 'grommet', 'grommet-theme-hpe'],
+          'supabase': ['@supabase/supabase-js']
+        }
+      }
+    }
   },
-  base: '/',
+  resolve: {
+    alias: {
+      '@': '/src',
+    }
+  },
+  server: {
+    host: true
+  }
 });
