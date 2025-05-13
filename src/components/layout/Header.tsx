@@ -21,27 +21,62 @@ const Header = () => {
   const isActive = (path: string) => location.pathname === path;
 
   return (
-    <GrommetHeader background={darkMode ? 'background-back' : 'background-front'} pad={{ horizontal: 'xlarge', vertical: 'small' }} elevation="small">
-      <Box direction="row" align="center" fill="horizontal">
-        <Link to="/" style={{ display: 'flex', alignItems: 'center', textDecoration: 'none' }}>
-          <HPELogo height={32} />
-          <Text margin={{ left: 'small' }} weight="bold" color="text-strong" size="large">Walkthrough App</Text>
-        </Link>
-        <Box flex="grow" justify="center" direction="row">
+    <GrommetHeader 
+      background={darkMode ? 'background-back' : 'background-front'} 
+      pad={{ horizontal: 'medium', vertical: 'small' }} 
+      elevation="small"
+    >
+      <Box 
+        direction="row" 
+        align="center" 
+        justify="between"
+        fill="horizontal"
+        gap="medium"
+      >
+        {/* Logo Section */}
+        <Box 
+          direction="row" 
+          align="center" 
+          basis="1/4"
+        >
+          <Link to="/" style={{ display: 'flex', alignItems: 'center', textDecoration: 'none' }}>
+            <HPELogo height={32} />
+            <Text margin={{ left: 'small' }} weight="bold" color="text-strong">
+              Walkthrough App
+            </Text>
+          </Link>
+        </Box>
+
+        {/* Navigation Section */}
+        <Box 
+          flex="grow" 
+          align="center" 
+          justify="center"
+        >
           {size !== 'small' && (
-            <Nav direction="row" gap="small">
+            <Nav 
+              direction="row" 
+              gap="medium"
+            >
               {navItems.map((item) => (
-                <Link key={item.path} to={item.path} style={{ textDecoration: 'none' }}>
+                <Link 
+                  key={item.path} 
+                  to={item.path} 
+                  style={{ textDecoration: 'none' }}
+                >
                   <Box
                     direction="row"
                     align="center"
-                    pad={{ horizontal: 'small', vertical: 'xsmall' }}
+                    pad={{ horizontal: 'medium', vertical: 'xsmall' }}
                     background={isActive(item.path) ? { color: 'brand', opacity: 'weak' } : undefined}
                     round="small"
-                    gap="xsmall"
+                    gap="small"
                   >
                     {item.icon}
-                    <Text color={isActive(item.path) ? 'brand' : 'text'} weight={isActive(item.path) ? 'bold' : undefined}>
+                    <Text 
+                      color={isActive(item.path) ? 'brand' : 'text'} 
+                      weight={isActive(item.path) ? 'bold' : undefined}
+                    >
                       {item.label}
                     </Text>
                   </Box>
@@ -50,25 +85,52 @@ const Header = () => {
             </Nav>
           )}
         </Box>
-        <Box direction="row" align="center" gap="small">
-          <Button plain icon={<Bell size={20} />} a11yTitle="Notifications" />
+
+        {/* Actions Section */}
+        <Box 
+          direction="row" 
+          align="center" 
+          basis="1/4" 
+          justify="end"
+          gap="small"
+        >
+          <Button 
+            plain 
+            icon={<Bell size={20} />} 
+            a11yTitle="Notifications" 
+          />
         </Box>
       </Box>
+
+      {/* Mobile Navigation */}
       {size === 'small' && (
-        <Box direction="row" gap="xsmall" margin={{ top: 'small' }} overflow="auto">
-          <Nav direction="row" gap="xsmall">
+        <Box 
+          direction="row" 
+          gap="small" 
+          margin={{ top: 'small' }} 
+          justify="center"
+          overflow="auto"
+        >
+          <Nav direction="row" gap="small">
             {navItems.map((item) => (
-              <Link key={item.path} to={item.path} style={{ textDecoration: 'none' }}>
+              <Link 
+                key={item.path} 
+                to={item.path} 
+                style={{ textDecoration: 'none' }}
+              >
                 <Box
                   direction="row"
                   align="center"
-                  pad={{ horizontal: 'small', vertical: 'xsmall' }}
+                  pad={{ horizontal: 'medium', vertical: 'xsmall' }}
                   background={isActive(item.path) ? { color: 'brand', opacity: 'weak' } : undefined}
                   round="small"
-                  gap="xsmall"
+                  gap="small"
                 >
                   {item.icon}
-                  <Text color={isActive(item.path) ? 'brand' : 'text'} weight={isActive(item.path) ? 'bold' : undefined}>
+                  <Text 
+                    color={isActive(item.path) ? 'brand' : 'text'} 
+                    weight={isActive(item.path) ? 'bold' : undefined}
+                  >
                     {item.label}
                   </Text>
                 </Box>
