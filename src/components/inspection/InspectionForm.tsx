@@ -37,7 +37,7 @@ export const InspectionForm = () => {
   const handleSubmit = async ({ value }: { value: any }) => {
     setLoading(true);
     try {
-      const response = await fetch('/api/SubmitInspection', {
+      const response = await fetch('http://localhost:3001/api/SubmitInspection', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -56,26 +56,15 @@ export const InspectionForm = () => {
         }),
       });
 
-      let errorMessage = 'Failed to submit inspection';
-      let responseData;
-
-      // Check if the response has JSON content
-      const contentType = response.headers.get('content-type');
-      if (contentType && contentType.includes('application/json')) {
-        responseData = await response.json();
-      } else {
-        // Handle non-JSON response
-        const textResponse = await response.text();
-        throw new Error(textResponse || errorMessage);
-      }
-
       if (!response.ok) {
-        throw new Error(responseData?.message || errorMessage);
+        throw new Error('Failed to submit inspection');
       }
+
+      const data = await response.json();
       
       navigate('/confirmation', { 
         state: { 
-          inspectionId: responseData.data?.Id,
+          inspectionId: data.data?.Id,
           success: true 
         } 
       });

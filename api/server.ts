@@ -1,6 +1,7 @@
 import express from 'express';
 import cors from 'cors';
 import { getInspections } from './GetInspections';
+import submitInspection from './SubmitInspection';
 
 const app = express();
 
@@ -8,8 +9,9 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-// Mount the GetInspections endpoint
+// Mount the API endpoints
 app.get('/api/inspections', getInspections);
+app.post('/api/SubmitInspection', submitInspection);
 
 // Start the server
 const PORT = process.env.PORT || 3001;
