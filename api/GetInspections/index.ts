@@ -19,7 +19,7 @@ export default app.http('GetInspections', {
         jsonBody: data
       };
     } catch (error: any) {
-      context.log.error(`Error fetching inspections: ${error.message}`);
+      console.error(`Error fetching inspections: ${error.message}`);
       return { 
         status: 500, 
         jsonBody: { 
