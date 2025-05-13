@@ -315,7 +315,7 @@ export const InspectionForm = () => {
             }}
             className="w-full py-3 text-emerald-600 border border-emerald-200 rounded-md hover:bg-emerald-50 hover:border-emerald-300 transition-colors mb-8"
           >
-            Add Another Rack
+            Add Incident
           </button>
 
           <div className="flex items-center justify-end gap-4 sticky bottom-0 bg-white p-4 border-t border-gray-100 -mx-6">
