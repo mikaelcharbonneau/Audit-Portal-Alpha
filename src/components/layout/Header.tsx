@@ -1,15 +1,16 @@
-import { Link, useLocation } from 'react-router-dom';
-import { Bell, Home, Clipboard, BarChart } from 'lucide-react';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { Bell, Home, Clipboard, BarChart, User, LogOut } from 'lucide-react';
 import HPELogo from '../ui/HPELogo';
 import { useTheme } from '../../context/ThemeContext';
-import { useUser } from '../../context/UserContext';
-import { Header as GrommetHeader, Box, Nav, Button, Text, ResponsiveContext } from 'grommet';
+import { useAuth } from '../../context/AuthContext';
+import { Header as GrommetHeader, Box, Nav, Button, Text, ResponsiveContext, Menu } from 'grommet';
 import { useContext } from 'react';
 
 const Header = () => {
   const location = useLocation();
+  const navigate = useNavigate();
   const { darkMode } = useTheme();
-  const { user } = useUser();
+  const { user, logout } = useAuth();
   const size = useContext(ResponsiveContext);
 
   const navItems = [
@@ -19,6 +20,11 @@ const Header = () => {
   ];
 
   const isActive = (path: string) => location.pathname === path;
+
+  const handleLogout = async () => {
+    await logout();
+    navigate('/login');
+  };
 
   return (
     <GrommetHeader 
@@ -98,6 +104,13 @@ const Header = () => {
             plain 
             icon={<Bell size={20} />} 
             a11yTitle="Notifications" 
+          />
+          <Menu
+            icon={<User size={20} />}
+            items={[
+              { label: 'Profile', onClick: () => navigate('/profile') },
+              { label: 'Sign Out', onClick: handleLogout }
+            ]}
           />
         </Box>
       </Box>

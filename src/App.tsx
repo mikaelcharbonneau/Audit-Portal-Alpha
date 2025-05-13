@@ -3,14 +3,18 @@ import { Routes, Route, Navigate } from 'react-router-dom';
 import { Grommet } from 'grommet';
 import { hpe } from 'grommet-theme-hpe';
 import { ThemeProvider } from './context/ThemeContext';
-import { UserProvider } from './context/UserContext';
+import { AuthProvider } from './context/AuthContext';
 import Layout from './components/layout/Layout';
 import Dashboard from './pages/Dashboard';
 import Inspections from './pages/Inspections';
 import InspectionFlow from './pages/InspectionFlow';
 import Confirmation from './pages/Confirmation';
 import Reports from './pages/Reports';
+import Profile from './pages/Profile';
+import Login from './pages/Login';
+import Register from './pages/Register';
 import NotFound from './pages/NotFound';
+import ProtectedRoute from './components/ProtectedRoute';
 import ErrorBoundaryComponent from './components/ErrorBoundaryComponent';
 
 const App = () => {
@@ -19,22 +23,30 @@ const App = () => {
       <ErrorBoundaryComponent />
       <div className="main-content">
         <ThemeProvider>
-          <UserProvider>
+          <AuthProvider>
             <Grommet theme={hpe} full>
               <Routes>
-                <Route path="/" element={<Layout />}>
-                  <Route index element={<Dashboard />} />
-                  <Route path="inspections" element={<Inspections />} />
-                  <Route path="inspection" element={<InspectionFlow />} />
-                  <Route path="confirmation" element={<Confirmation />} />
-                  <Route path="reports" element={<Reports />} />
-                  <Route path="reports/:id" element={<Reports />} />
-                  <Route path="not-found" element={<NotFound />} />
-                  <Route path="*" element={<Navigate to="/not-found" replace />} />
+                {/* Public Routes */}
+                <Route path="/login" element={<Login />} />
+                <Route path="/register" element={<Register />} />
+
+                {/* Protected Routes */}
+                <Route element={<ProtectedRoute />}>
+                  <Route element={<Layout />}>
+                    <Route index element={<Dashboard />} />
+                    <Route path="inspections" element={<Inspections />} />
+                    <Route path="inspection" element={<InspectionFlow />} />
+                    <Route path="confirmation" element={<Confirmation />} />
+                    <Route path="reports" element={<Reports />} />
+                    <Route path="reports/:id" element={<Reports />} />
+                    <Route path="profile" element={<Profile />} />
+                    <Route path="not-found" element={<NotFound />} />
+                    <Route path="*" element={<Navigate to="/not-found" replace />} />
+                  </Route>
                 </Route>
               </Routes>
             </Grommet>
-          </UserProvider>
+          </AuthProvider>
         </ThemeProvider>
       </div>
     </>
