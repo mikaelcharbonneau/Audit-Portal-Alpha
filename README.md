@@ -1,4 +1,4 @@
-# HPE Audit Portal
+# HPE Audit Portal - Beta Release
 
 A web application designed to facilitate, record, and report on audit workflows for datacenter operations. It streamlines the process of submitting, tracking, and generating reports for audits performed by internal users (typically datacenter technicians).
 
