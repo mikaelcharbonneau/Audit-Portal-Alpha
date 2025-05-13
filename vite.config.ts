@@ -12,16 +12,11 @@ export default defineConfig({
   // Exclude the api directory from being processed by Vite
   build: {
     rollupOptions: {
-      external: [
-        'api/GetInspections/index.ts',
-        'api/GenerateReport/index.ts',
-        'api/SubmitInspection/index.ts',
-        '@azure/functions'
-      ]
+      external: ['api/**']
     }
   },
   // Prevent Vite from trying to resolve API imports during development
   optimizeDeps: {
-    exclude: ['@azure/functions']
+    exclude: ['api']
   }
 })
