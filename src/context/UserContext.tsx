@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, ReactNode } from 'react';
+import { createContext, useContext, ReactNode } from 'react';
 import { User } from '../types';
 
 // Default user data since login is not required
@@ -17,11 +17,8 @@ type UserContextType = {
 const UserContext = createContext<UserContextType | undefined>(undefined);
 
 export const UserProvider = ({ children }: { children: ReactNode }) => {
-  // No need for updateUser since login functionality is not required
-  const user = defaultUser;
-
   return (
-    <UserContext.Provider value={{ user }}>
+    <UserContext.Provider value={{ user: defaultUser }}>
       {children}
     </UserContext.Provider>
   );
