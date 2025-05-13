@@ -56,18 +56,20 @@ const Report = () => {
     setLoading(true);
     setError(null);
     try {
-      const response = await fetch(`/api/GenerateReport?id=${reportId}`);
+      const { data, error: supabaseError } = await supabase
+        .from('AuditReports')
+        .select('*')
+        .eq('Id', reportId)
+        .single();
       
-      if (!response.ok) {
-        throw new Error(`Failed to fetch report: ${response.statusText}`);
+      if (supabaseError) {
+        throw supabaseError;
       }
       
-      const result = await response.json();
-      
-      if (result.success) {
-        setReport(result.data);
+      if (data) {
+        setReport(data);
       } else {
-        throw new Error(result.message || 'Failed to fetch report data');
+        throw new Error('Report not found');
       }
     } catch (error: any) {
       console.error('Error fetching report:', error);
