@@ -2,6 +2,9 @@ import { Request, Response } from 'express';
 import { supabase } from "../db";
 
 export const getInspections = async (req: Request, res: Response) => {
+  // Set JSON content type header
+  res.setHeader('Content-Type', 'application/json');
+  
   try {
     const { data, error } = await supabase
       .from('AuditReports')
@@ -9,14 +12,19 @@ export const getInspections = async (req: Request, res: Response) => {
       .order('Timestamp', { ascending: false })
       .limit(50);
     
-    if (error) throw error;
+    if (error) {
+      return res.status(500).json({ 
+        success: false, 
+        message: error.message 
+      });
+    }
     
-    res.status(200).json(data);
+    return res.status(200).json(data || []);
   } catch (error: any) {
-    console.error(`Error fetching inspections: ${error.message}`);
-    res.status(500).json({ 
+    console.error('Error fetching inspections:', error);
+    return res.status(500).json({ 
       success: false, 
-      message: `Error fetching inspections: ${error.message}` 
+      message: error?.message || 'An unexpected error occurred while fetching inspections'
     });
   }
-}
+};
