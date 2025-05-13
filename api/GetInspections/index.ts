@@ -1,14 +1,7 @@
-import { NextApiRequest, NextApiResponse } from 'next';
+import { Request, Response } from 'express';
 import { supabase } from "../db";
 
-export default async function handler(req: NextApiRequest, res: NextApiResponse) {
-  if (req.method !== 'GET') {
-    return res.status(405).json({ 
-      success: false, 
-      message: 'Method not allowed' 
-    });
-  }
-
+export const getInspections = async (req: Request, res: Response) => {
   try {
     const { data, error } = await supabase
       .from('AuditReports')
@@ -18,10 +11,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     
     if (error) throw error;
     
-    return res.status(200).json(data);
+    res.status(200).json(data);
   } catch (error: any) {
     console.error(`Error fetching inspections: ${error.message}`);
-    return res.status(500).json({ 
+    res.status(500).json({ 
       success: false, 
       message: `Error fetching inspections: ${error.message}` 
     });
