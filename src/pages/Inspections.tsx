@@ -44,14 +44,15 @@ const Inspections = () => {
     setLoading(true);
     setError(null);
     try {
-      const response = await fetch('/api/GetInspections');
+      const { data, error } = await supabase
+        .from('AuditReports')
+        .select('*')
+        .order('Timestamp', { ascending: false })
+        .limit(50);
       
-      if (!response.ok) {
-        throw new Error(`Failed to fetch inspections: ${response.statusText}`);
-      }
+      if (error) throw error;
       
-      const data = await response.json();
-      setInspections(data);
+      setInspections(data || []);
     } catch (error: any) {
       console.error('Error fetching inspections:', error);
       setError(error.message);

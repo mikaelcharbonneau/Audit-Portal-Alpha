@@ -2,9 +2,17 @@ import { Request, Response } from 'express';
 import { supabase } from "../db";
 
 export const getInspections = async (req: Request, res: Response) => {
-  // Set JSON content type header
+  // Set CORS headers
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
   res.setHeader('Content-Type', 'application/json');
   
+  // Handle preflight requests
+  if (req.method === 'OPTIONS') {
+    return res.status(200).json({});
+  }
+
   try {
     const { data, error } = await supabase
       .from('AuditReports')
