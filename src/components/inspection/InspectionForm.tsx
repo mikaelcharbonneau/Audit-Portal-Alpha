@@ -11,10 +11,10 @@ import {
   CheckBox,
   Heading,
   Text,
-  Grid
+  Grid,
+  Spinner
 } from 'grommet';
 import { FormNext } from 'grommet-icons';
-import { supabase } from '../../lib/supabaseClient';
 
 const dataHallOptions = ['Hall A', 'Hall B', 'Hall C', 'Hall D'];
 const statusOptions = ['Operational', 'Maintenance', 'Alert', 'Offline'];
@@ -37,7 +37,6 @@ export const InspectionForm = () => {
   const handleSubmit = async ({ value }: { value: any }) => {
     setLoading(true);
     try {
-      // Send the inspection data to our API endpoint
       const response = await fetch('/api/SubmitInspection', {
         method: 'POST',
         headers: {
@@ -59,23 +58,16 @@ export const InspectionForm = () => {
 
       const data = await response.json();
 
-      if (response.ok) {
-        // Redirect to confirmation page with the inspection ID
-        navigate('/confirmation', { 
-          state: { 
-            inspectionId: data.data.Id,
-            success: true 
-          } 
-        });
-      } else {
-        console.error('Error submitting inspection:', data.message);
-        navigate('/confirmation', { 
-          state: { 
-            success: false,
-            error: data.message  
-          } 
-        });
+      if (!response.ok) {
+        throw new Error(data.message || 'Failed to submit inspection');
       }
+
+      navigate('/confirmation', { 
+        state: { 
+          inspectionId: data.data?.Id,
+          success: true 
+        } 
+      });
     } catch (error: any) {
       console.error('Error submitting inspection:', error);
       navigate('/confirmation', { 
@@ -88,6 +80,15 @@ export const InspectionForm = () => {
       setLoading(false);
     }
   };
+
+  if (loading) {
+    return (
+      <Box align="center" justify="center" height="medium">
+        <Spinner size="medium" />
+        <Text margin={{ top: 'small' }}>Submitting inspection...</Text>
+      </Box>
+    );
+  }
 
   return (
     <Box pad="medium" background="light-2" round="small">

@@ -1,7 +1,18 @@
-import { NextApiRequest, NextApiResponse } from 'next';
+import { Request, Response } from 'express';
 import { supabase } from "../db";
 
-export default async function handler(req: NextApiRequest, res: NextApiResponse) {
+export default async function handler(req: Request, res: Response) {
+  // Set CORS headers
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+  res.setHeader('Content-Type', 'application/json');
+  
+  // Handle preflight requests
+  if (req.method === 'OPTIONS') {
+    return res.status(200).json({});
+  }
+
   if (req.method !== 'POST') {
     return res.status(405).json({ 
       success: false, 
@@ -9,21 +20,34 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     });
   }
 
-  const body = req.body;
-  const { userEmail = "unknown", ...reportData } = body;
-  
   try {
+    const { userEmail = "unknown", ...reportData } = req.body;
+    
+    if (!reportData.datahall) {
+      return res.status(400).json({
+        success: false,
+        message: "Data hall is required"
+      });
+    }
+
     const { data, error } = await supabase
       .from('AuditReports')
       .insert([
         { 
           UserEmail: userEmail,
-          ReportData: reportData
+          ReportData: reportData,
+          Timestamp: new Date().toISOString()
         }
       ])
       .select();
     
-    if (error) throw error;
+    if (error) {
+      console.error('Supabase error:', error);
+      return res.status(500).json({ 
+        success: false, 
+        message: error.message 
+      });
+    }
     
     return res.status(200).json({ 
       success: true, 
@@ -31,10 +55,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       data: data?.[0]
     });
   } catch (error: any) {
-    console.error(`Error storing inspection: ${error.message}`);
+    console.error('Error storing inspection:', error);
     return res.status(500).json({ 
       success: false, 
-      message: `Error storing inspection: ${error.message}` 
+      message: error?.message || 'An unexpected error occurred while storing the inspection'
     });
   }
 }
