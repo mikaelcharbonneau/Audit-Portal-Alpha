@@ -1,9 +1,9 @@
 import { Link, useLocation } from 'react-router-dom';
-import { Bell, Home, Clipboard, BarChart, Settings, LogOut } from 'lucide-react';
+import { Bell, Home, Clipboard, BarChart } from 'lucide-react';
 import HPELogo from '../ui/HPELogo';
 import { useTheme } from '../../context/ThemeContext';
 import { useUser } from '../../context/UserContext';
-import { Header as GrommetHeader, Box, Nav, Button, Avatar, Text, ResponsiveContext, DropButton } from 'grommet';
+import { Header as GrommetHeader, Box, Nav, Button, Text, ResponsiveContext } from 'grommet';
 import { useContext } from 'react';
 
 const Header = () => {
@@ -19,12 +19,6 @@ const Header = () => {
   ];
 
   const isActive = (path: string) => location.pathname === path;
-
-  const userAvatar = (
-    <Avatar background="brand" src={user.avatarUrl} size="medium">
-      {!user.avatarUrl && user.name.charAt(0)}
-    </Avatar>
-  );
 
   return (
     <GrommetHeader background={darkMode ? 'background-back' : 'background-front'} pad={{ horizontal: 'xlarge', vertical: 'small' }} elevation="small">
@@ -58,24 +52,6 @@ const Header = () => {
         </Box>
         <Box direction="row" align="center" gap="small">
           <Button plain icon={<Bell size={20} />} a11yTitle="Notifications" />
-          <Link to="/profile" style={{ display: 'flex', alignItems: 'center' }}>
-            <Box pad="xsmall" round="full" hoverIndicator>
-              <Settings size={20} />
-            </Box>
-          </Link>
-          <DropButton
-            dropAlign={{ top: 'bottom', right: 'right' }}
-            icon={userAvatar}
-            label={<Text size="small">{user.name}</Text>}
-            dropContent={
-              <Box pad="small" background="background-front" gap="small">
-                <Link to="/profile" style={{ textDecoration: 'none' }}>
-                  <Text>Profile</Text>
-                </Link>
-                <Button onClick={() => signOut()} label="Logout" icon={<LogOut size={18} />} plain />
-              </Box>
-            }
-          />
         </Box>
       </Box>
       {size === 'small' && (
