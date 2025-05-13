@@ -1,103 +1,60 @@
-import express, { Request, Response } from 'express';
-import bodyParser from 'body-parser';
-import dotenv from 'dotenv';
-import { getConnection } from './db';
+// This file is for reference only and is not used in the actual API endpoints
+// The API endpoints now use Supabase directly
 
-dotenv.config();
+import { supabase } from './db';
 
-const app = express();
-const port = process.env.PORT || 3000;
-
-app.use(bodyParser.json());
-
-// GenerateReport endpoint (GET)
-app.get('/api/GenerateReport', function (req, res) {
-  (async () => {
-    const id = req.query.id;
-    if (!id) {
-      return res.status(400).send('Report ID is required');
-    }
-    try {
-      const pool = await getConnection();
-      const result = await pool.request()
-        .input('Id', id)
-        .query('SELECT UserEmail, Timestamp, ReportData FROM AuditReports WHERE Id = @Id');
-      if (result.recordset.length === 0) {
-        return res.status(404).send('Report not found');
-      }
-      const reportData = result.recordset[0];
-      res.status(200).json({
-        message: 'Report generation successful',
-        data: reportData,
-        reportUrl: `https://example.sharepoint.com/reports/${id}.xlsx`
-      });
-    } catch (error: any) {
-      res.status(500).send(`Error generating report: ${error.message}`);
-    }
-  })().catch(error => {
-    res.status(500).send(`Error generating report: ${error.message}`);
-  });
-});
-
-// GetInspections endpoint (GET)
-app.get('/api/GetInspections', function (req, res) {
-  (async () => {
-    try {
-      const pool = await getConnection();
-      const result = await pool.request().query(
-        'SELECT TOP 50 Id, UserEmail, Timestamp, ReportData FROM AuditReports ORDER BY Timestamp DESC'
-      );
-      res.status(200).json(result.recordset);
-    } catch (error: any) {
-      res.status(500).send(`Error fetching inspections: ${error.message}`);
-    }
-  })().catch(error => {
-    res.status(500).send(`Error fetching inspections: ${error.message}`);
-  });
-});
-
-// SubmitInspection endpoint (POST)
-app.post('/api/SubmitInspection', function (req, res) {
-  (async () => {
-    let body = req.body || {};
-    const { userEmail = 'unknown', ...data } = body;
-    try {
-      const pool = await getConnection();
-      await pool.request()
-        .input('UserEmail', userEmail)
-        .input('Timestamp', new Date())
-        .input('ReportData', JSON.stringify(data))
-        .query('INSERT INTO AuditReports (UserEmail, Timestamp, ReportData) VALUES (@UserEmail, @Timestamp, @ReportData)');
-      res.status(200).send('Inspection saved');
-    } catch (error: any) {
-      res.status(500).send(`Error storing inspection: ${error.message}`);
-    }
-  })().catch(error => {
-    res.status(500).send(`Error storing inspection: ${error.message}`);
-  });
-});
-
-// Serve static files from the frontend build (dist at project root)
-import path from 'path';
-
-// Serve static files from the frontend build
-const distPath = path.join(__dirname, '../../dist');
-app.use(express.static(distPath));
-
-// Health check endpoint for /api
-app.get('/api', (req, res) => {
-  res.send('API is running');
-});
-
-// SPA fallback: serve index.html for any non-API route
-app.get('*', (req, res) => {
-  if (!req.path.startsWith('/api')) {
-    res.sendFile(path.join(distPath, 'index.html'));
-  } else {
-    res.status(404).send('API endpoint not found');
+// Example server functionality - not currently used
+export const getAuditReports = async () => {
+  try {
+    const { data, error } = await supabase
+      .from('AuditReports')
+      .select('*')
+      .order('Timestamp', { ascending: false })
+      .limit(50);
+    
+    if (error) throw error;
+    
+    return data;
+  } catch (error: any) {
+    console.error('Error fetching audit reports:', error.message);
+    throw error;
   }
-});
+};
 
-app.listen(port, () => {
-  console.log(`Server running on http://localhost:${port}`);
-});
+export const getAuditReportById = async (id: string) => {
+  try {
+    const { data, error } = await supabase
+      .from('AuditReports')
+      .select('*')
+      .eq('Id', id)
+      .single();
+    
+    if (error) throw error;
+    
+    return data;
+  } catch (error: any) {
+    console.error(`Error fetching audit report ${id}:`, error.message);
+    throw error;
+  }
+};
+
+export const createAuditReport = async (userEmail: string, reportData: any) => {
+  try {
+    const { data, error } = await supabase
+      .from('AuditReports')
+      .insert([
+        { 
+          UserEmail: userEmail,
+          ReportData: reportData
+        }
+      ])
+      .select();
+    
+    if (error) throw error;
+    
+    return data;
+  } catch (error: any) {
+    console.error('Error creating audit report:', error.message);
+    throw error;
+  }
+};
