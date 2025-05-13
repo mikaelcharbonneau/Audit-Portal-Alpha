@@ -27,6 +27,7 @@ const App = () => {
                   <Route path="inspections" element={<Inspections />} />
                   <Route path="inspection" element={<InspectionFlow />} />
                   <Route path="confirmation" element={<Confirmation />} />
+                  <Route path="reports" element={<Reports />} />
                   <Route path="reports/:id" element={<Reports />} />
                   <Route path="not-found" element={<NotFound />} />
                   <Route path="*" element={<Navigate to="/not-found" replace />} />
