@@ -45,7 +45,7 @@ export default app.http('GenerateReport', {
         }
       };
     } catch (error: any) {
-      context.log.error(`Error generating report: ${error.message}`);
+      console.error(`Error generating report: ${error.message}`);
       return { 
         status: 500, 
         jsonBody: { 
