@@ -41,6 +41,7 @@ export const InspectionForm = () => {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'Accept': 'application/json'
         },
         body: JSON.stringify({
           userEmail: value.userEmail,
@@ -55,16 +56,26 @@ export const InspectionForm = () => {
         }),
       });
 
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || 'Failed to submit inspection');
+      let errorMessage = 'Failed to submit inspection';
+      let responseData;
+
+      // Check if the response has JSON content
+      const contentType = response.headers.get('content-type');
+      if (contentType && contentType.includes('application/json')) {
+        responseData = await response.json();
+      } else {
+        // Handle non-JSON response
+        const textResponse = await response.text();
+        throw new Error(textResponse || errorMessage);
       }
 
-      const data = await response.json();
+      if (!response.ok) {
+        throw new Error(responseData?.message || errorMessage);
+      }
       
       navigate('/confirmation', { 
         state: { 
-          inspectionId: data.data?.Id,
+          inspectionId: responseData.data?.Id,
           success: true 
         } 
       });

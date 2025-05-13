@@ -8,22 +8,29 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
   res.setHeader('Content-Type', 'application/json');
   
-  // Handle preflight requests
-  if (req.method === 'OPTIONS') {
-    return res.status(200).json({ success: true });
-  }
-
-  if (req.method !== 'POST') {
-    return res.status(405).json({ 
-      success: false, 
-      message: 'Method not allowed' 
-    });
-  }
-
-  const body = req.body;
-  const { userEmail = "unknown", ...reportData } = body;
-  
   try {
+    // Handle preflight requests
+    if (req.method === 'OPTIONS') {
+      return res.status(200).json({ success: true });
+    }
+
+    if (req.method !== 'POST') {
+      return res.status(405).json({ 
+        success: false, 
+        message: 'Method not allowed' 
+      });
+    }
+
+    if (!req.body) {
+      return res.status(400).json({
+        success: false,
+        message: 'Request body is required'
+      });
+    }
+
+    const body = req.body;
+    const { userEmail = "unknown", ...reportData } = body;
+    
     const { data, error } = await supabase
       .from('AuditReports')
       .insert([
@@ -53,7 +60,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     return res.status(500).json({ 
       success: false, 
       message: 'An unexpected error occurred',
-      error: error.message
+      error: error?.message || 'Unknown error'
     });
   }
 }
