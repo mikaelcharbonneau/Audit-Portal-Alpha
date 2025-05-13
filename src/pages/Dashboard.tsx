@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ClipboardList, AlertTriangle, CheckCircle } from 'lucide-react';
+import { ClipboardList, AlertTriangle, CheckCircle, ChevronDown } from 'lucide-react';
 import { format } from 'date-fns';
 import { supabase } from '../lib/supabaseClient';
 
@@ -16,10 +16,21 @@ interface Inspection {
   };
 }
 
+const dataHalls = [
+  'Island 1',
+  'Island 8',
+  'Island 9',
+  'Island 10',
+  'Island 11',
+  'Island 12',
+  'Green Nitrogen'
+];
+
 const Dashboard = () => {
   const navigate = useNavigate();
   const [inspections, setInspections] = useState<Inspection[]>([]);
   const [loading, setLoading] = useState(true);
+  const [showDropdown, setShowDropdown] = useState(false);
 
   useEffect(() => {
     fetchInspections();
@@ -45,6 +56,11 @@ const Dashboard = () => {
     resolved: inspections.filter(i => !i.ReportData.isUrgent).length
   };
 
+  const handleDataHallSelect = (datahall: string) => {
+    navigate('/inspection', { state: { selectedDataHall: datahall } });
+    setShowDropdown(false);
+  };
+
   return (
     <div className="p-6">
       <div className="flex justify-between items-center mb-8">
@@ -52,13 +68,30 @@ const Dashboard = () => {
           <h1 className="text-2xl font-semibold mb-2">Dashboard</h1>
           <p className="text-gray-600">Welcome back, {inspections[0]?.UserEmail || 'User'}</p>
         </div>
-        <button
-          onClick={() => navigate('/inspection')}
-          className="bg-emerald-500 text-white px-4 py-2 rounded-lg flex items-center gap-2 hover:bg-emerald-600"
-        >
-          <ClipboardList className="w-5 h-5" />
-          Start Walkthrough
-        </button>
+        <div className="relative">
+          <button
+            onClick={() => setShowDropdown(!showDropdown)}
+            className="bg-emerald-500 text-white px-4 py-2 rounded-lg flex items-center gap-2 hover:bg-emerald-600"
+          >
+            <ClipboardList className="w-5 h-5" />
+            Start Walkthrough
+            <ChevronDown className={`w-4 h-4 transition-transform ${showDropdown ? 'rotate-180' : ''}`} />
+          </button>
+          
+          {showDropdown && (
+            <div className="absolute right-0 mt-2 w-56 bg-white rounded-lg shadow-lg py-1 z-50">
+              {dataHalls.map((hall) => (
+                <button
+                  key={hall}
+                  onClick={() => handleDataHallSelect(hall)}
+                  className="w-full text-left px-4 py-2 text-gray-700 hover:bg-emerald-50 hover:text-emerald-600"
+                >
+                  {hall}
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">

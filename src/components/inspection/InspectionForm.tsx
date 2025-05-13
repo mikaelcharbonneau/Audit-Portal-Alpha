@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import {
   Box,
   Form,
@@ -17,15 +17,30 @@ import {
 import { FormNext } from 'grommet-icons';
 import { supabase } from '../../lib/supabaseClient';
 
-const dataHallOptions = ['Hall A', 'Hall B', 'Hall C', 'Hall D'];
+const dataHallOptions = [
+  'Island 1',
+  'Island 8',
+  'Island 9',
+  'Island 10',
+  'Island 11',
+  'Island 12',
+  'Green Nitrogen'
+];
+
 const statusOptions = ['Operational', 'Maintenance', 'Alert', 'Offline'];
+
+interface LocationState {
+  selectedDataHall?: string;
+}
 
 export const InspectionForm = () => {
   const navigate = useNavigate();
+  const location = useLocation();
+  const { selectedDataHall } = (location.state as LocationState) || {};
   const [loading, setLoading] = useState(false);
   const [formValues, setFormValues] = useState({
     userEmail: '',
-    datahall: '',
+    datahall: selectedDataHall || '',
     status: '',
     temperatureReading: '',
     humidityReading: '',
@@ -114,6 +129,7 @@ export const InspectionForm = () => {
               name="datahall"
               options={dataHallOptions}
               placeholder="Select Data Hall"
+              value={formValues.datahall}
             />
           </FormField>
           
