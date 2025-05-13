@@ -32,11 +32,11 @@ export default app.http('SubmitInspection', {
         jsonBody: { 
           success: true, 
           message: "Inspection saved",
-          data: data[0]
+          data: data?.[0]
         } 
       };
     } catch (error: any) {
-      context.log.error(`Error storing inspection: ${error.message}`);
+      console.error(`Error storing inspection: ${error.message}`);
       return { 
         status: 500, 
         jsonBody: { 
