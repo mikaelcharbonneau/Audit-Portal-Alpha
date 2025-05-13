@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { Box, Button, Heading, Text, CheckBox, TextArea } from 'grommet';
+import { Box, Button, Text, TextArea } from 'grommet';
 import { ChevronDown, ChevronUp, Server } from 'lucide-react';
 import { supabase } from '../../lib/supabaseClient';
 
@@ -111,199 +111,214 @@ export const InspectionForm = () => {
     }
   };
 
-  if (hasIssues === null) {
-    return (
-      <Box pad="medium">
-        <Heading level={2} margin={{ bottom: 'medium' }}>
-          Inspection Walkthrough
-        </Heading>
-        <Text margin={{ bottom: 'medium' }}>Location: {selectedDataHall}</Text>
-        
+  return (
+    <Box pad="medium">
+      <Text size="xlarge" weight="bold" margin={{ bottom: 'medium' }}>
+        New Inspection
+      </Text>
+      
+      <Text size="large" margin={{ bottom: 'small' }}>
+        Inspection Walkthrough
+      </Text>
+      
+      <Text margin={{ bottom: 'medium' }}>
+        Location: {selectedDataHall}
+      </Text>
+
+      {hasIssues === null ? (
         <Box margin={{ bottom: 'medium' }}>
           <Text margin={{ bottom: 'medium' }}>
             Have you discovered any issues during the walkthrough?
           </Text>
           <Box direction="row" gap="medium">
-            <Button 
-              primary
-              color="status-critical"
-              label="Yes, I found issues"
+            <button
               onClick={() => setHasIssues(true)}
-            />
-            <Button
-              primary
-              color="status-ok"
-              label="No issues found"
+              className="px-6 py-2 bg-red-500 text-white rounded-md hover:bg-red-600 transition-colors"
+            >
+              Yes, I found issues
+            </button>
+            <button
               onClick={() => setHasIssues(false)}
-            />
+              className="px-6 py-2 bg-emerald-500 text-white rounded-md hover:bg-emerald-600 transition-colors"
+            >
+              No issues found
+            </button>
           </Box>
         </Box>
-      </Box>
-    );
-  }
-
-  return (
-    <Box pad="medium">
-      <Heading level={2} margin={{ bottom: 'medium' }}>
-        Inspection Walkthrough
-      </Heading>
-      <Text margin={{ bottom: 'medium' }}>Location: {selectedDataHall}</Text>
-
-      {racks.map((rack, index) => (
-        <Box
-          key={rack.id}
-          background="light-1"
-          round="small"
-          margin={{ bottom: 'medium' }}
-          pad="medium"
-        >
-          <Box
-            direction="row"
-            align="center"
-            justify="between"
-            onClick={() => toggleRackExpansion(rack.id)}
-            style={{ cursor: 'pointer' }}
-          >
-            <Box direction="row" align="center" gap="small">
-              <Server size={20} />
-              <Text weight="bold">Rack: {rack.location || `#${index + 1}`}</Text>
-            </Box>
-            {expandedRacks.includes(rack.id) ? <ChevronUp /> : <ChevronDown />}
-          </Box>
-
-          {expandedRacks.includes(rack.id) && (
-            <Box margin={{ top: 'medium' }} gap="medium">
-              <Box>
-                <Text margin={{ bottom: 'xsmall' }}>Rack Location</Text>
-                <input
-                  type="text"
-                  value={rack.location}
-                  onChange={(e) => updateRack(rack.id, { location: e.target.value })}
-                  className="form-input"
-                  placeholder="Enter rack location"
-                />
-              </Box>
-
-              <Box>
-                <Text margin={{ bottom: 'xsmall' }}>Select Impacted Device(s)</Text>
-                <Box gap="small">
-                  <CheckBox
-                    label="Power Supply Unit"
-                    checked={rack.devices.powerSupplyUnit}
-                    onChange={(e) => updateRack(rack.id, {
-                      devices: { ...rack.devices, powerSupplyUnit: e.target.checked }
-                    })}
-                  />
-                  <CheckBox
-                    label="Power Distribution Unit"
-                    checked={rack.devices.powerDistributionUnit}
-                    onChange={(e) => updateRack(rack.id, {
-                      devices: { ...rack.devices, powerDistributionUnit: e.target.checked }
-                    })}
-                  />
-                  <CheckBox
-                    label="Rear Door Heat Exchanger"
-                    checked={rack.devices.rearDoorHeatExchanger}
-                    onChange={(e) => updateRack(rack.id, {
-                      devices: { ...rack.devices, rearDoorHeatExchanger: e.target.checked }
-                    })}
-                  />
+      ) : (
+        <>
+          {racks.map((rack, index) => (
+            <Box
+              key={rack.id}
+              background="white"
+              round="small"
+              margin={{ bottom: 'medium' }}
+              border={{ color: 'light-3', size: '1px' }}
+            >
+              <Box
+                direction="row"
+                align="center"
+                justify="between"
+                pad="medium"
+                onClick={() => toggleRackExpansion(rack.id)}
+                style={{ cursor: 'pointer' }}
+              >
+                <Box direction="row" align="center" gap="small">
+                  <Server size={20} className="text-gray-600" />
+                  <Text>Rack: #{index + 1}</Text>
                 </Box>
+                {expandedRacks.includes(rack.id) ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
               </Box>
 
-              {rack.devices.powerSupplyUnit && (
-                <Box background="light-2" pad="medium" round="small">
-                  <Text weight="bold" margin={{ bottom: 'medium' }}>Power Supply Unit</Text>
-                  <Box gap="medium">
-                    <Box>
-                      <Text margin={{ bottom: 'xsmall' }}>Issue Description</Text>
-                      <select
-                        value={rack.psuDetails?.status || ''}
-                        onChange={(e) => updateRack(rack.id, {
-                          psuDetails: { ...rack.psuDetails, status: e.target.value }
-                        })}
-                        className="form-input"
-                      >
-                        <option value="">Select PSU status</option>
-                        {psuStatusOptions.map(option => (
-                          <option key={option} value={option}>{option}</option>
-                        ))}
-                      </select>
-                    </Box>
+              {expandedRacks.includes(rack.id) && (
+                <Box pad="medium" border={{ side: 'top', color: 'light-3', size: '1px' }}>
+                  <Box margin={{ bottom: 'medium' }}>
+                    <Text margin={{ bottom: 'xsmall' }}>Rack Location</Text>
+                    <input
+                      type="text"
+                      value={rack.location}
+                      onChange={(e) => updateRack(rack.id, { location: e.target.value })}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                      placeholder="Enter rack location"
+                    />
+                  </Box>
 
-                    <Box>
-                      <Text margin={{ bottom: 'xsmall' }}>PSU ID</Text>
-                      <select
-                        value={rack.psuDetails?.psuId || ''}
-                        onChange={(e) => updateRack(rack.id, {
-                          psuDetails: { ...rack.psuDetails, psuId: e.target.value }
-                        })}
-                        className="form-input"
-                      >
-                        <option value="">Select PSU</option>
-                        {psuIdOptions.map(option => (
-                          <option key={option} value={option}>{option}</option>
-                        ))}
-                      </select>
-                    </Box>
-
-                    <Box>
-                      <Text margin={{ bottom: 'xsmall' }}>Device U-Height</Text>
-                      <select
-                        value={rack.psuDetails?.uHeight || ''}
-                        onChange={(e) => updateRack(rack.id, {
-                          psuDetails: { ...rack.psuDetails, uHeight: e.target.value }
-                        })}
-                        className="form-input"
-                      >
-                        <option value="">Select U-Height</option>
-                        {uHeightOptions.map(option => (
-                          <option key={option} value={option}>{option}</option>
-                        ))}
-                      </select>
-                    </Box>
-
-                    <Box>
-                      <Text margin={{ bottom: 'xsmall' }}>Additional Comments (Optional)</Text>
-                      <TextArea
-                        value={rack.psuDetails?.comments || ''}
-                        onChange={(e) => updateRack(rack.id, {
-                          psuDetails: { ...rack.psuDetails, comments: e.target.value }
-                        })}
-                        placeholder="Add any additional comments"
-                      />
+                  <Box margin={{ bottom: 'medium' }}>
+                    <Text margin={{ bottom: 'xsmall' }}>Select Impacted Device(s)</Text>
+                    <Box gap="small">
+                      <label className="flex items-center gap-2 cursor-pointer">
+                        <input
+                          type="checkbox"
+                          checked={rack.devices.powerSupplyUnit}
+                          onChange={(e) => updateRack(rack.id, {
+                            devices: { ...rack.devices, powerSupplyUnit: e.target.checked }
+                          })}
+                          className="w-4 h-4 rounded border-gray-300 text-emerald-500 focus:ring-emerald-500"
+                        />
+                        <span>Power Supply Unit</span>
+                      </label>
+                      <label className="flex items-center gap-2 cursor-pointer">
+                        <input
+                          type="checkbox"
+                          checked={rack.devices.powerDistributionUnit}
+                          onChange={(e) => updateRack(rack.id, {
+                            devices: { ...rack.devices, powerDistributionUnit: e.target.checked }
+                          })}
+                          className="w-4 h-4 rounded border-gray-300 text-emerald-500 focus:ring-emerald-500"
+                        />
+                        <span>Power Distribution Unit</span>
+                      </label>
+                      <label className="flex items-center gap-2 cursor-pointer">
+                        <input
+                          type="checkbox"
+                          checked={rack.devices.rearDoorHeatExchanger}
+                          onChange={(e) => updateRack(rack.id, {
+                            devices: { ...rack.devices, rearDoorHeatExchanger: e.target.checked }
+                          })}
+                          className="w-4 h-4 rounded border-gray-300 text-emerald-500 focus:ring-emerald-500"
+                        />
+                        <span>Rear Door Heat Exchanger</span>
+                      </label>
                     </Box>
                   </Box>
+
+                  {rack.devices.powerSupplyUnit && (
+                    <Box margin={{ bottom: 'medium' }}>
+                      <Text weight="bold" margin={{ bottom: 'small' }}>Power Supply Unit</Text>
+                      <Box gap="medium">
+                        <Box>
+                          <Text margin={{ bottom: 'xsmall' }}>Issue Description</Text>
+                          <select
+                            value={rack.psuDetails?.status || ''}
+                            onChange={(e) => updateRack(rack.id, {
+                              psuDetails: { ...rack.psuDetails, status: e.target.value }
+                            })}
+                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                          >
+                            <option value="">Select PSU status</option>
+                            {psuStatusOptions.map(option => (
+                              <option key={option} value={option}>{option}</option>
+                            ))}
+                          </select>
+                        </Box>
+
+                        <Box>
+                          <Text margin={{ bottom: 'xsmall' }}>PSU ID</Text>
+                          <select
+                            value={rack.psuDetails?.psuId || ''}
+                            onChange={(e) => updateRack(rack.id, {
+                              psuDetails: { ...rack.psuDetails, psuId: e.target.value }
+                            })}
+                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                          >
+                            <option value="">Select PSU</option>
+                            {psuIdOptions.map(option => (
+                              <option key={option} value={option}>{option}</option>
+                            ))}
+                          </select>
+                        </Box>
+
+                        <Box>
+                          <Text margin={{ bottom: 'xsmall' }}>Device U-Height</Text>
+                          <select
+                            value={rack.psuDetails?.uHeight || ''}
+                            onChange={(e) => updateRack(rack.id, {
+                              psuDetails: { ...rack.psuDetails, uHeight: e.target.value }
+                            })}
+                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                          >
+                            <option value="">Select U-Height</option>
+                            {uHeightOptions.map(option => (
+                              <option key={option} value={option}>{option}</option>
+                            ))}
+                          </select>
+                        </Box>
+
+                        <Box>
+                          <Text margin={{ bottom: 'xsmall' }}>Additional Comments (Optional)</Text>
+                          <textarea
+                            value={rack.psuDetails?.comments || ''}
+                            onChange={(e) => updateRack(rack.id, {
+                              psuDetails: { ...rack.psuDetails, comments: e.target.value }
+                            })}
+                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-emerald-500 min-h-[100px]"
+                            placeholder="Add any additional comments"
+                          />
+                        </Box>
+                      </Box>
+                    </Box>
+                  )}
+
+                  {/* Similar sections for PDU and RDHX would go here */}
                 </Box>
               )}
-
-              {/* Similar sections for PDU and RDHX would go here */}
             </Box>
-          )}
-        </Box>
-      ))}
+          ))}
 
-      <Box margin={{ vertical: 'medium' }}>
-        <Button
-          label="Add Another Rack"
-          onClick={addRack}
-          plain
-          color="brand"
-        />
-      </Box>
+          <button
+            onClick={addRack}
+            className="w-full py-2 text-emerald-600 border border-emerald-600 rounded-md hover:bg-emerald-50 transition-colors mb-6"
+          >
+            Add Another Rack
+          </button>
 
-      <Box direction="row" gap="medium" margin={{ top: 'large' }}>
-        <Button
-          label="Cancel"
-          onClick={() => navigate('/')}
-        />
-        <Button
-          primary
-          label={loading ? 'Submitting...' : 'Complete Walkthrough'}
-          onClick={handleSubmit}
-          disabled={loading || racks.length === 0}
-        />
-      </Box>
+          <Box direction="row" gap="medium">
+            <button
+              onClick={() => navigate('/')}
+              className="px-6 py-2 text-gray-600 hover:text-gray-800 transition-colors"
+            >
+              Cancel
+            </button>
+            <button
+              onClick={handleSubmit}
+              disabled={loading || racks.length === 0}
+              className="px-6 py-2 bg-emerald-500 text-white rounded-md hover:bg-emerald-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {loading ? 'Submitting...' : 'Complete Walkthrough'}
+            </button>
+          </Box>
+        </>
+      )}
     </Box>
   );
 };
