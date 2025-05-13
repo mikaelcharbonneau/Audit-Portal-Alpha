@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   Box,
@@ -51,24 +51,17 @@ export const InspectionForm = () => {
           comments: value.comments,
           isUrgent: value.isUrgent,
           securityPassed: value.securityPassed,
-          coolingSystemCheck: value.coolingSystemCheck,
+          coolingSystemCheck: value.coolingSystemCheck
         }),
       });
 
-      let data;
-      const contentType = response.headers.get('content-type');
-      if (contentType && contentType.includes('application/json')) {
-        data = await response.json();
-      } else {
-        // Handle non-JSON responses
-        const text = await response.text();
-        throw new Error(`Server returned non-JSON response: ${text}`);
-      }
-
       if (!response.ok) {
-        throw new Error(data.message || 'Failed to submit inspection');
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Failed to submit inspection');
       }
 
+      const data = await response.json();
+      
       navigate('/confirmation', { 
         state: { 
           inspectionId: data.data?.Id,
