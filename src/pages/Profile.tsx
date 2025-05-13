@@ -20,9 +20,8 @@ const Profile = () => {
     <div className="max-w-4xl mx-auto p-6">
       {/* Profile Header */}
       <div className="bg-white rounded-lg shadow-sm overflow-hidden mb-6">
-        <div className="bg-[#01A982] h-32"></div>
-        <div className="px-6 py-4 flex items-center">
-          <div className="w-24 h-24 bg-[#01A982] rounded-full -mt-16 flex items-center justify-center text-white text-3xl font-medium">
+        <div className="px-6 py-6 flex items-center">
+          <div className="w-24 h-24 bg-[#01A982] rounded-full flex items-center justify-center text-white text-3xl font-medium">
             {user.name.charAt(0)}
           </div>
           <div className="ml-6">
