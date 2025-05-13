@@ -5,12 +5,13 @@ import App from './App';
 import { ThemeProvider } from './context/ThemeContext';
 import './index.css';
 
+// Debug environment variables loading
+console.log('Environment loading check - ENV PREFIX:', import.meta.env.MODE);
+
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    <ThemeProvider>
-      <BrowserRouter>
-        <App />
-      </BrowserRouter>
-    </ThemeProvider>
+    <BrowserRouter>
+      <App />
+    </BrowserRouter>
   </StrictMode>
 );
