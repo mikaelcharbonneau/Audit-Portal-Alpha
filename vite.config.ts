@@ -10,6 +10,9 @@ export default defineConfig({
     },
   },
   server: {
+    hmr: {
+      timeout: 120000 // Increase timeout to 120 seconds
+    },
     proxy: {
       '/api': {
         target: 'http://localhost:3001',
