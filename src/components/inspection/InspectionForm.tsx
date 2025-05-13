@@ -1,80 +1,96 @@
 import { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import {
-  Box,
-  Form,
-  FormField,
-  TextInput,
-  Button,
-  Select,
-  TextArea,
-  CheckBox,
-  Heading,
-  Text,
-  Grid,
-  Spinner
-} from 'grommet';
-import { FormNext } from 'grommet-icons';
+import { Box, Button, Heading, Text, CheckBox, TextArea } from 'grommet';
+import { ChevronDown, ChevronUp, Server } from 'lucide-react';
 import { supabase } from '../../lib/supabaseClient';
 
-const dataHallOptions = [
-  'Island 1',
-  'Island 8',
-  'Island 9',
-  'Island 10',
-  'Island 11',
-  'Island 12',
-  'Green Nitrogen'
-];
-
-const statusOptions = ['Operational', 'Maintenance', 'Alert', 'Offline'];
+interface RackForm {
+  id: string;
+  location: string;
+  devices: {
+    powerSupplyUnit: boolean;
+    powerDistributionUnit: boolean;
+    rearDoorHeatExchanger: boolean;
+  };
+  psuDetails?: {
+    status: string;
+    psuId: string;
+    uHeight: string;
+    comments?: string;
+  };
+  pduDetails?: {
+    status: string;
+    pduId: string;
+    comments?: string;
+  };
+  rdhxDetails?: {
+    status: string;
+    comments?: string;
+  };
+}
 
 interface LocationState {
   selectedDataHall?: string;
 }
+
+const psuStatusOptions = ['Healthy', 'Amber LED', 'Powered-Off', 'Other'];
+const psuIdOptions = ['PSU 1', 'PSU 2', 'PSU 3', 'PSU 4', 'PSU 5', 'PSU 6'];
+const uHeightOptions = Array.from({ length: 49 }, (_, i) => `U${i}`);
 
 export const InspectionForm = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { selectedDataHall } = (location.state as LocationState) || {};
   const [loading, setLoading] = useState(false);
-  const [formValues, setFormValues] = useState({
-    userEmail: '',
-    datahall: selectedDataHall || '',
-    status: '',
-    temperatureReading: '',
-    humidityReading: '',
-    comments: '',
-    isUrgent: false,
-    securityPassed: true,
-    coolingSystemCheck: true
-  });
+  const [hasIssues, setHasIssues] = useState<boolean | null>(null);
+  const [racks, setRacks] = useState<RackForm[]>([]);
+  const [expandedRacks, setExpandedRacks] = useState<string[]>([]);
 
-  const handleSubmit = async ({ value }: { value: any }) => {
+  const toggleRackExpansion = (rackId: string) => {
+    setExpandedRacks(prev => 
+      prev.includes(rackId) 
+        ? prev.filter(id => id !== rackId)
+        : [...prev, rackId]
+    );
+  };
+
+  const addRack = () => {
+    const newRack: RackForm = {
+      id: `rack-${Date.now()}`,
+      location: '',
+      devices: {
+        powerSupplyUnit: false,
+        powerDistributionUnit: false,
+        rearDoorHeatExchanger: false
+      }
+    };
+    setRacks([...racks, newRack]);
+    setExpandedRacks([...expandedRacks, newRack.id]);
+  };
+
+  const updateRack = (rackId: string, updates: Partial<RackForm>) => {
+    setRacks(racks.map(rack => 
+      rack.id === rackId ? { ...rack, ...updates } : rack
+    ));
+  };
+
+  const handleSubmit = async () => {
     setLoading(true);
     try {
       const { data, error } = await supabase
         .from('AuditReports')
-        .insert([
-          { 
-            UserEmail: value.userEmail,
-            ReportData: {
-              datahall: value.datahall,
-              status: value.status,
-              temperatureReading: value.temperatureReading,
-              humidityReading: value.humidityReading,
-              comments: value.comments,
-              isUrgent: value.isUrgent,
-              securityPassed: value.securityPassed,
-              coolingSystemCheck: value.coolingSystemCheck
-            }
+        .insert([{
+          UserEmail: 'user@example.com', // This should come from auth context
+          ReportData: {
+            datahall: selectedDataHall,
+            hasIssues,
+            racks,
+            timestamp: new Date().toISOString()
           }
-        ])
+        }])
         .select();
 
-      if (error) {
-        throw error;
-      }
+      if (error) throw error;
       
       navigate('/confirmation', { 
         state: { 
@@ -87,7 +103,7 @@ export const InspectionForm = () => {
       navigate('/confirmation', { 
         state: { 
           success: false,
-          error: error.message || 'Failed to submit inspection'
+          error: error.message 
         } 
       });
     } finally {
@@ -95,113 +111,199 @@ export const InspectionForm = () => {
     }
   };
 
-  if (loading) {
+  if (hasIssues === null) {
     return (
-      <Box align="center" justify="center" height="medium">
-        <Spinner size="medium" />
-        <Text margin={{ top: 'small' }}>Submitting inspection...</Text>
+      <Box pad="medium">
+        <Heading level={2} margin={{ bottom: 'medium' }}>
+          Inspection Walkthrough
+        </Heading>
+        <Text margin={{ bottom: 'medium' }}>Location: {selectedDataHall}</Text>
+        
+        <Box margin={{ bottom: 'medium' }}>
+          <Text margin={{ bottom: 'medium' }}>
+            Have you discovered any issues during the walkthrough?
+          </Text>
+          <Box direction="row" gap="medium">
+            <Button 
+              primary
+              color="status-critical"
+              label="Yes, I found issues"
+              onClick={() => setHasIssues(true)}
+            />
+            <Button
+              primary
+              color="status-ok"
+              label="No issues found"
+              onClick={() => setHasIssues(false)}
+            />
+          </Box>
+        </Box>
       </Box>
     );
   }
 
   return (
-    <Box pad="medium" background="light-2" round="small">
-      <Heading level={2} margin={{ top: 'none', bottom: 'medium' }}>Submit New Inspection</Heading>
-      <Text margin={{ bottom: 'medium' }}>Please fill out all required fields below.</Text>
-      
-      <Form
-        value={formValues}
-        onChange={nextValue => setFormValues(nextValue)}
-        onSubmit={handleSubmit}
-        validate="submit"
-      >
-        <Grid columns={['1/2', '1/2']} gap="medium">
-          <FormField name="userEmail" label="Email" required>
-            <TextInput 
-              name="userEmail" 
-              type="email" 
-              placeholder="your.email@hpe.com" 
-            />
-          </FormField>
-          
-          <FormField name="datahall" label="Data Hall" required>
-            <Select
-              name="datahall"
-              options={dataHallOptions}
-              placeholder="Select Data Hall"
-              value={formValues.datahall}
-            />
-          </FormField>
-          
-          <FormField name="status" label="Status" required>
-            <Select
-              name="status"
-              options={statusOptions}
-              placeholder="Select Status"
-            />
-          </FormField>
-          
-          <FormField name="temperatureReading" label="Temperature (°C)" required>
-            <TextInput 
-              name="temperatureReading" 
-              type="number" 
-              step="0.1"
-              placeholder="e.g. 22.5" 
-            />
-          </FormField>
-          
-          <FormField name="humidityReading" label="Humidity (%)" required>
-            <TextInput 
-              name="humidityReading" 
-              type="number"
-              step="0.1"
-              placeholder="e.g. 45.0" 
-            />
-          </FormField>
-        </Grid>
-        
-        <FormField name="comments" label="Additional Comments">
-          <TextArea 
-            name="comments" 
-            placeholder="Enter any additional observations or concerns here"
-            rows={5}
-          />
-        </FormField>
-        
-        <Box margin={{ vertical: 'medium' }} gap="small">
-          <CheckBox
-            name="isUrgent"
-            label="Mark as urgent"
-          />
-          
-          <CheckBox
-            name="securityPassed"
-            label="Security checks passed"
-            checked={formValues.securityPassed}
-          />
-          
-          <CheckBox
-            name="coolingSystemCheck"
-            label="Cooling system operational"
-            checked={formValues.coolingSystemCheck}
-          />
+    <Box pad="medium">
+      <Heading level={2} margin={{ bottom: 'medium' }}>
+        Inspection Walkthrough
+      </Heading>
+      <Text margin={{ bottom: 'medium' }}>Location: {selectedDataHall}</Text>
+
+      {racks.map((rack, index) => (
+        <Box
+          key={rack.id}
+          background="light-1"
+          round="small"
+          margin={{ bottom: 'medium' }}
+          pad="medium"
+        >
+          <Box
+            direction="row"
+            align="center"
+            justify="between"
+            onClick={() => toggleRackExpansion(rack.id)}
+            style={{ cursor: 'pointer' }}
+          >
+            <Box direction="row" align="center" gap="small">
+              <Server size={20} />
+              <Text weight="bold">Rack: {rack.location || `#${index + 1}`}</Text>
+            </Box>
+            {expandedRacks.includes(rack.id) ? <ChevronUp /> : <ChevronDown />}
+          </Box>
+
+          {expandedRacks.includes(rack.id) && (
+            <Box margin={{ top: 'medium' }} gap="medium">
+              <Box>
+                <Text margin={{ bottom: 'xsmall' }}>Rack Location</Text>
+                <input
+                  type="text"
+                  value={rack.location}
+                  onChange={(e) => updateRack(rack.id, { location: e.target.value })}
+                  className="form-input"
+                  placeholder="Enter rack location"
+                />
+              </Box>
+
+              <Box>
+                <Text margin={{ bottom: 'xsmall' }}>Select Impacted Device(s)</Text>
+                <Box gap="small">
+                  <CheckBox
+                    label="Power Supply Unit"
+                    checked={rack.devices.powerSupplyUnit}
+                    onChange={(e) => updateRack(rack.id, {
+                      devices: { ...rack.devices, powerSupplyUnit: e.target.checked }
+                    })}
+                  />
+                  <CheckBox
+                    label="Power Distribution Unit"
+                    checked={rack.devices.powerDistributionUnit}
+                    onChange={(e) => updateRack(rack.id, {
+                      devices: { ...rack.devices, powerDistributionUnit: e.target.checked }
+                    })}
+                  />
+                  <CheckBox
+                    label="Rear Door Heat Exchanger"
+                    checked={rack.devices.rearDoorHeatExchanger}
+                    onChange={(e) => updateRack(rack.id, {
+                      devices: { ...rack.devices, rearDoorHeatExchanger: e.target.checked }
+                    })}
+                  />
+                </Box>
+              </Box>
+
+              {rack.devices.powerSupplyUnit && (
+                <Box background="light-2" pad="medium" round="small">
+                  <Text weight="bold" margin={{ bottom: 'medium' }}>Power Supply Unit</Text>
+                  <Box gap="medium">
+                    <Box>
+                      <Text margin={{ bottom: 'xsmall' }}>Issue Description</Text>
+                      <select
+                        value={rack.psuDetails?.status || ''}
+                        onChange={(e) => updateRack(rack.id, {
+                          psuDetails: { ...rack.psuDetails, status: e.target.value }
+                        })}
+                        className="form-input"
+                      >
+                        <option value="">Select PSU status</option>
+                        {psuStatusOptions.map(option => (
+                          <option key={option} value={option}>{option}</option>
+                        ))}
+                      </select>
+                    </Box>
+
+                    <Box>
+                      <Text margin={{ bottom: 'xsmall' }}>PSU ID</Text>
+                      <select
+                        value={rack.psuDetails?.psuId || ''}
+                        onChange={(e) => updateRack(rack.id, {
+                          psuDetails: { ...rack.psuDetails, psuId: e.target.value }
+                        })}
+                        className="form-input"
+                      >
+                        <option value="">Select PSU</option>
+                        {psuIdOptions.map(option => (
+                          <option key={option} value={option}>{option}</option>
+                        ))}
+                      </select>
+                    </Box>
+
+                    <Box>
+                      <Text margin={{ bottom: 'xsmall' }}>Device U-Height</Text>
+                      <select
+                        value={rack.psuDetails?.uHeight || ''}
+                        onChange={(e) => updateRack(rack.id, {
+                          psuDetails: { ...rack.psuDetails, uHeight: e.target.value }
+                        })}
+                        className="form-input"
+                      >
+                        <option value="">Select U-Height</option>
+                        {uHeightOptions.map(option => (
+                          <option key={option} value={option}>{option}</option>
+                        ))}
+                      </select>
+                    </Box>
+
+                    <Box>
+                      <Text margin={{ bottom: 'xsmall' }}>Additional Comments (Optional)</Text>
+                      <TextArea
+                        value={rack.psuDetails?.comments || ''}
+                        onChange={(e) => updateRack(rack.id, {
+                          psuDetails: { ...rack.psuDetails, comments: e.target.value }
+                        })}
+                        placeholder="Add any additional comments"
+                      />
+                    </Box>
+                  </Box>
+                </Box>
+              )}
+
+              {/* Similar sections for PDU and RDHX would go here */}
+            </Box>
+          )}
         </Box>
-        
-        <Box direction="row" gap="medium" margin={{ top: 'medium' }}>
-          <Button 
-            type="submit" 
-            primary 
-            label={loading ? 'Submitting...' : 'Submit Inspection'} 
-            disabled={loading}
-            icon={<FormNext />}
-            reverse
-          />
-          <Button 
-            label="Cancel" 
-            onClick={() => navigate('/')} 
-          />
-        </Box>
-      </Form>
+      ))}
+
+      <Box margin={{ vertical: 'medium' }}>
+        <Button
+          label="Add Another Rack"
+          onClick={addRack}
+          plain
+          color="brand"
+        />
+      </Box>
+
+      <Box direction="row" gap="medium" margin={{ top: 'large' }}>
+        <Button
+          label="Cancel"
+          onClick={() => navigate('/')}
+        />
+        <Button
+          primary
+          label={loading ? 'Submitting...' : 'Complete Walkthrough'}
+          onClick={handleSubmit}
+          disabled={loading || racks.length === 0}
+        />
+      </Box>
     </Box>
   );
 };
