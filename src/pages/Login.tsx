@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Box, Button, Form, FormField, TextInput, Text, Heading } from 'grommet';
+import { Box, Button, Form, FormField, TextInput, Text, Image } from 'grommet';
 import { supabase } from '../lib/supabaseClient';
 import { Mail, Lock } from 'lucide-react';
 import HPELogo from '../components/ui/HPELogo';
@@ -33,66 +33,143 @@ const Login = () => {
   return (
     <Box
       fill
-      align="center"
-      justify="center"
-      pad="medium"
-      background="light-2"
+      direction="row"
+      background="light-1"
     >
+      {/* Left Panel - Image */}
       <Box
-        width="medium"
-        pad="large"
-        background="white"
-        round="small"
-        elevation="small"
+        basis="1/2"
+        background={{
+          image: "url(https://images.pexels.com/photos/325229/pexels-photo-325229.jpeg)",
+          position: "center",
+          size: "cover",
+          opacity: "medium"
+        }}
+        style={{ position: 'relative' }}
       >
-        <Box align="center" margin={{ bottom: 'medium' }}>
-          <HPELogo height={40} />
-          <Text 
-            margin={{ top: 'small' }} 
-            size="xlarge" 
+        <Box
+          fill
+          background={{ 
+            color: 'brand',
+            opacity: 'strong' 
+          }}
+          style={{ position: 'absolute' }}
+        />
+        <Box
+          fill
+          justify="center"
+          align="center"
+          pad="large"
+          style={{ position: 'relative', zIndex: 1 }}
+        >
+          <Text
+            size="xxlarge"
             weight="bold"
-            color="text-strong"
-            style={{ fontFamily: 'MetricHPE' }}
+            color="white"
+            textAlign="center"
+            margin={{ bottom: 'medium' }}
           >
-            Hewlett Packard Enterprise
+            Data Center Audit Portal
+          </Text>
+          <Text
+            size="large"
+            color="white"
+            textAlign="center"
+            style={{ maxWidth: '400px' }}
+          >
+            Streamline your data center inspections and reporting with our comprehensive audit solution
           </Text>
         </Box>
-        
-        <Form onSubmit={({ value }) => handleSubmit(value)}>
-          <FormField name="email" label="Email">
-            <TextInput
-              name="email"
-              icon={<Mail size={20} color="#666666" />}
-              placeholder="Enter your email"
-              type="email"
-              required
-            />
-          </FormField>
+      </Box>
+
+      {/* Right Panel - Login Form */}
+      <Box
+        basis="1/2"
+        align="center"
+        justify="center"
+        pad="large"
+      >
+        <Box
+          width="medium"
+        >
+          <Box align="center" margin={{ bottom: 'large' }}>
+            <HPELogo height={48} />
+            <Text 
+              margin={{ top: 'medium' }} 
+              size="xxlarge" 
+              weight="bold"
+              color="brand"
+              style={{ fontFamily: 'MetricHPE' }}
+            >
+              Hewlett Packard Enterprise
+            </Text>
+          </Box>
           
-          <FormField name="password" label="Password">
-            <TextInput
+          <Form onSubmit={({ value }) => handleSubmit(value)}>
+            <FormField 
+              name="email" 
+              label={
+                <Text color="dark-3" weight="bold">
+                  Email Address
+                </Text>
+              }
+            >
+              <TextInput
+                name="email"
+                icon={<Mail size={20} color="#666666" />}
+                placeholder="Enter your email"
+                type="email"
+                required
+              />
+            </FormField>
+            
+            <FormField 
               name="password"
-              icon={<Lock size={20} color="#666666" />}
-              placeholder="Enter your password"
-              type="password"
-              required
+              label={
+                <Text color="dark-3" weight="bold">
+                  Password
+                </Text>
+              }
+            >
+              <TextInput
+                name="password"
+                icon={<Lock size={20} color="#666666" />}
+                placeholder="Enter your password"
+                type="password"
+                required
+              />
+            </FormField>
+
+            {error && (
+              <Box 
+                margin={{ vertical: 'small' }} 
+                background="status-error" 
+                pad="small" 
+                round="small"
+              >
+                <Text size="small" color="white">
+                  {error}
+                </Text>
+              </Box>
+            )}
+
+            <Button
+              type="submit"
+              primary
+              color="brand"
+              label={loading ? 'Signing in...' : 'Sign In'}
+              disabled={loading}
+              margin={{ top: 'medium' }}
+              fill="horizontal"
             />
-          </FormField>
+          </Form>
 
-          {error && (
-            <Box margin={{ vertical: 'small' }} background="status-error" pad="small" round="small">
-              <Text size="small" color="white">{error}</Text>
-            </Box>
-          )}
-
-          <Button
-            type="submit"
-            primary
-            label={loading ? 'Signing in...' : 'Sign In'}
-            disabled={loading}
-            margin={{ top: 'medium' }}
-          />
-        </Form>
+          <Box margin={{ top: 'medium' }} align="center">
+            <Text size="small" color="dark-3">
+              This is an internal application for HPE employees only
+            </Text>
+          </Box>
+        </Box>
       </Box>
     </Box>
   );
