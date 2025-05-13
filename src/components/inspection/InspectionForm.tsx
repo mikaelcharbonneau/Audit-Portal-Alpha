@@ -153,7 +153,7 @@ export const InspectionForm = () => {
               >
                 <div className="flex items-center gap-3">
                   <Server size={20} className="text-gray-500" />
-                  <span className="font-medium">Rack: #{index + 1}</span>
+                  <span className="font-medium">Issue #{index + 1}</span>
                 </div>
                 {expandedRacks.includes(rack.id) ? (
                   <ChevronUp size={20} className="text-gray-400" />
