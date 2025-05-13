@@ -8,15 +8,5 @@ export default defineConfig({
     alias: {
       '@': path.resolve(__dirname, './src'),
     },
-  },
-  // Exclude the api directory from being processed by Vite
-  build: {
-    rollupOptions: {
-      external: ['api/**']
-    }
-  },
-  // Prevent Vite from trying to resolve API imports during development
-  optimizeDeps: {
-    exclude: ['api']
   }
 })
