@@ -144,25 +144,23 @@ const Dashboard = () => {
               onClick={() => navigate(`/reports/${inspection.Id}`)}
             >
               <div 
-                className="h-40 bg-cover bg-center"
+                className="relative h-48 bg-cover bg-center"
                 style={{ 
-                  backgroundImage: `linear-gradient(rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.3)), url(https://images.pexels.com/photos/325229/pexels-photo-325229.jpeg)`,
-                  backgroundPosition: 'center',
-                  backgroundSize: 'cover'
+                  backgroundImage: `linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.7)), url(https://images.pexels.com/photos/325229/pexels-photo-325229.jpeg)`,
                 }}
               >
-                <div className="p-4 text-white">
-                  <h3 className="font-medium text-lg">
+                <div className="absolute inset-0 p-6 flex flex-col justify-end">
+                  <h3 className="text-xl font-medium text-white mb-2">
                     Daily Issue Report - {format(new Date(inspection.Timestamp), 'MMM do yyyy')}
                   </h3>
-                  <p className="text-sm opacity-90">{inspection.ReportData.datahall}</p>
+                  <p className="text-sm text-gray-200">{inspection.ReportData.datahall}</p>
                 </div>
               </div>
-              <div className="p-4">
-                <div className="flex gap-2">
-                  <button className="text-sm text-gray-600 hover:text-gray-800">View</button>
-                  <button className="text-sm text-gray-600 hover:text-gray-800">Download</button>
-                  <button className="text-sm text-gray-600 hover:text-gray-800">Share</button>
+              <div className="p-4 bg-white border-t border-gray-100">
+                <div className="flex gap-4 text-sm text-gray-600">
+                  <button className="hover:text-emerald-600 transition-colors">View</button>
+                  <button className="hover:text-emerald-600 transition-colors">Download</button>
+                  <button className="hover:text-emerald-600 transition-colors">Share</button>
                 </div>
               </div>
             </div>
