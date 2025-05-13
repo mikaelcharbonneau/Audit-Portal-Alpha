@@ -169,14 +169,14 @@ export const InspectionForm = () => {
                   <div className="space-y-6">
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Rack Location
+                        Tile Location
                       </label>
                       <select
                         value={rack.location}
                         onChange={(e) => updateRack(rack.id, { location: e.target.value })}
                         className="w-full px-4 py-2.5 border border-gray-300 rounded-md focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
                       >
-                        <option value="">Select rack location</option>
+                        <option value="">Select tile location</option>
                         {availableRacks.map(rackId => (
                           <option key={rackId} value={rackId}>{rackId}</option>
                         ))}
