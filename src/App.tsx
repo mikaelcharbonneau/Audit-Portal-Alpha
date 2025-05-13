@@ -11,26 +11,32 @@ import InspectionFlow from './pages/InspectionFlow';
 import Confirmation from './pages/Confirmation';
 import Reports from './pages/Reports';
 import NotFound from './pages/NotFound';
+import ErrorBoundaryComponent from './components/ErrorBoundaryComponent';
 
 const App = () => {
   return (
-    <ThemeProvider>
-      <UserProvider>
-        <Grommet theme={hpe} full>
-          <Routes>
-            <Route path="/" element={<Layout />}>
-              <Route index element={<Dashboard />} />
-              <Route path="inspections" element={<Inspections />} />
-              <Route path="inspection" element={<InspectionFlow />} />
-              <Route path="confirmation" element={<Confirmation />} />
-              <Route path="reports/:id" element={<Reports />} />
-              <Route path="not-found" element={<NotFound />} />
-              <Route path="*" element={<Navigate to="/not-found" replace />} />
-            </Route>
-          </Routes>
-        </Grommet>
-      </UserProvider>
-    </ThemeProvider>
+    <>
+      <ErrorBoundaryComponent />
+      <div className="main-content">
+        <ThemeProvider>
+          <UserProvider>
+            <Grommet theme={hpe} full>
+              <Routes>
+                <Route path="/" element={<Layout />}>
+                  <Route index element={<Dashboard />} />
+                  <Route path="inspections" element={<Inspections />} />
+                  <Route path="inspection" element={<InspectionFlow />} />
+                  <Route path="confirmation" element={<Confirmation />} />
+                  <Route path="reports/:id" element={<Reports />} />
+                  <Route path="not-found" element={<NotFound />} />
+                  <Route path="*" element={<Navigate to="/not-found" replace />} />
+                </Route>
+              </Routes>
+            </Grommet>
+          </UserProvider>
+        </ThemeProvider>
+      </div>
+    </>
   );
 };
 
