@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Box, Grid, Text } from 'grommet';
 import { ClipboardList, AlertTriangle, CheckCircle } from 'lucide-react';
 import { format } from 'date-fns';
 import { supabase } from '../lib/supabaseClient';
@@ -41,7 +40,7 @@ const Dashboard = () => {
   };
 
   const stats = {
-    completed: inspections.length, // All submitted inspections are considered completed
+    completed: inspections.length,
     active: inspections.filter(i => i.ReportData.isUrgent).length,
     resolved: inspections.filter(i => !i.ReportData.isUrgent).length
   };
@@ -110,11 +109,9 @@ const Dashboard = () => {
             >
               <div className="flex items-center gap-2 mb-2">
                 <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                  inspection.ReportData.status === 'completed' ? 'bg-emerald-100 text-emerald-800' :
-                  inspection.ReportData.status === 'in-progress' ? 'bg-amber-100 text-amber-800' :
-                  'bg-gray-100 text-gray-800'
+                  inspection.ReportData.isUrgent ? 'bg-amber-100 text-amber-800' : 'bg-emerald-100 text-emerald-800'
                 }`}>
-                  {inspection.ReportData.status}
+                  {inspection.ReportData.isUrgent ? 'Urgent' : 'Normal'}
                 </span>
                 <span className="text-sm text-gray-500">
                   {format(new Date(inspection.Timestamp), 'MMM d, yyyy')}
@@ -146,12 +143,22 @@ const Dashboard = () => {
               className="bg-white rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-shadow cursor-pointer"
               onClick={() => navigate(`/reports/${inspection.Id}`)}
             >
-              <div className="h-40 bg-gray-200"></div>
+              <div 
+                className="h-40 bg-cover bg-center"
+                style={{ 
+                  backgroundImage: `linear-gradient(rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.3)), url(https://images.pexels.com/photos/325229/pexels-photo-325229.jpeg)`,
+                  backgroundPosition: 'center',
+                  backgroundSize: 'cover'
+                }}
+              >
+                <div className="p-4 text-white">
+                  <h3 className="font-medium text-lg">
+                    Daily Issue Report - {format(new Date(inspection.Timestamp), 'MMM do yyyy')}
+                  </h3>
+                  <p className="text-sm opacity-90">{inspection.ReportData.datahall}</p>
+                </div>
+              </div>
               <div className="p-4">
-                <h3 className="font-medium mb-2">
-                  Daily Issue Report - {format(new Date(inspection.Timestamp), 'MMM do yyyy')}
-                </h3>
-                <p className="text-sm text-gray-600 mb-4">{inspection.ReportData.datahall}</p>
                 <div className="flex gap-2">
                   <button className="text-sm text-gray-600 hover:text-gray-800">View</button>
                   <button className="text-sm text-gray-600 hover:text-gray-800">Download</button>
