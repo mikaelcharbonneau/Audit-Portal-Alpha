@@ -1,10 +1,9 @@
 import { useState, useEffect } from 'react';
 import { format } from 'date-fns';
-import { Settings, Mail, Phone, Building, Clock, Download, Moon, Sun } from 'lucide-react';
-import { useTheme } from '../context/ThemeContext';
+import { Mail, Phone, Building, Clock, Download, Pencil, Upload } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { supabase } from '../lib/supabaseClient';
-import { Box, Spinner } from 'grommet';
+import { Box, Spinner, Layer, Form, FormField, TextInput, Button } from 'grommet';
 
 interface Activity {
   id: string;
@@ -19,8 +18,14 @@ interface UserStats {
   reports_generated: number;
 }
 
+interface UserProfile {
+  full_name: string;
+  avatar_url: string | null;
+  phone: string | null;
+  department: string;
+}
+
 const Profile = () => {
-  const { darkMode, toggleDarkMode } = useTheme();
   const { user } = useAuth();
   const [activities, setActivities] = useState<Activity[]>([]);
   const [stats, setStats] = useState<UserStats>({
@@ -28,17 +33,37 @@ const Profile = () => {
     issues_resolved: 0,
     reports_generated: 0
   });
+  const [profile, setProfile] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [uploading, setUploading] = useState(false);
 
   useEffect(() => {
     if (user) {
       Promise.all([
         fetchUserActivities(),
-        fetchUserStats()
+        fetchUserStats(),
+        fetchUserProfile()
       ]).finally(() => setLoading(false));
     }
   }, [user]);
+
+  const fetchUserProfile = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('user_profiles')
+        .select('*')
+        .eq('user_id', user?.id)
+        .single();
+
+      if (error) throw error;
+      setProfile(data);
+    } catch (error: any) {
+      console.error('Error fetching profile:', error);
+      setError('Failed to load profile');
+    }
+  };
 
   const fetchUserActivities = async () => {
     try {
@@ -81,6 +106,53 @@ const Profile = () => {
     }
   };
 
+  const handleProfileUpdate = async (values: Partial<UserProfile>) => {
+    try {
+      const { error } = await supabase
+        .from('user_profiles')
+        .upsert({
+          user_id: user?.id,
+          ...values
+        });
+
+      if (error) throw error;
+      
+      await fetchUserProfile();
+      setShowEditModal(false);
+    } catch (error: any) {
+      console.error('Error updating profile:', error);
+      setError('Failed to update profile');
+    }
+  };
+
+  const handleAvatarUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    try {
+      setUploading(true);
+      const file = event.target.files?.[0];
+      if (!file) return;
+
+      const fileExt = file.name.split('.').pop();
+      const filePath = `${user?.id}/avatar.${fileExt}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from('avatars')
+        .upload(filePath, file, { upsert: true });
+
+      if (uploadError) throw uploadError;
+
+      const { data: { publicUrl } } = supabase.storage
+        .from('avatars')
+        .getPublicUrl(filePath);
+
+      await handleProfileUpdate({ avatar_url: publicUrl });
+    } catch (error: any) {
+      console.error('Error uploading avatar:', error);
+      setError('Failed to upload avatar');
+    } finally {
+      setUploading(false);
+    }
+  };
+
   const calculateProgressPercentage = (value: number, type: keyof UserStats) => {
     const maxValues = {
       walkthroughs_completed: 50,
@@ -114,16 +186,58 @@ const Profile = () => {
       {/* Profile Header */}
       <div className="bg-white rounded-lg shadow-sm overflow-hidden mb-6">
         <div className="px-6 py-6 flex items-center">
-          <div className="w-24 h-24 bg-[#01A982] rounded-full flex items-center justify-center text-white text-3xl font-medium">
-            {user.email?.charAt(0).toUpperCase()}
+          <div className="relative">
+            {profile?.avatar_url ? (
+              <img
+                src={profile.avatar_url}
+                alt={profile.full_name}
+                className="w-24 h-24 rounded-full object-cover"
+              />
+            ) : (
+              <div className="w-24 h-24 bg-[#01A982] rounded-full flex items-center justify-center text-white text-3xl font-medium">
+                {profile?.full_name?.charAt(0) || user.email?.charAt(0)}
+              </div>
+            )}
+            <label className="absolute bottom-0 right-0 bg-white rounded-full p-2 shadow-lg cursor-pointer">
+              <Upload className="w-4 h-4 text-gray-600" />
+              <input
+                type="file"
+                className="hidden"
+                accept="image/*"
+                onChange={handleAvatarUpload}
+                disabled={uploading}
+              />
+            </label>
           </div>
-          <div className="ml-6">
-            <h1 className="text-2xl font-semibold text-gray-900">{user.email}</h1>
-            <p className="text-gray-600">Data Center Technician</p>
+          <div className="ml-6 flex-1">
+            <div className="flex items-center justify-between">
+              <div>
+                <h1 className="text-2xl font-semibold text-gray-900">
+                  {profile?.full_name || 'Update your profile'}
+                </h1>
+                <p className="text-gray-600">Data Center Technician</p>
+              </div>
+              <button
+                onClick={() => setShowEditModal(true)}
+                className="p-2 text-gray-600 hover:text-gray-900"
+              >
+                <Pencil className="w-5 h-5" />
+              </button>
+            </div>
             <div className="mt-4 space-y-2">
               <div className="flex items-center text-gray-600">
                 <Mail className="w-4 h-4 mr-2" />
                 <span className="text-sm">{user.email}</span>
+              </div>
+              {profile?.phone && (
+                <div className="flex items-center text-gray-600">
+                  <Phone className="w-4 h-4 mr-2" />
+                  <span className="text-sm">{profile.phone}</span>
+                </div>
+              )}
+              <div className="flex items-center text-gray-600">
+                <Building className="w-4 h-4 mr-2" />
+                <span className="text-sm">{profile?.department}</span>
               </div>
               <div className="flex items-center text-gray-600">
                 <Clock className="w-4 h-4 mr-2" />
@@ -187,39 +301,12 @@ const Profile = () => {
             </div>
             <div className="px-6 py-4 space-y-4">
               <div className="flex items-center justify-between">
-                <span className="text-sm text-gray-600">Dark Theme</span>
-                <button 
-                  onClick={toggleDarkMode}
-                  className={`relative inline-flex items-center h-6 rounded-full w-11 transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#01A982] ${
-                    darkMode ? 'bg-[#01A982]' : 'bg-gray-200'
-                  }`}
-                >
-                  <span className="sr-only">Toggle dark mode</span>
-                  <span 
-                    className={`inline-block w-5 h-5 transform transition-transform bg-white rounded-full ${
-                      darkMode ? 'translate-x-6' : 'translate-x-1'
-                    }`}
-                  />
-                </button>
-              </div>
-
-              <div className="flex items-center justify-between">
                 <span className="text-sm text-gray-600">Email Notifications</span>
                 <button 
                   className={`relative inline-flex items-center h-6 rounded-full w-11 bg-[#01A982]`}
                 >
                   <span className="sr-only">Toggle email notifications</span>
                   <span className="inline-block w-5 h-5 transform translate-x-6 bg-white rounded-full" />
-                </button>
-              </div>
-
-              <div className="flex items-center justify-between">
-                <span className="text-sm text-gray-600">Push Notifications</span>
-                <button 
-                  className={`relative inline-flex items-center h-6 rounded-full w-11 bg-gray-200`}
-                >
-                  <span className="sr-only">Toggle push notifications</span>
-                  <span className="inline-block w-5 h-5 transform translate-x-1 bg-white rounded-full" />
                 </button>
               </div>
 
@@ -293,15 +380,40 @@ const Profile = () => {
                   </div>
                 </div>
               </div>
-
-              <button className="w-full mt-6 flex items-center justify-center px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50">
-                <Download className="w-4 h-4 mr-2" />
-                Download Full Report
-              </button>
             </div>
           </div>
         </div>
       </div>
+
+      {/* Edit Profile Modal */}
+      {showEditModal && (
+        <Layer
+          onEsc={() => setShowEditModal(false)}
+          onClickOutside={() => setShowEditModal(false)}
+        >
+          <Box pad="medium" gap="medium" width="medium">
+            <h2 className="text-xl font-semibold">Edit Profile</h2>
+            <Form
+              value={profile || {}}
+              onSubmit={({ value }) => handleProfileUpdate(value)}
+            >
+              <FormField name="full_name" label="Full Name">
+                <TextInput name="full_name" placeholder="Enter your full name" />
+              </FormField>
+              <FormField name="phone" label="Phone">
+                <TextInput name="phone" placeholder="Enter your phone number" />
+              </FormField>
+              <FormField name="department" label="Department">
+                <TextInput name="department" placeholder="Enter your department" />
+              </FormField>
+              <Box direction="row" gap="medium" justify="end" margin={{ top: 'medium' }}>
+                <Button label="Cancel" onClick={() => setShowEditModal(false)} />
+                <Button type="submit" primary label="Save Changes" />
+              </Box>
+            </Form>
+          </Box>
+        </Layer>
+      )}
     </div>
   );
 };
