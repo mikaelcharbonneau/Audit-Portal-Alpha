@@ -5,7 +5,6 @@ import InspectionFlow from './pages/InspectionFlow';
 import Inspections from './pages/Inspections';
 import Confirmation from './pages/Confirmation';
 import Reports from './pages/Reports';
-import Profile from './pages/Profile';
 import NotFound from './pages/NotFound';
 import { UserProvider } from './context/UserContext';
 import { ThemeProvider, useTheme } from './context/ThemeContext';
@@ -94,7 +93,6 @@ function AppContent() {
             <Route path="inspection" element={<InspectionFlow />} />
             <Route path="confirmation" element={<Confirmation />} />
             <Route path="reports" element={<Reports />} />
-            <Route path="profile" element={<Profile />} />
             <Route path="*" element={<NotFound />} />
           </Route>
         </Routes>
@@ -111,4 +109,4 @@ function App() {
   );
 }
 
-export default App
+export default App;
