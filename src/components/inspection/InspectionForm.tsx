@@ -52,7 +52,6 @@ export const InspectionForm = () => {
           isUrgent: value.isUrgent,
           securityPassed: value.securityPassed,
           coolingSystemCheck: value.coolingSystemCheck,
-          timestamp: new Date().toISOString()
         }),
       });
 
@@ -73,7 +72,7 @@ export const InspectionForm = () => {
       navigate('/confirmation', { 
         state: { 
           success: false,
-          error: error.message  
+          error: error.message
         } 
       });
     } finally {
@@ -99,10 +98,15 @@ export const InspectionForm = () => {
         value={formValues}
         onChange={nextValue => setFormValues(nextValue)}
         onSubmit={handleSubmit}
+        validate="submit"
       >
         <Grid columns={['1/2', '1/2']} gap="medium">
           <FormField name="userEmail" label="Email" required>
-            <TextInput name="userEmail" type="email" placeholder="your.email@hpe.com" />
+            <TextInput 
+              name="userEmail" 
+              type="email" 
+              placeholder="your.email@hpe.com" 
+            />
           </FormField>
           
           <FormField name="datahall" label="Data Hall" required>

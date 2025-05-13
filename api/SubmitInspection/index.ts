@@ -6,11 +6,10 @@ export default async function handler(req: Request, res: Response) {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
-  res.setHeader('Content-Type', 'application/json');
   
   // Handle preflight requests
   if (req.method === 'OPTIONS') {
-    return res.status(200).json({});
+    return res.status(200).end();
   }
 
   if (req.method !== 'POST') {
@@ -20,16 +19,17 @@ export default async function handler(req: Request, res: Response) {
     });
   }
 
-  try {
-    const { userEmail = "unknown", ...reportData } = req.body;
-    
-    if (!reportData.datahall) {
-      return res.status(400).json({
-        success: false,
-        message: "Data hall is required"
-      });
-    }
+  const { userEmail, ...reportData } = req.body;
 
+  // Validate required fields
+  if (!userEmail || !reportData.datahall || !reportData.status) {
+    return res.status(400).json({
+      success: false,
+      message: 'Missing required fields: email, data hall, and status are required'
+    });
+  }
+
+  try {
     const { data, error } = await supabase
       .from('AuditReports')
       .insert([
@@ -45,20 +45,20 @@ export default async function handler(req: Request, res: Response) {
       console.error('Supabase error:', error);
       return res.status(500).json({ 
         success: false, 
-        message: error.message 
+        message: 'Failed to save inspection'
       });
     }
     
     return res.status(200).json({ 
       success: true, 
-      message: "Inspection saved",
+      message: "Inspection saved successfully",
       data: data?.[0]
     });
   } catch (error: any) {
     console.error('Error storing inspection:', error);
     return res.status(500).json({ 
       success: false, 
-      message: error?.message || 'An unexpected error occurred while storing the inspection'
+      message: 'An unexpected error occurred'
     });
   }
 }
