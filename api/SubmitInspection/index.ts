@@ -6,10 +6,11 @@ export default async function handler(req: Request, res: Response) {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+  res.setHeader('Content-Type', 'application/json'); // Always set Content-Type for all responses
   
   // Handle preflight requests
   if (req.method === 'OPTIONS') {
-    return res.status(200).end();
+    return res.status(200).json({ success: true }); // Return valid JSON even for OPTIONS
   }
 
   if (req.method !== 'POST') {
@@ -45,7 +46,8 @@ export default async function handler(req: Request, res: Response) {
       console.error('Supabase error:', error);
       return res.status(500).json({ 
         success: false, 
-        message: 'Failed to save inspection'
+        message: 'Failed to save inspection',
+        error: error.message
       });
     }
     
@@ -58,7 +60,8 @@ export default async function handler(req: Request, res: Response) {
     console.error('Error storing inspection:', error);
     return res.status(500).json({ 
       success: false, 
-      message: 'An unexpected error occurred'
+      message: 'An unexpected error occurred',
+      error: error.message
     });
   }
 }

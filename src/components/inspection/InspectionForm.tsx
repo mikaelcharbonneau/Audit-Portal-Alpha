@@ -55,7 +55,15 @@ export const InspectionForm = () => {
         }),
       });
 
-      const data = await response.json();
+      let data;
+      const contentType = response.headers.get('content-type');
+      if (contentType && contentType.includes('application/json')) {
+        data = await response.json();
+      } else {
+        // Handle non-JSON responses
+        const text = await response.text();
+        throw new Error(`Server returned non-JSON response: ${text}`);
+      }
 
       if (!response.ok) {
         throw new Error(data.message || 'Failed to submit inspection');
@@ -72,7 +80,7 @@ export const InspectionForm = () => {
       navigate('/confirmation', { 
         state: { 
           success: false,
-          error: error.message
+          error: error.message || 'Failed to submit inspection'
         } 
       });
     } finally {
