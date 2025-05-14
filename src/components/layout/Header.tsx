@@ -40,13 +40,13 @@ const Header = () => {
         fill="horizontal"
         gap="small"
       >
-        {/* Logo and App Name Section */}
+        {/* Logo and App Name Section - Fixed width */}
         <Box 
           direction="row" 
           align="center"
-          gap="xlarge"
+          gap="small"
+          width="250px"
           flex={false}
-          width={{ min: '300px' }}
         >
           <Box width="32px" height="32px" flex={false}>
             <HPELogo height={32} />
@@ -55,16 +55,15 @@ const Header = () => {
             weight="bold" 
             color="text-strong" 
             size="medium"
-            margin={{ left: 'small' }}
           >
             Walkthrough App
           </Text>
         </Box>
 
-        {/* Navigation Section */}
+        {/* Navigation Section - Centered */}
         {size !== 'small' && (
-          <Box flex="grow" align="center">
-            <Nav direction="row" gap="xsmall">
+          <Box flex="grow" align="center" justify="center">
+            <Nav direction="row" gap="medium">
               {navItems.map((item) => (
                 <Link 
                   key={item.path} 
@@ -94,12 +93,14 @@ const Header = () => {
           </Box>
         )}
 
-        {/* Actions Section */}
+        {/* Actions Section - Fixed width */}
         <Box 
           direction="row" 
           align="center" 
           gap="small"
+          width="250px"
           flex={false}
+          justify="flex-end"
         >
           <Button 
             plain 
