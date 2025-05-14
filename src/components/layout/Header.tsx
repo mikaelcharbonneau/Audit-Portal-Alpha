@@ -55,7 +55,7 @@ const Header = () => {
             weight="bold" 
             color="text-strong" 
             size="medium"
-            margin={{ left: 'xlarge' }}
+            margin={{ left: 'medium' }}
           >
             Walkthrough App
           </Text>
