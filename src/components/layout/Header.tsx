@@ -1,5 +1,5 @@
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { Bell, Home, Clipboard, BarChart, User, LogOut } from 'lucide-react';
+import { Bell, Home, Clipboard, AlertTriangle, BarChart, User, LogOut } from 'lucide-react';
 import HPELogo from '../ui/HPELogo';
 import { useTheme } from '../../context/ThemeContext';
 import { useAuth } from '../../context/AuthContext';
@@ -16,6 +16,7 @@ const Header = () => {
   const navItems = [
     { path: '/', icon: <Home size={20} />, label: 'Dashboard' },
     { path: '/inspections', icon: <Clipboard size={20} />, label: 'Audits' },
+    { path: '/incidents', icon: <AlertTriangle size={20} />, label: 'Incidents' },
     { path: '/reports', icon: <BarChart size={20} />, label: 'Reports' },
   ];
 
