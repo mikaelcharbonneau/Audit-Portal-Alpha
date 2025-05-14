@@ -44,9 +44,9 @@ const Header = () => {
         <Box 
           direction="row" 
           align="center"
-          gap="medium"
+          gap="xlarge"
           flex={false}
-          width={{ min: '200px' }}
+          width={{ min: '300px' }}
         >
           <Box width="32px" height="32px" flex={false}>
             <HPELogo height={32} />
@@ -55,7 +55,7 @@ const Header = () => {
             weight="bold" 
             color="text-strong" 
             size="medium"
-            margin={{ left: 'small' }}
+            margin={{ left: 'xlarge' }}
           >
             Walkthrough App
           </Text>
