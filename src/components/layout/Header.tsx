@@ -44,7 +44,7 @@ const Header = () => {
         <Box 
           direction="row" 
           align="center"
-          gap="small"
+          gap="large"
           width="250px"
           flex={false}
         >
