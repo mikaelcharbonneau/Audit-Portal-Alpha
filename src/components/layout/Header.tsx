@@ -100,7 +100,7 @@ const Header = () => {
           gap="small"
           width="250px"
           flex={false}
-          justify="flex-end"
+          justify="end"
         >
           <Button 
             plain 
