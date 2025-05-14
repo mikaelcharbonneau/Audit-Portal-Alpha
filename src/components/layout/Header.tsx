@@ -38,20 +38,20 @@ const Header = () => {
         align="center" 
         justify="between"
         fill="horizontal"
-        gap="medium"
+        gap="small"
       >
         {/* Logo Section */}
         <Box 
           direction="row" 
-          align="center" 
-          gap="small"
-          width={{ min: 'auto' }}
+          align="center"
+          width={{ max: '200px' }}
+          flex={false}
         >
-          <Link to="/" style={{ display: 'flex', alignItems: 'center', gap: '12px', textDecoration: 'none' }}>
-            <Box width="40px" height="40px">
-              <HPELogo height={40} />
+          <Link to="/" style={{ display: 'flex', alignItems: 'center', gap: '8px', textDecoration: 'none' }}>
+            <Box width="32px" height="32px" flex={false}>
+              <HPELogo height={32} />
             </Box>
-            <Text weight="bold" color="text-strong" size="medium">
+            <Text weight="bold" color="text-strong" size="small" truncate>
               Walkthrough App
             </Text>
           </Link>
@@ -66,7 +66,7 @@ const Header = () => {
           {size !== 'small' && (
             <Nav 
               direction="row" 
-              gap="medium"
+              gap="small"
             >
               {navItems.map((item) => (
                 <Link 
@@ -77,15 +77,16 @@ const Header = () => {
                   <Box
                     direction="row"
                     align="center"
-                    pad={{ horizontal: 'medium', vertical: 'xsmall' }}
+                    pad={{ horizontal: 'small', vertical: 'xsmall' }}
                     background={isActive(item.path) ? { color: 'brand', opacity: 'weak' } : undefined}
                     round="small"
-                    gap="small"
+                    gap="xsmall"
                   >
                     {item.icon}
                     <Text 
                       color={isActive(item.path) ? 'brand' : 'text'} 
                       weight={isActive(item.path) ? 'bold' : undefined}
+                      size="small"
                     >
                       {item.label}
                     </Text>
@@ -101,7 +102,8 @@ const Header = () => {
           direction="row" 
           align="center" 
           gap="small"
-          width={{ min: 'auto' }}
+          width={{ max: '100px' }}
+          flex={false}
         >
           <Button 
             plain 
@@ -137,15 +139,16 @@ const Header = () => {
                 <Box
                   direction="row"
                   align="center"
-                  pad={{ horizontal: 'medium', vertical: 'xsmall' }}
+                  pad={{ horizontal: 'small', vertical: 'xsmall' }}
                   background={isActive(item.path) ? { color: 'brand', opacity: 'weak' } : undefined}
                   round="small"
-                  gap="small"
+                  gap="xsmall"
                 >
                   {item.icon}
                   <Text 
                     color={isActive(item.path) ? 'brand' : 'text'} 
                     weight={isActive(item.path) ? 'bold' : undefined}
+                    size="small"
                   >
                     {item.label}
                   </Text>
