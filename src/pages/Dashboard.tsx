@@ -4,20 +4,18 @@ import { ClipboardList, AlertTriangle, CheckCircle, ChevronDown } from 'lucide-r
 import { format } from 'date-fns';
 import { supabase } from '../lib/supabaseClient';
 import { useAuth } from '../context/AuthContext';
-import { locations } from '../utils/locationMapping';
 
 interface Inspection {
   Id: string;
   UserEmail: string;
   Timestamp: string;
   ReportData: {
-    location: string;
+    datacenter: string;
     datahall: string;
     issueCount: number;
-    criticality: 'low' | 'medium' | 'high' | 'critical';
+    status: 'Healthy' | 'Warning' | 'Critical';
     ticketId?: string;
     userFullName: string;
-    [key: string]: any;
   };
 }
 
@@ -80,16 +78,6 @@ const Dashboard = () => {
     setShowLocationDropdown(false);
   };
 
-  const getCriticalityColor = (criticality: string) => {
-    switch (criticality) {
-      case 'critical': return 'bg-red-100 text-red-800';
-      case 'high': return 'bg-orange-100 text-orange-800';
-      case 'medium': return 'bg-yellow-100 text-yellow-800';
-      case 'low': return 'bg-blue-100 text-blue-800';
-      default: return 'bg-gray-100 text-gray-800';
-    }
-  };
-
   return (
     <div className="p-6">
       <div className="flex justify-between items-center mb-8">
@@ -109,7 +97,7 @@ const Dashboard = () => {
           
           {showLocationDropdown && (
             <div className="absolute right-0 mt-2 w-64 bg-white rounded-lg shadow-lg py-1 z-50">
-              {locations.map((location) => (
+              {['Canada - Quebec', 'Norway - Enebakk', 'United States - Dallas'].map((location) => (
                 <button
                   key={location}
                   onClick={() => handleLocationSelect(location)}
@@ -162,54 +150,45 @@ const Dashboard = () => {
             View All
           </button>
         </div>
-        <div className="grid gap-4">
-          {inspections.slice(0, 4).map((inspection) => (
-            <div
-              key={inspection.Id}
-              className="bg-white rounded-lg p-4 shadow-sm hover:shadow-md transition-shadow"
-            >
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                <div>
-                  <p className="text-sm text-gray-500">Datacenter</p>
-                  <p className="font-medium">{inspection.ReportData.location}</p>
-                </div>
-                <div>
-                  <p className="text-sm text-gray-500">Data Hall</p>
-                  <p className="font-medium">{inspection.ReportData.datahall}</p>
-                </div>
-                <div>
-                  <p className="text-sm text-gray-500">Issues Reported</p>
-                  <p className="font-medium">{inspection.ReportData.issueCount || 0}</p>
-                </div>
-                <div>
-                  <p className="text-sm text-gray-500">Criticality</p>
-                  <span className={`inline-block px-2 py-1 rounded-full text-xs font-medium ${
-                    getCriticalityColor(inspection.ReportData.criticality)
-                  }`}>
-                    {inspection.ReportData.criticality || 'N/A'}
-                  </span>
-                </div>
-              </div>
-              <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mt-4 pt-4 border-t border-gray-100">
-                <div>
-                  <p className="text-sm text-gray-500">Ticket</p>
-                  <p className="font-medium">
-                    {inspection.ReportData.ticketId || 'N/A'}
-                  </p>
-                </div>
-                <div>
-                  <p className="text-sm text-gray-500">Inspector</p>
-                  <p className="font-medium">{inspection.ReportData.userFullName}</p>
-                </div>
-                <div>
-                  <p className="text-sm text-gray-500">Date</p>
-                  <p className="font-medium">
-                    {format(new Date(inspection.Timestamp), 'MMM d, yyyy')}
-                  </p>
-                </div>
-              </div>
-            </div>
-          ))}
+        <div className="bg-white rounded-lg shadow-sm overflow-hidden">
+          <table className="w-full">
+            <thead>
+              <tr className="bg-gray-50 border-b border-gray-200">
+                <th className="text-left px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Datacenter</th>
+                <th className="text-left px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Data Hall</th>
+                <th className="text-left px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Issues Reported</th>
+                <th className="text-left px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                <th className="text-left px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Ticket</th>
+                <th className="text-left px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Inspector</th>
+                <th className="text-left px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-gray-200">
+              {inspections.slice(0, 4).map((inspection) => (
+                <tr 
+                  key={inspection.Id}
+                  className="hover:bg-gray-50 cursor-pointer"
+                  onClick={() => navigate(`/reports/${inspection.Id}`)}
+                >
+                  <td className="px-6 py-4 text-sm text-gray-900">{inspection.ReportData.datacenter}</td>
+                  <td className="px-6 py-4 text-sm text-gray-900">{inspection.ReportData.datahall}</td>
+                  <td className="px-6 py-4 text-sm text-gray-900">{inspection.ReportData.issueCount || 0}</td>
+                  <td className="px-6 py-4 text-sm">
+                    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                      inspection.ReportData.issueCount === 0 
+                        ? 'bg-green-100 text-green-800'
+                        : 'bg-red-100 text-red-800'
+                    }`}>
+                      {inspection.ReportData.issueCount === 0 ? 'Healthy' : 'Warning'}
+                    </span>
+                  </td>
+                  <td className="px-6 py-4 text-sm text-gray-900">{inspection.ReportData.ticketId || 'N/A'}</td>
+                  <td className="px-6 py-4 text-sm text-gray-900">{inspection.ReportData.userFullName}</td>
+                  <td className="px-6 py-4 text-sm text-gray-900">{format(new Date(inspection.Timestamp), 'MMM d, yyyy')}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </div>
       </div>
     </div>
