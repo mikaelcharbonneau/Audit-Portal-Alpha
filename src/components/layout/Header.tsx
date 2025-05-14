@@ -40,34 +40,25 @@ const Header = () => {
         fill="horizontal"
         gap="small"
       >
-        {/* Logo Section */}
+        {/* Logo and App Name Section */}
         <Box 
           direction="row" 
           align="center"
-          width={{ max: '200px' }}
+          gap="small"
           flex={false}
         >
-          <Link to="/" style={{ display: 'flex', alignItems: 'center', gap: '8px', textDecoration: 'none' }}>
-            <Box width="32px" height="32px" flex={false}>
-              <HPELogo height={32} />
-            </Box>
-            <Text weight="bold" color="text-strong" size="small" truncate>
-              Walkthrough App
-            </Text>
-          </Link>
+          <Box width="32px" height="32px" flex={false}>
+            <HPELogo height={32} />
+          </Box>
+          <Text weight="bold" color="text-strong" size="small">
+            Walkthrough App
+          </Text>
         </Box>
 
         {/* Navigation Section */}
-        <Box 
-          flex="grow" 
-          align="center" 
-          justify="center"
-        >
-          {size !== 'small' && (
-            <Nav 
-              direction="row" 
-              gap="small"
-            >
+        {size !== 'small' && (
+          <Box flex="grow" align="center">
+            <Nav direction="row" gap="xsmall">
               {navItems.map((item) => (
                 <Link 
                   key={item.path} 
@@ -94,15 +85,14 @@ const Header = () => {
                 </Link>
               ))}
             </Nav>
-          )}
-        </Box>
+          </Box>
+        )}
 
         {/* Actions Section */}
         <Box 
           direction="row" 
           align="center" 
           gap="small"
-          width={{ max: '100px' }}
           flex={false}
         >
           <Button 
