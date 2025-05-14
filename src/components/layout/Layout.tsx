@@ -9,18 +9,8 @@ const Layout = () => {
   return (
     <Box fill direction="column" background={darkMode ? 'background-back' : 'background-front'}>
       <Header />
-      <Box 
-        as="main" 
-        flex 
-        overflow="auto"
-        background={darkMode ? 'background-back' : 'background-front'}
-      >
-        <Box
-          width={{ max: 'xxlarge' }}
-          margin="auto"
-          pad={{ horizontal: 'medium' }}
-          fill
-        >
+      <Box as="main" flex pad={{ vertical: 'medium', horizontal: 'large' }}>
+        <Box width="xlarge" alignSelf="center">
           <Outlet />
         </Box>
       </Box>
