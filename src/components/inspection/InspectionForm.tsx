@@ -116,34 +116,26 @@ export const InspectionForm = ({ selectedLocation, selectedDataHall }: Inspectio
   };
 
   return (
-    <div className="max-w-3xl mx-auto">
-      <div className="mb-8">
-        <h1 className="text-2xl font-semibold mb-2">Inspection Walkthrough</h1>
-        <p className="text-gray-600">Location: {selectedLocation}</p>
-        <p className="text-gray-600">Data Hall: {selectedDataHall}</p>
+    <div className="bg-white rounded-lg p-6 shadow-sm mb-6">
+      <h2 className="text-lg font-medium mb-4">
+        Have you discovered any issues during the walkthrough?
+      </h2>
+      <div className="flex gap-4">
+        <button
+          onClick={handleYesIssuesClick}
+          className="px-6 py-2.5 bg-red-500 text-white rounded-md hover:bg-red-600 transition-colors"
+        >
+          Yes, I found issues
+        </button>
+        <button
+          onClick={() => setHasIssues(false)}
+          className="px-6 py-2.5 bg-emerald-500 text-white rounded-md hover:bg-emerald-600 transition-colors"
+        >
+          No issues found
+        </button>
       </div>
 
-      {hasIssues === null ? (
-        <div className="bg-white rounded-lg p-6 shadow-sm mb-6">
-          <h2 className="text-lg font-medium mb-4">
-            Have you discovered any issues during the walkthrough?
-          </h2>
-          <div className="flex gap-4">
-            <button
-              onClick={handleYesIssuesClick}
-              className="px-6 py-2.5 bg-red-500 text-white rounded-md hover:bg-red-600 transition-colors"
-            >
-              Yes, I found issues
-            </button>
-            <button
-              onClick={() => setHasIssues(false)}
-              className="px-6 py-2.5 bg-emerald-500 text-white rounded-md hover:bg-emerald-600 transition-colors"
-            >
-              No issues found
-            </button>
-          </div>
-        </div>
-      ) : (
+      {hasIssues === true && (
         <>
           {racks.map((rack, index) => (
             <div
@@ -340,6 +332,24 @@ export const InspectionForm = ({ selectedLocation, selectedDataHall }: Inspectio
             </button>
           </div>
         </>
+      )}
+
+      {hasIssues === false && (
+        <div className="flex items-center justify-end gap-4 sticky bottom-0 bg-white p-4 border-t border-gray-100 -mx-6">
+          <button
+            onClick={() => navigate('/')}
+            className="px-6 py-2.5 text-gray-700 hover:text-gray-900 transition-colors"
+          >
+            Cancel
+          </button>
+          <button
+            onClick={handleSubmit}
+            disabled={loading}
+            className="px-6 py-2.5 bg-emerald-500 text-white rounded-md hover:bg-emerald-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            {loading ? 'Submitting...' : 'Complete Walkthrough'}
+          </button>
+        </div>
       )}
     </div>
   );
