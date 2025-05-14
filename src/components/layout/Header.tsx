@@ -99,8 +99,8 @@ const Header = () => {
           align="center" 
           gap="small"
           width="250px"
-          flex={false}
-          justify="end"
+          flex={true}
+          justify="flex-end"
         >
           <Button 
             plain 
