@@ -4,7 +4,7 @@ import { ClipboardList, AlertTriangle, CheckCircle, ChevronDown } from 'lucide-r
 import { format } from 'date-fns';
 import { supabase } from '../lib/supabaseClient';
 import { useAuth } from '../context/AuthContext';
-import { locations, datahallsByLocation } from '../utils/locationMapping';
+import { locations } from '../utils/locationMapping';
 
 interface Inspection {
   Id: string;
@@ -24,8 +24,6 @@ const Dashboard = () => {
   const [inspections, setInspections] = useState<Inspection[]>([]);
   const [loading, setLoading] = useState(true);
   const [showLocationDropdown, setShowLocationDropdown] = useState(false);
-  const [selectedLocation, setSelectedLocation] = useState<string | null>(null);
-  const [showDatahallDropdown, setShowDatahallDropdown] = useState(false);
   const [userFullName, setUserFullName] = useState<string>('');
 
   useEffect(() => {
@@ -67,19 +65,10 @@ const Dashboard = () => {
   };
 
   const handleLocationSelect = (location: string) => {
-    setSelectedLocation(location);
-    setShowLocationDropdown(false);
-    setShowDatahallDropdown(true);
-  };
-
-  const handleDatahallSelect = (datahall: string) => {
     navigate('/inspection', { 
-      state: { 
-        selectedLocation: selectedLocation,
-        selectedDataHall: datahall 
-      } 
+      state: { selectedLocation: location }
     });
-    setShowDatahallDropdown(false);
+    setShowLocationDropdown(false);
   };
 
   const stats = {
@@ -118,20 +107,6 @@ const Dashboard = () => {
                   className="w-full text-left px-4 py-2 text-gray-700 hover:bg-emerald-50 hover:text-emerald-600"
                 >
                   {location}
-                </button>
-              ))}
-            </div>
-          )}
-
-          {showDatahallDropdown && selectedLocation && (
-            <div className="absolute right-0 mt-2 w-56 bg-white rounded-lg shadow-lg py-1 z-50">
-              {datahallsByLocation[selectedLocation].map((datahall) => (
-                <button
-                  key={datahall}
-                  onClick={() => handleDatahallSelect(datahall)}
-                  className="w-full text-left px-4 py-2 text-gray-700 hover:bg-emerald-50 hover:text-emerald-600"
-                >
-                  {datahall}
                 </button>
               ))}
             </div>
