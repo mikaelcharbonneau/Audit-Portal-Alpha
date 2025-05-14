@@ -30,33 +30,29 @@ const Header = () => {
   return (
     <GrommetHeader 
       background={darkMode ? 'background-back' : 'background-front'} 
-      pad={{ horizontal: 'medium', vertical: 'small' }} 
+      pad={{ vertical: 'small' }} 
       elevation="small"
     >
-      <Box 
-        direction="row" 
-        align="center" 
+      <Box
+        direction="row"
+        align="center"
         justify="between"
+        width={{ max: 'xxlarge' }}
+        margin="auto"
+        pad={{ horizontal: 'medium' }}
         fill="horizontal"
-        gap="small"
       >
-        {/* Logo and App Name Section */}
+        {/* Logo Section */}
         <Box 
           direction="row" 
           align="center"
-          gap="xlarge"
+          gap="medium"
           flex={false}
-          width={{ min: '300px' }}
         >
-          <Box width="32px" height="32px" flex={false}>
+          <Box width="32px" height="32px">
             <HPELogo height={32} />
           </Box>
-          <Text 
-            weight="bold" 
-            color="text-strong" 
-            size="medium"
-            margin={{ left: 'small' }}
-          >
+          <Text weight="bold" color="text-strong">
             Walkthrough App
           </Text>
         </Box>
@@ -64,7 +60,7 @@ const Header = () => {
         {/* Navigation Section */}
         {size !== 'small' && (
           <Box flex="grow" align="center">
-            <Nav direction="row" gap="xsmall">
+            <Nav direction="row" gap="medium">
               {navItems.map((item) => (
                 <Link 
                   key={item.path} 
@@ -77,13 +73,12 @@ const Header = () => {
                     pad={{ horizontal: 'small', vertical: 'xsmall' }}
                     background={isActive(item.path) ? { color: 'brand', opacity: 'weak' } : undefined}
                     round="small"
-                    gap="xsmall"
+                    gap="small"
                   >
                     {item.icon}
                     <Text 
                       color={isActive(item.path) ? 'brand' : 'text'} 
                       weight={isActive(item.path) ? 'bold' : undefined}
-                      size="small"
                     >
                       {item.label}
                     </Text>
@@ -115,45 +110,6 @@ const Header = () => {
           />
         </Box>
       </Box>
-
-      {/* Mobile Navigation */}
-      {size === 'small' && (
-        <Box 
-          direction="row" 
-          gap="small" 
-          margin={{ top: 'small' }} 
-          justify="center"
-          overflow="auto"
-        >
-          <Nav direction="row" gap="small">
-            {navItems.map((item) => (
-              <Link 
-                key={item.path} 
-                to={item.path} 
-                style={{ textDecoration: 'none' }}
-              >
-                <Box
-                  direction="row"
-                  align="center"
-                  pad={{ horizontal: 'small', vertical: 'xsmall' }}
-                  background={isActive(item.path) ? { color: 'brand', opacity: 'weak' } : undefined}
-                  round="small"
-                  gap="xsmall"
-                >
-                  {item.icon}
-                  <Text 
-                    color={isActive(item.path) ? 'brand' : 'text'} 
-                    weight={isActive(item.path) ? 'bold' : undefined}
-                    size="small"
-                  >
-                    {item.label}
-                  </Text>
-                </Box>
-              </Link>
-            ))}
-          </Nav>
-        </Box>
-      )}
     </GrommetHeader>
   );
 };
