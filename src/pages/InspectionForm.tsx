@@ -3,6 +3,7 @@ import { Box } from 'grommet';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { ChevronDown, Server } from 'lucide-react';
 import { datahallsByLocation } from '../utils/locationMapping';
+import { rackLocations } from '../utils/rackLocations';
 import { supabase } from '../lib/supabaseClient';
 
 interface LocationState {
@@ -55,6 +56,21 @@ const InspectionForm = () => {
   }
 
   const datahalls = datahallsByLocation[selectedLocation] || [];
+  const availableRacks = selectedDataHall ? rackLocations[selectedDataHall] || [] : [];
+
+  const isFormValid = () => {
+    if (!selectedDataHall) return false;
+    if (hasIssues === null) return false;
+    if (hasIssues === true) {
+      return racks.every(rack => 
+        rack.location && 
+        (rack.devices.powerSupplyUnit || 
+         rack.devices.powerDistributionUnit || 
+         rack.devices.rearDoorHeatExchanger)
+      );
+    }
+    return true;
+  };
 
   const handleYesIssuesClick = () => {
     setHasIssues(true);
@@ -124,8 +140,8 @@ const InspectionForm = () => {
   };
 
   return (
-    <Box pad="medium">
-      <div className="max-w-3xl mx-auto">
+    <Box pad="medium" overflow="auto" height={{ min: '100vh' }}>
+      <div className="max-w-3xl mx-auto pb-24">
         <div className="mb-8">
           <h1 className="text-2xl font-semibold mb-4">New Inspection</h1>
           <div className="bg-white rounded-lg p-6 shadow-sm">
@@ -173,8 +189,8 @@ const InspectionForm = () => {
                   onClick={handleYesIssuesClick}
                   className={`px-6 py-2.5 rounded-md transition-colors ${
                     hasIssues === true 
-                      ? 'bg-red-500 text-white' 
-                      : 'border border-red-500 text-red-500 hover:bg-red-50'
+                      ? 'bg-amber-500 text-white hover:bg-amber-600' 
+                      : 'border border-amber-500 text-amber-600 hover:bg-amber-50'
                   }`}
                 >
                   Yes, I found issues
@@ -217,20 +233,23 @@ const InspectionForm = () => {
                         <div className="space-y-6">
                           <div>
                             <label className="block text-sm font-medium text-gray-700 mb-2">
-                              Tile Location
+                              Tile Location *
                             </label>
-                            <input
-                              type="text"
+                            <select
                               value={rack.location}
                               onChange={(e) => updateRack(rack.id, { location: e.target.value })}
                               className="w-full px-4 py-2.5 border border-gray-300 rounded-md focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
-                              placeholder="Enter tile location"
-                            />
+                            >
+                              <option value="">Select tile location</option>
+                              {availableRacks.map(rackId => (
+                                <option key={rackId} value={rackId}>{rackId}</option>
+                              ))}
+                            </select>
                           </div>
 
                           <div>
                             <label className="block text-sm font-medium text-gray-700 mb-3">
-                              Select Impacted Device(s)
+                              Select Impacted Device(s) *
                             </label>
                             <div className="space-y-3">
                               <label className="flex items-center gap-3 cursor-pointer group">
@@ -377,14 +396,18 @@ const InspectionForm = () => {
           <div className="max-w-3xl mx-auto flex justify-end gap-4">
             <button
               onClick={() => navigate('/')}
-              className="px-6 py-2.5 text-gray-700 hover:text-gray-900 transition-colors"
+              className="px-6 py-2.5 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 transition-colors"
             >
               Cancel Audit
             </button>
             <button
               onClick={handleSubmit}
-              disabled={loading || hasIssues === null || !selectedDataHall}
-              className="px-6 py-2.5 bg-emerald-500 text-white rounded-md hover:bg-emerald-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              disabled={loading || !isFormValid()}
+              className={`px-6 py-2.5 rounded-md text-white transition-colors ${
+                isFormValid()
+                  ? 'bg-emerald-500 hover:bg-emerald-600'
+                  : 'bg-emerald-300 cursor-not-allowed'
+              }`}
             >
               {loading ? 'Submitting...' : 'Complete Audit'}
             </button>
