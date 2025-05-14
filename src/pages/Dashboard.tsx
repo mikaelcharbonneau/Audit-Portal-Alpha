@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { ClipboardList, AlertTriangle, CheckCircle, ChevronDown } from 'lucide-react';
 import { format } from 'date-fns';
 import { supabase } from '../lib/supabaseClient';
+import { useAuth } from '../context/AuthContext';
 
 interface Inspection {
   Id: string;
@@ -28,13 +29,35 @@ const dataHalls = [
 
 const Dashboard = () => {
   const navigate = useNavigate();
+  const { user } = useAuth();
   const [inspections, setInspections] = useState<Inspection[]>([]);
   const [loading, setLoading] = useState(true);
   const [showDropdown, setShowDropdown] = useState(false);
+  const [userFullName, setUserFullName] = useState<string>('');
 
   useEffect(() => {
     fetchInspections();
-  }, []);
+    if (user) {
+      fetchUserProfile();
+    }
+  }, [user]);
+
+  const fetchUserProfile = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('user_profiles')
+        .select('full_name')
+        .eq('user_id', user?.id)
+        .single();
+
+      if (error) throw error;
+      if (data) {
+        setUserFullName(data.full_name);
+      }
+    } catch (error) {
+      console.error('Error fetching user profile:', error);
+    }
+  };
 
   const fetchInspections = async () => {
     try {
@@ -66,7 +89,7 @@ const Dashboard = () => {
       <div className="flex justify-between items-center mb-8">
         <div>
           <h1 className="text-2xl font-semibold mb-2">Dashboard</h1>
-          <p className="text-gray-600">Welcome back, {inspections[0]?.UserEmail || 'User'}</p>
+          <p className="text-gray-600">Welcome back, {userFullName || 'User'}</p>
         </div>
         <div className="relative">
           <button
