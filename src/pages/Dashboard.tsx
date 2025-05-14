@@ -11,9 +11,12 @@ interface Inspection {
   UserEmail: string;
   Timestamp: string;
   ReportData: {
+    location: string;
     datahall: string;
-    status: string;
-    isUrgent: boolean;
+    issueCount: number;
+    criticality: 'low' | 'medium' | 'high' | 'critical';
+    ticketId?: string;
+    userFullName: string;
     [key: string]: any;
   };
 }
@@ -64,6 +67,12 @@ const Dashboard = () => {
     }
   };
 
+  const stats = {
+    completed: inspections.length,
+    active: inspections.filter(i => i.ReportData.issueCount > 0).length,
+    resolved: inspections.filter(i => i.ReportData.issueCount === 0).length
+  };
+
   const handleLocationSelect = (location: string) => {
     navigate('/inspection', { 
       state: { selectedLocation: location }
@@ -71,14 +80,14 @@ const Dashboard = () => {
     setShowLocationDropdown(false);
   };
 
-  const stats = {
-    completed: inspections.length,
-    active: inspections.filter(i => i.ReportData.isUrgent).length,
-    resolved: inspections.filter(i => !i.ReportData.isUrgent).length
-  };
-
-  const getShortLocation = (location: string) => {
-    return location.split(',').pop()?.trim() || location;
+  const getCriticalityColor = (criticality: string) => {
+    switch (criticality) {
+      case 'critical': return 'bg-red-100 text-red-800';
+      case 'high': return 'bg-orange-100 text-orange-800';
+      case 'medium': return 'bg-yellow-100 text-yellow-800';
+      case 'low': return 'bg-blue-100 text-blue-800';
+      default: return 'bg-gray-100 text-gray-800';
+    }
   };
 
   return (
@@ -99,7 +108,7 @@ const Dashboard = () => {
           </button>
           
           {showLocationDropdown && (
-            <div className="absolute right-0 mt-2 w-56 bg-white rounded-lg shadow-lg py-1 z-50">
+            <div className="absolute right-0 mt-2 w-64 bg-white rounded-lg shadow-lg py-1 z-50">
               {locations.map((location) => (
                 <button
                   key={location}
@@ -157,75 +166,46 @@ const Dashboard = () => {
           {inspections.slice(0, 4).map((inspection) => (
             <div
               key={inspection.Id}
-              className="bg-white rounded-lg p-4 shadow-sm hover:shadow-md transition-shadow cursor-pointer"
-              onClick={() => navigate(`/reports/${inspection.Id}`)}
+              className="bg-white rounded-lg p-4 shadow-sm hover:shadow-md transition-shadow"
             >
-              <div className="flex items-center gap-2 mb-2">
-                <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                  inspection.ReportData.isUrgent ? 'bg-amber-100 text-amber-800' : 'bg-emerald-100 text-emerald-800'
-                }`}>
-                  {inspection.ReportData.isUrgent ? 'Urgent' : 'Normal'}
-                </span>
-                <span className="text-sm text-gray-500">
-                  {format(new Date(inspection.Timestamp), 'MMM d, yyyy')}
-                </span>
-              </div>
-              <p className="font-medium mb-1">{inspection.ReportData.datahall}</p>
-              <p className="text-sm text-gray-600">
-                {inspection.ReportData.isUrgent ? 'Issues reported' : 'No issues reported'}
-              </p>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      <div>
-        <div className="flex justify-between items-center mb-4">
-          <h2 className="text-xl font-medium">Reports</h2>
-          <button
-            onClick={() => navigate('/reports')}
-            className="text-emerald-500 hover:text-emerald-600"
-          >
-            View All
-          </button>
-        </div>
-        <div className="grid md:grid-cols-3 gap-6">
-          {inspections.slice(0, 3).map((inspection) => (
-            <div
-              key={inspection.Id}
-              className="bg-white rounded-lg overflow-hidden shadow-sm"
-            >
-              <div 
-                className="relative h-48 bg-cover bg-center"
-                style={{ 
-                  backgroundImage: `linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.7)), url(https://images.pexels.com/photos/325229/pexels-photo-325229.jpeg)`,
-                }}
-              >
-                <div className="absolute inset-0 p-6 flex flex-col justify-end">
-                  <h3 className="text-xl font-medium text-white mb-2">
-                    Daily Issue Report - {format(new Date(inspection.Timestamp), 'MMM do yyyy')}
-                  </h3>
-                  <p className="text-sm text-gray-200">{getShortLocation(inspection.ReportData.datahall)}</p>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div>
+                  <p className="text-sm text-gray-500">Datacenter</p>
+                  <p className="font-medium">{inspection.ReportData.location}</p>
+                </div>
+                <div>
+                  <p className="text-sm text-gray-500">Data Hall</p>
+                  <p className="font-medium">{inspection.ReportData.datahall}</p>
+                </div>
+                <div>
+                  <p className="text-sm text-gray-500">Issues Reported</p>
+                  <p className="font-medium">{inspection.ReportData.issueCount || 0}</p>
+                </div>
+                <div>
+                  <p className="text-sm text-gray-500">Criticality</p>
+                  <span className={`inline-block px-2 py-1 rounded-full text-xs font-medium ${
+                    getCriticalityColor(inspection.ReportData.criticality)
+                  }`}>
+                    {inspection.ReportData.criticality || 'N/A'}
+                  </span>
                 </div>
               </div>
-              <div className="p-4 bg-white border-t border-gray-100">
-                <div className="flex gap-4">
-                  <button 
-                    onClick={() => navigate(`/reports/${inspection.Id}`)}
-                    className="text-sm text-gray-600 hover:text-emerald-600 transition-colors"
-                  >
-                    View
-                  </button>
-                  <button 
-                    className="text-sm text-gray-600 hover:text-emerald-600 transition-colors"
-                  >
-                    Download
-                  </button>
-                  <button 
-                    className="text-sm text-gray-600 hover:text-emerald-600 transition-colors"
-                  >
-                    Share
-                  </button>
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mt-4 pt-4 border-t border-gray-100">
+                <div>
+                  <p className="text-sm text-gray-500">Ticket</p>
+                  <p className="font-medium">
+                    {inspection.ReportData.ticketId || 'N/A'}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-sm text-gray-500">Inspector</p>
+                  <p className="font-medium">{inspection.ReportData.userFullName}</p>
+                </div>
+                <div>
+                  <p className="text-sm text-gray-500">Date</p>
+                  <p className="font-medium">
+                    {format(new Date(inspection.Timestamp), 'MMM d, yyyy')}
+                  </p>
                 </div>
               </div>
             </div>
