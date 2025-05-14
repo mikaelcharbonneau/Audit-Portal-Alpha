@@ -44,11 +44,14 @@ const Header = () => {
         <Box 
           direction="row" 
           align="center" 
-          basis="1/4"
+          gap="small"
+          width={{ min: 'auto' }}
         >
-          <Link to="/" style={{ display: 'flex', alignItems: 'center', textDecoration: 'none' }}>
-            <HPELogo height={32} />
-            <Text margin={{ left: 'small' }} weight="bold" color="text-strong">
+          <Link to="/" style={{ display: 'flex', alignItems: 'center', gap: '12px', textDecoration: 'none' }}>
+            <Box width="40px" height="40px">
+              <HPELogo height={40} />
+            </Box>
+            <Text weight="bold" color="text-strong" size="medium">
               Walkthrough App
             </Text>
           </Link>
@@ -97,9 +100,8 @@ const Header = () => {
         <Box 
           direction="row" 
           align="center" 
-          basis="1/4" 
-          justify="end"
           gap="small"
+          width={{ min: 'auto' }}
         >
           <Button 
             plain 
