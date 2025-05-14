@@ -30,7 +30,7 @@ const Header = () => {
   return (
     <GrommetHeader 
       background={darkMode ? 'background-back' : 'background-front'} 
-      pad={{ horizontal: 'medium', vertical: 'small',right: 'small' }} 
+      pad={{ horizontal: 'medium', vertical: 'small',right: 'large' }} 
       elevation="small"
     >
       <Box 
