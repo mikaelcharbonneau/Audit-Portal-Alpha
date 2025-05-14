@@ -8,6 +8,7 @@ import Layout from './components/layout/Layout';
 import Dashboard from './pages/Dashboard';
 import Inspections from './pages/Inspections';
 import InspectionFlow from './pages/InspectionFlow';
+import InspectionForm from './pages/InspectionForm';
 import Confirmation from './pages/Confirmation';
 import Reports from './pages/Reports';
 import Profile from './pages/Profile';
@@ -34,6 +35,7 @@ const App = () => {
                     <Route index element={<Dashboard />} />
                     <Route path="inspections" element={<Inspections />} />
                     <Route path="inspection" element={<InspectionFlow />} />
+                    <Route path="inspection/form" element={<InspectionForm />} />
                     <Route path="confirmation" element={<Confirmation />} />
                     <Route path="reports" element={<Reports />} />
                     <Route path="reports/:id" element={<Reports />} />
