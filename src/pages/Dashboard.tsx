@@ -84,6 +84,10 @@ const Dashboard = () => {
     setShowDropdown(false);
   };
 
+  const getShortLocation = (location: string) => {
+    return location.split(',').pop()?.trim() || location;
+  };
+
   return (
     <div className="p-6">
       <div className="flex justify-between items-center mb-8">
@@ -196,8 +200,7 @@ const Dashboard = () => {
           {inspections.slice(0, 3).map((inspection) => (
             <div
               key={inspection.Id}
-              className="bg-white rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-shadow cursor-pointer"
-              onClick={() => navigate(`/reports/${inspection.Id}`)}
+              className="bg-white rounded-lg overflow-hidden shadow-sm"
             >
               <div 
                 className="relative h-48 bg-cover bg-center"
@@ -209,14 +212,27 @@ const Dashboard = () => {
                   <h3 className="text-xl font-medium text-white mb-2">
                     Daily Issue Report - {format(new Date(inspection.Timestamp), 'MMM do yyyy')}
                   </h3>
-                  <p className="text-sm text-gray-200">{inspection.ReportData.datahall}</p>
+                  <p className="text-sm text-gray-200">{getShortLocation(inspection.ReportData.datahall)}</p>
                 </div>
               </div>
               <div className="p-4 bg-white border-t border-gray-100">
-                <div className="flex gap-4 text-sm text-gray-600">
-                  <button className="hover:text-emerald-600 transition-colors">View</button>
-                  <button className="hover:text-emerald-600 transition-colors">Download</button>
-                  <button className="hover:text-emerald-600 transition-colors">Share</button>
+                <div className="flex gap-4">
+                  <button 
+                    onClick={() => navigate(`/reports/${inspection.Id}`)}
+                    className="text-sm text-gray-600 hover:text-emerald-600 transition-colors"
+                  >
+                    View
+                  </button>
+                  <button 
+                    className="text-sm text-gray-600 hover:text-emerald-600 transition-colors"
+                  >
+                    Download
+                  </button>
+                  <button 
+                    className="text-sm text-gray-600 hover:text-emerald-600 transition-colors"
+                  >
+                    Share
+                  </button>
                 </div>
               </div>
             </div>
