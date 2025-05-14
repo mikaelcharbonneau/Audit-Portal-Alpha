@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Box } from 'grommet';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { ChevronDown, Server } from 'lucide-react';
@@ -49,6 +49,14 @@ const InspectionForm = () => {
   const [loading, setLoading] = useState(false);
   const [racks, setRacks] = useState<RackForm[]>([]);
   const [expandedRacks, setExpandedRacks] = useState<string[]>([]);
+  const [walkThroughNumber, setWalkThroughNumber] = useState(42);
+
+  useEffect(() => {
+    const lastNumber = localStorage.getItem('lastWalkThroughNumber');
+    if (lastNumber) {
+      setWalkThroughNumber(parseInt(lastNumber, 10));
+    }
+  }, []);
 
   if (!selectedLocation) {
     navigate('/');
@@ -113,12 +121,16 @@ const InspectionForm = () => {
             datahall: selectedDataHall,
             hasIssues,
             racks,
+            walkThroughNumber,
             timestamp: new Date().toISOString()
           }
         }])
         .select();
 
       if (error) throw error;
+
+      const nextNumber = walkThroughNumber + 1;
+      localStorage.setItem('lastWalkThroughNumber', nextNumber.toString());
       
       navigate('/confirmation', { 
         state: { 
@@ -143,7 +155,7 @@ const InspectionForm = () => {
     <Box pad="medium" overflow="auto" height={{ min: '100vh' }}>
       <div className="max-w-3xl mx-auto pb-24">
         <div className="mb-8">
-          <h1 className="text-2xl font-semibold mb-4">New Inspection</h1>
+          <h2 className="text-xl font-semibold mb-4">Walkthrough Audit #{walkThroughNumber}</h2>
           <div className="bg-white rounded-lg p-6 shadow-sm">
             <h2 className="text-xl font-semibold mb-4">Location Details</h2>
             <p className="text-gray-600 mb-4">Location: {selectedLocation}</p>
@@ -180,7 +192,7 @@ const InspectionForm = () => {
               )}
             </div>
 
-            <div className="border-t border-gray-200 pt-6">
+            <div className="border-b border-gray-200 pb-6 mb-6">
               <h2 className="text-lg font-medium mb-4">
                 Have you discovered any issues during the walkthrough?
               </h2>
@@ -189,8 +201,8 @@ const InspectionForm = () => {
                   onClick={handleYesIssuesClick}
                   className={`px-6 py-2.5 rounded-md transition-colors ${
                     hasIssues === true 
-                      ? 'bg-amber-500 text-white hover:bg-amber-600' 
-                      : 'border border-amber-500 text-amber-600 hover:bg-amber-50'
+                      ? 'bg-emerald-500 text-white hover:bg-emerald-600' 
+                      : 'border border-gray-300 text-gray-500 hover:border-gray-400'
                   }`}
                 >
                   Yes, I found issues
@@ -199,8 +211,10 @@ const InspectionForm = () => {
                   onClick={() => setHasIssues(false)}
                   className={`px-6 py-2.5 rounded-md transition-colors ${
                     hasIssues === false 
-                      ? 'bg-emerald-500 text-white' 
-                      : 'border border-emerald-500 text-emerald-500 hover:bg-emerald-50'
+                      ? 'bg-emerald-500 text-white hover:bg-emerald-600' 
+                      : hasIssues === true
+                        ? 'border border-gray-300 text-gray-500'
+                        : 'border border-emerald-500 text-emerald-500 hover:bg-emerald-50'
                   }`}
                 >
                   No issues found
@@ -391,12 +405,11 @@ const InspectionForm = () => {
           </div>
         </div>
 
-        {/* Footer */}
         <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 p-4">
           <div className="max-w-3xl mx-auto flex justify-end gap-4">
             <button
               onClick={() => navigate('/')}
-              className="px-6 py-2.5 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 transition-colors"
+              className="px-6 py-2.5 border border-gray-300 text-gray-500 rounded-md hover:bg-gray-50 transition-colors"
             >
               Cancel Audit
             </button>
