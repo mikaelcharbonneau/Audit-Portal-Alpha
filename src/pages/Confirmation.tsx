@@ -1,7 +1,15 @@
 import React from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { Box, Card } from 'grommet';
-import { FormCheckmark, StatusCritical } from 'grommet-icons';
+import {
+  Box,
+  Button,
+  Heading,
+  Text,
+  Card,
+  CardBody,
+  CardFooter
+} from 'grommet';
+import { FormCheckmark, StatusCritical, FormView, FormPrevious } from 'grommet-icons';
 
 interface LocationState {
   inspectionId?: string;
@@ -15,109 +23,111 @@ const Confirmation = () => {
   const state = location.state as LocationState || { success: false };
 
   return (
-    <Box fill align="center" justify="center" background="light-2">
+    <Box pad="medium" align="center" justify="center" fill>
       <Card 
         width="large" 
-        background="white" 
-        pad="large" 
-        round="small" 
-        elevation="small"
+        background="light-1" 
+        pad="medium" 
+        margin={{ vertical: 'medium' }}
       >
-        {state.success ? (
-          <Box align="center" gap="medium">
-            <Box
-              background="#01A982"
-              pad="medium"
-              round="full"
-              align="center"
-              justify="center"
-              width="xsmall"
-              height="xsmall"
-            >
-              <FormCheckmark size="large" color="white" />
-            </Box>
-            <Box align="center" gap="small">
-              <h2 className="text-2xl font-semibold text-gray-900">
-                Inspection Submitted Successfully
-              </h2>
-              <p className="text-gray-600 text-center">
-                Your inspection has been recorded and is available for review.
-              </p>
-            </Box>
-            {state.inspectionId && (
-              <Box 
-                background="light-2" 
-                pad="medium" 
-                round="small" 
-                width="large"
-                gap="xsmall"
+        <CardBody pad="medium">
+          {state.success ? (
+            <Box align="center" gap="medium">
+              <Box
+                background="status-ok"
+                pad="medium"
+                round="full"
+                align="center"
+                justify="center"
+                width="xsmall"
+                height="xsmall"
               >
-                <p className="text-sm font-medium text-gray-600">Inspection ID:</p>
-                <p className="text-sm font-mono text-gray-900">{state.inspectionId}</p>
+                <FormCheckmark size="large" color="white" />
               </Box>
-            )}
-            <Box direction="row" gap="medium" margin={{ top: "medium" }}>
-              <button
-                onClick={() => navigate(`/reports/${state.inspectionId}`)}
-                className="px-6 py-2.5 bg-[#01A982] text-white rounded-md hover:bg-[#018768] transition-colors"
-              >
-                View Report
-              </button>
-              <button
-                onClick={() => navigate('/')}
-                className="px-6 py-2.5 border border-gray-300 text-gray-600 rounded-md hover:bg-gray-50 transition-colors"
-              >
-                Back to Dashboard
-              </button>
+              <Heading level={2} margin={{ bottom: 'none' }}>
+                Inspection Submitted Successfully
+              </Heading>
+              <Text textAlign="center">
+                Your inspection has been recorded and is available for review.
+              </Text>
+              {state.inspectionId && (
+                <Box 
+                  background="light-2" 
+                  pad="small" 
+                  round="small" 
+                  width="medium" 
+                  align="center"
+                >
+                  <Text size="small" weight="bold">Inspection ID:</Text>
+                  <Text>{state.inspectionId}</Text>
+                </Box>
+              )}
             </Box>
-          </Box>
-        ) : (
-          <Box align="center" gap="medium">
-            <Box
-              background="status-critical"
-              pad="medium"
-              round="full"
-              align="center"
-              justify="center"
-              width="xsmall"
-              height="xsmall"
-            >
-              <StatusCritical size="large" color="white" />
-            </Box>
-            <Box align="center" gap="small">
-              <h2 className="text-2xl font-semibold text-gray-900">
-                Submission Error
-              </h2>
-              <p className="text-gray-600 text-center">
-                There was a problem submitting your inspection. Please try again.
-              </p>
-            </Box>
-            {state.error && (
-              <Box 
+          ) : (
+            <Box align="center" gap="medium">
+              <Box
                 background="status-critical"
                 pad="medium"
-                round="small"
-                width="large"
+                round="full"
+                align="center"
+                justify="center"
+                width="xsmall"
+                height="xsmall"
               >
-                <p className="text-sm text-white">Error: {state.error}</p>
+                <StatusCritical size="large" color="white" />
               </Box>
-            )}
-            <Box direction="row" gap="medium" margin={{ top: "medium" }}>
-              <button
-                onClick={() => navigate('/inspection')}
-                className="px-6 py-2.5 bg-[#01A982] text-white rounded-md hover:bg-[#018768] transition-colors"
-              >
-                Try Again
-              </button>
-              <button
-                onClick={() => navigate('/')}
-                className="px-6 py-2.5 border border-gray-300 text-gray-600 rounded-md hover:bg-gray-50 transition-colors"
-              >
-                Back to Dashboard
-              </button>
+              <Heading level={2} margin={{ bottom: 'none' }}>
+                Submission Error
+              </Heading>
+              <Text textAlign="center">
+                There was a problem submitting your inspection. Please try again.
+              </Text>
+              {state.error && (
+                <Box 
+                  background="status-error" 
+                  pad="small" 
+                  round="small" 
+                  width="large" 
+                  align="center"
+                >
+                  <Text size="small" color="white">Error: {state.error}</Text>
+                </Box>
+              )}
             </Box>
-          </Box>
-        )}
+          )}
+        </CardBody>
+        <CardFooter pad={{ horizontal: 'medium', vertical: 'small' }} gap="medium" justify="center">
+          {state.success ? (
+            <>
+              {state.inspectionId && (
+                <Button
+                  icon={<FormView />}
+                  label="View Report"
+                  onClick={() => navigate(`/reports/${state.inspectionId}`)}
+                  primary
+                />
+              )}
+              <Button
+                icon={<FormPrevious />}
+                label="Back to Dashboard"
+                onClick={() => navigate('/')}
+              />
+            </>
+          ) : (
+            <>
+              <Button
+                label="Try Again"
+                onClick={() => navigate('/inspection')}
+                primary
+              />
+              <Button
+                icon={<FormPrevious />}
+                label="Back to Dashboard"
+                onClick={() => navigate('/')}
+              />
+            </>
+          )}
+        </CardFooter>
       </Card>
     </Box>
   );
