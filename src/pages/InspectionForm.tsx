@@ -49,7 +49,14 @@ const InspectionForm = () => {
   const [loading, setLoading] = useState(false);
   const [racks, setRacks] = useState<RackForm[]>([]);
   const [expandedRacks, setExpandedRacks] = useState<string[]>([]);
-  const [walkThroughNumber] = useState(42);
+  const [walkThroughNumber, setWalkThroughNumber] = useState(42);
+
+  useEffect(() => {
+    const lastNumber = localStorage.getItem('lastWalkThroughNumber');
+    if (lastNumber) {
+      setWalkThroughNumber(parseInt(lastNumber, 10));
+    }
+  }, []);
 
   if (!selectedLocation) {
     navigate('/');
@@ -121,6 +128,9 @@ const InspectionForm = () => {
         .select();
 
       if (error) throw error;
+
+      const nextNumber = walkThroughNumber + 1;
+      localStorage.setItem('lastWalkThroughNumber', nextNumber.toString());
       
       navigate('/confirmation', { 
         state: { 
