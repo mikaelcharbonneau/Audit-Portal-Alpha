@@ -1,7 +1,7 @@
 import React from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { Box } from 'grommet';
-import { Check, FormPrevious, FormView } from 'lucide-react';
+import { Check, AlarmPlus as FormPrevious, View as FormView } from 'lucide-react';
 
 interface LocationState {
   inspectionId?: string;
