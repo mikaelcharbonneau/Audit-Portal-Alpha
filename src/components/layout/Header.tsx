@@ -44,13 +44,19 @@ const Header = () => {
         <Box 
           direction="row" 
           align="center"
-          gap="small"
+          gap="medium"
           flex={false}
+          width={{ min: '200px' }}
         >
           <Box width="32px" height="32px" flex={false}>
             <HPELogo height={32} />
           </Box>
-          <Text weight="bold" color="text-strong" size="small">
+          <Text 
+            weight="bold" 
+            color="text-strong" 
+            size="medium"
+            margin={{ left: 'small' }}
+          >
             Walkthrough App
           </Text>
         </Box>
