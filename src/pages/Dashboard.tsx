@@ -4,6 +4,7 @@ import { ClipboardList, AlertTriangle, CheckCircle, ChevronDown } from 'lucide-r
 import { format } from 'date-fns';
 import { supabase } from '../lib/supabaseClient';
 import { useAuth } from '../context/AuthContext';
+import { locations, datahallsByLocation } from '../utils/locationMapping';
 
 interface Inspection {
   Id: string;
@@ -17,22 +18,14 @@ interface Inspection {
   };
 }
 
-const dataHalls = [
-  'Island 1',
-  'Island 8',
-  'Island 9',
-  'Island 10',
-  'Island 11',
-  'Island 12',
-  'Green Nitrogen'
-];
-
 const Dashboard = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
   const [inspections, setInspections] = useState<Inspection[]>([]);
   const [loading, setLoading] = useState(true);
-  const [showDropdown, setShowDropdown] = useState(false);
+  const [showLocationDropdown, setShowLocationDropdown] = useState(false);
+  const [selectedLocation, setSelectedLocation] = useState<string | null>(null);
+  const [showDatahallDropdown, setShowDatahallDropdown] = useState(false);
   const [userFullName, setUserFullName] = useState<string>('');
 
   useEffect(() => {
@@ -73,15 +66,26 @@ const Dashboard = () => {
     }
   };
 
+  const handleLocationSelect = (location: string) => {
+    setSelectedLocation(location);
+    setShowLocationDropdown(false);
+    setShowDatahallDropdown(true);
+  };
+
+  const handleDatahallSelect = (datahall: string) => {
+    navigate('/inspection', { 
+      state: { 
+        selectedLocation: selectedLocation,
+        selectedDataHall: datahall 
+      } 
+    });
+    setShowDatahallDropdown(false);
+  };
+
   const stats = {
     completed: inspections.length,
     active: inspections.filter(i => i.ReportData.isUrgent).length,
     resolved: inspections.filter(i => !i.ReportData.isUrgent).length
-  };
-
-  const handleDataHallSelect = (datahall: string) => {
-    navigate('/inspection', { state: { selectedDataHall: datahall } });
-    setShowDropdown(false);
   };
 
   const getShortLocation = (location: string) => {
@@ -97,23 +101,37 @@ const Dashboard = () => {
         </div>
         <div className="relative">
           <button
-            onClick={() => setShowDropdown(!showDropdown)}
+            onClick={() => setShowLocationDropdown(!showLocationDropdown)}
             className="bg-emerald-500 text-white px-4 py-2 rounded-lg flex items-center gap-2 hover:bg-emerald-600"
           >
             <ClipboardList className="w-5 h-5" />
             Start Walkthrough
-            <ChevronDown className={`w-4 h-4 transition-transform ${showDropdown ? 'rotate-180' : ''}`} />
+            <ChevronDown className={`w-4 h-4 transition-transform ${showLocationDropdown ? 'rotate-180' : ''}`} />
           </button>
           
-          {showDropdown && (
+          {showLocationDropdown && (
             <div className="absolute right-0 mt-2 w-56 bg-white rounded-lg shadow-lg py-1 z-50">
-              {dataHalls.map((hall) => (
+              {locations.map((location) => (
                 <button
-                  key={hall}
-                  onClick={() => handleDataHallSelect(hall)}
+                  key={location}
+                  onClick={() => handleLocationSelect(location)}
                   className="w-full text-left px-4 py-2 text-gray-700 hover:bg-emerald-50 hover:text-emerald-600"
                 >
-                  {hall}
+                  {location}
+                </button>
+              ))}
+            </div>
+          )}
+
+          {showDatahallDropdown && selectedLocation && (
+            <div className="absolute right-0 mt-2 w-56 bg-white rounded-lg shadow-lg py-1 z-50">
+              {datahallsByLocation[selectedLocation].map((datahall) => (
+                <button
+                  key={datahall}
+                  onClick={() => handleDatahallSelect(datahall)}
+                  className="w-full text-left px-4 py-2 text-gray-700 hover:bg-emerald-50 hover:text-emerald-600"
+                >
+                  {datahall}
                 </button>
               ))}
             </div>
