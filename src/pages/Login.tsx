@@ -49,27 +49,27 @@ const Login = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-hpe-blue-950 px-4">
+    <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4">
       <div className="max-w-md w-full">
         {/* Header */}
         <div className="text-center mb-8">
           <div className="inline-flex mb-6">
             <HPELogo height={48} />
           </div>
-          <h2 className="text-2xl font-bold text-hpe-blue-700 dark:text-white">
+          <h2 className="text-2xl font-bold text-hpe-blue-700">
             HPE Walkthrough App
           </h2>
-          <p className="mt-2 text-sm text-hpe-blue-500 dark:text-hpe-blue-200">
+          <p className="mt-2 text-sm text-hpe-blue-500">
             Sign in to access your dashboard
           </p>
         </div>
         
         {/* Login Card */}
-        <div className="bg-white dark:bg-hpe-blue-900 shadow-md rounded-lg">
+        <div className="bg-white shadow-md rounded-lg">
           {/* Form */}
           <form onSubmit={handleSubmit} className="p-6">
             {error && (
-              <div className="mb-4 p-3 bg-hpe-error-50 dark:bg-hpe-error-900/30 border border-hpe-error-200 dark:border-hpe-error-800 rounded-md text-sm text-hpe-error-600 dark:text-hpe-error-300">
+              <div className="mb-4 p-3 bg-hpe-error-50 border border-hpe-error-200 rounded-md text-sm text-hpe-error-600">
                 {error}
               </div>
             )}
@@ -102,7 +102,7 @@ const Login = () => {
                 <button 
                   type="button"
                   onClick={() => navigate('/reset-password')}
-                  className="text-sm text-hpe-green hover:text-hpe-green-600 dark:text-hpe-green-400"
+                  className="text-sm text-hpe-green hover:text-hpe-green-600"
                 >
                   Forgot password?
                 </button>
@@ -132,7 +132,7 @@ const Login = () => {
                   onChange={(e) => setRememberMe(e.target.checked)}
                   className="h-4 w-4 text-hpe-green-500 rounded border-gray-300 focus:ring-hpe-green-500"
                 />
-                <label htmlFor="remember-me" className="ml-2 text-sm text-hpe-blue-600 dark:text-hpe-blue-100">
+                <label htmlFor="remember-me" className="ml-2 text-sm text-hpe-blue-600">
                   Remember me
                 </label>
               </div>
@@ -158,21 +158,21 @@ const Login = () => {
           </form>
           
           {/* Footer */}
-          <div className="px-6 py-4 bg-gray-50 dark:bg-hpe-blue-800 text-center rounded-b-lg">
-            <p className="text-sm text-hpe-blue-500 dark:text-hpe-blue-200">
-              Don't have an account? <a href="mailto:support@hpe.com" className="text-hpe-green hover:text-hpe-green-600 dark:text-hpe-green-400 font-medium">Contact your administrator</a>
+          <div className="px-6 py-4 bg-gray-50 text-center rounded-b-lg">
+            <p className="text-sm text-hpe-blue-500">
+              Don't have an account? <a href="mailto:support@hpe.com" className="text-hpe-green hover:text-hpe-green-600 font-medium">Contact your administrator</a>
             </p>
           </div>
         </div>
         
         {/* Footer Links */}
         <div className="mt-6 text-center">
-          <div className="flex justify-center space-x-4 text-xs text-hpe-blue-500 dark:text-hpe-blue-300">
-            <a href="https://www.hpe.com/us/en/legal/privacy.html" target="_blank" rel="noopener noreferrer" className="hover:text-hpe-blue-700 dark:hover:text-white">Privacy Policy</a>
-            <a href="https://www.hpe.com/us/en/legal/terms-of-use.html" target="_blank" rel="noopener noreferrer" className="hover:text-hpe-blue-700 dark:hover:text-white">Terms of Service</a>
-            <a href="mailto:support@hpe.com" className="hover:text-hpe-blue-700 dark:hover:text-white">Contact Support</a>
+          <div className="flex justify-center space-x-4 text-xs text-hpe-blue-500">
+            <a href="https://www.hpe.com/us/en/legal/privacy.html" target="_blank" rel="noopener noreferrer" className="hover:text-hpe-blue-700">Privacy Policy</a>
+            <a href="https://www.hpe.com/us/en/legal/terms-of-use.html" target="_blank" rel="noopener noreferrer" className="hover:text-hpe-blue-700">Terms of Service</a>
+            <a href="mailto:support@hpe.com" className="hover:text-hpe-blue-700">Contact Support</a>
           </div>
-          <p className="mt-3 text-xs text-hpe-blue-400 dark:text-hpe-blue-400">
+          <p className="mt-3 text-xs text-hpe-blue-400">
             &copy; {new Date().getFullYear()} Hewlett Packard Enterprise Development LP
           </p>
         </div>
