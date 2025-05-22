@@ -23,12 +23,23 @@ export default defineConfig({
       '/rest/v1': {
         target: process.env.VITE_SUPABASE_URL,
         changeOrigin: true,
+        secure: false,
+        ws: true,
         rewrite: (path) => path.replace(/^\/rest\/v1/, '/rest/v1')
       },
       '/auth/v1': {
         target: process.env.VITE_SUPABASE_URL,
         changeOrigin: true,
+        secure: false,
+        ws: true,
         rewrite: (path) => path.replace(/^\/auth\/v1/, '/auth/v1')
+      },
+      '/storage/v1': {
+        target: process.env.VITE_SUPABASE_URL,
+        changeOrigin: true,
+        secure: false,
+        ws: true,
+        rewrite: (path) => path.replace(/^\/storage\/v1/, '/storage/v1')
       }
     }
   }
