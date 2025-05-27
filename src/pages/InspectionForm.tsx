@@ -238,7 +238,7 @@ const InspectionForm = () => {
 
             {hasIssues === true && (
               <div className="mt-8 border-t border-gray-200 pt-6">
-                {racks.map((rack, index) => (
+                {racks.map((rack) => (
                   <div
                     key={rack.id}
                     className="bg-white rounded-lg shadow-sm mb-6 overflow-hidden border border-gray-200"
@@ -249,7 +249,9 @@ const InspectionForm = () => {
                         className="flex items-center gap-3 hover:text-emerald-600"
                       >
                         <Server size={20} className="text-gray-500" />
-                        <span className="font-medium">Issue #{index + 1}</span>
+                        <span className="font-medium">
+                          Rack {rack.location || '#'}
+                        </span>
                         <ChevronDown className={`w-4 h-4 text-gray-400 transition-transform ${
                           expandedRacks.includes(rack.id) ? 'rotate-180' : ''
                         }`} />
