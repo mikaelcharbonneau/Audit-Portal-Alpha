@@ -6,29 +6,46 @@ export type Json =
   | { [key: string]: Json | undefined }
   | Json[]
 
-export type Database = {
+export interface Database {
   public: {
     Tables: {
       AuditReports: {
         Row: {
           Id: string
-          ReportData: Json
-          Timestamp: string
           UserEmail: string
+          Timestamp: string
+          ReportData: Json
+          datacenter: string
+          datahall: string
+          issues_reported: number
+          state: 'Healthy' | 'Warning' | 'Critical'
+          walkthrough_id: number
+          user_full_name: string
         }
         Insert: {
           Id?: string
-          ReportData: Json
-          Timestamp?: string
           UserEmail: string
+          Timestamp?: string
+          ReportData: Json
+          datacenter: string
+          datahall: string
+          issues_reported: number
+          state: 'Healthy' | 'Warning' | 'Critical'
+          walkthrough_id: number
+          user_full_name: string
         }
         Update: {
           Id?: string
-          ReportData?: Json
-          Timestamp?: string
           UserEmail?: string
+          Timestamp?: string
+          ReportData?: Json
+          datacenter?: string
+          datahall?: string
+          issues_reported?: number
+          state?: 'Healthy' | 'Warning' | 'Critical'
+          walkthrough_id?: number
+          user_full_name?: string
         }
-        Relationships: []
       }
     }
     Views: {
@@ -38,9 +55,6 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
-      [_ in never]: never
-    }
-    CompositeTypes: {
       [_ in never]: never
     }
   }
