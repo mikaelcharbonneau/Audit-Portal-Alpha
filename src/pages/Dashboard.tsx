@@ -14,7 +14,7 @@ interface Inspection {
   datahall: string;
   issues_reported: number;
   state: 'Healthy' | 'Warning' | 'Critical';
-  ticket: string | null;
+  walkthrough_id: number;
   user_full_name: string;
 }
 
@@ -191,7 +191,7 @@ const Dashboard = () => {
                       {inspection.issues_reported === 0 ? 'Healthy' : inspection.state}
                     </span>
                   </td>
-                  <td className="px-6 py-4 text-sm text-gray-900">#{inspection.ticket || 'N/A'}</td>
+                  <td className="px-6 py-4 text-sm text-gray-900">#{inspection.walkthrough_id}</td>
                   <td className="px-6 py-4 text-sm text-gray-900">{inspection.user_full_name}</td>
                   <td className="px-6 py-4 text-sm text-gray-900">{format(new Date(inspection.Timestamp), 'MMM d, yyyy')}</td>
                 </tr>
