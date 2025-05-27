@@ -13,7 +13,7 @@ export const locations = [
 export const datahallsByLocation: LocationStructure = {
   'Canada - Quebec': ['Island 1', 'Island 8', 'Island 9', 'Island 10', 'Island 11', 'Island 12', 'Green Nitrogen'],
   'Norway - Enebakk': ['Flying Whale'],
-  'Norway - Rjukan': ['H20 Lab'],
+  'Norway - Rjukan': ['Flying Whale'],
   'United States - Dallas': ['Island 1', 'Island 2', 'Island 3', 'Island 4'],
-  'United States - Houston': []
+  'United States - Houston': ['H20 Lab']
 };
