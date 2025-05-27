@@ -25,11 +25,17 @@ const Dashboard = () => {
   const [loading, setLoading] = useState(true);
   const [showLocationDropdown, setShowLocationDropdown] = useState(false);
   const [userFullName, setUserFullName] = useState<string>('');
+  const [walkThroughNumber, setWalkThroughNumber] = useState(1);
 
   useEffect(() => {
     fetchInspections();
     if (user) {
       fetchUserProfile();
+    }
+    // Get the last walkthrough number from localStorage
+    const lastNumber = localStorage.getItem('lastWalkThroughNumber');
+    if (lastNumber) {
+      setWalkThroughNumber(parseInt(lastNumber, 10));
     }
   }, [user]);
 
@@ -159,7 +165,7 @@ const Dashboard = () => {
                 <th className="text-left px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Data Hall</th>
                 <th className="text-left px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Issues Reported</th>
                 <th className="text-left px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">State</th>
-                <th className="text-left px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Ticket</th>
+                <th className="text-left px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Walkthrough ID</th>
                 <th className="text-left px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Technician</th>
                 <th className="text-left px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
               </tr>
@@ -185,7 +191,7 @@ const Dashboard = () => {
                       {inspection.issues_reported === 0 ? 'Healthy' : inspection.state}
                     </span>
                   </td>
-                  <td className="px-6 py-4 text-sm text-gray-900">{inspection.ticket || 'N/A'}</td>
+                  <td className="px-6 py-4 text-sm text-gray-900">#{inspection.ticket || 'N/A'}</td>
                   <td className="px-6 py-4 text-sm text-gray-900">{inspection.user_full_name}</td>
                   <td className="px-6 py-4 text-sm text-gray-900">{format(new Date(inspection.Timestamp), 'MMM d, yyyy')}</td>
                 </tr>
