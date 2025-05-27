@@ -38,6 +38,9 @@ interface RackForm {
 const psuStatusOptions = ['Healthy', 'Amber LED', 'Powered-Off', 'Other'];
 const psuIdOptions = ['PSU 1', 'PSU 2', 'PSU 3', 'PSU 4', 'PSU 5', 'PSU 6'];
 const uHeightOptions = Array.from({ length: 49 }, (_, i) => `U${i}`);
+const pduStatusOptions = ['Healthy', 'Tripped Breaker', 'Powered-Off', 'Active Alarm', 'Other'];
+const pduIdOptions = ['PDU A', 'PDU B', 'PDU C'];
+const rdhxStatusOptions = ['Healthy', 'Water Leak', 'Powered-Off', 'Active Alarm', 'Other'];
 
 const InspectionForm = () => {
   const location = useLocation();
@@ -368,6 +371,102 @@ const InspectionForm = () => {
                                     value={rack.psuDetails?.comments || ''}
                                     onChange={(e) => updateRack(rack.id, {
                                       psuDetails: { ...rack.psuDetails, comments: e.target.value }
+                                    })}
+                                    className="w-full px-4 py-2.5 border border-gray-300 rounded-md focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 min-h-[100px]"
+                                    placeholder="Add any additional comments"
+                                  />
+                                </div>
+                              </div>
+                            </div>
+                          )}
+
+                          {rack.devices.powerDistributionUnit && (
+                            <div className="pt-4 border-t border-gray-100">
+                              <h3 className="text-lg font-medium mb-4">Power Distribution Unit Details</h3>
+                              <div className="space-y-4">
+                                <div>
+                                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                                    Status
+                                  </label>
+                                  <select
+                                    value={rack.pduDetails?.status || ''}
+                                    onChange={(e) => updateRack(rack.id, {
+                                      pduDetails: { ...rack.pduDetails, status: e.target.value }
+                                    })}
+                                    className="w-full px-4 py-2.5 border border-gray-300 rounded-md focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
+                                  >
+                                    <option value="">Select status</option>
+                                    {pduStatusOptions.map(option => (
+                                      <option key={option} value={option}>{option}</option>
+                                    ))}
+                                  </select>
+                                </div>
+
+                                <div>
+                                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                                    PDU ID
+                                  </label>
+                                  <select
+                                    value={rack.pduDetails?.pduId || ''}
+                                    onChange={(e) => updateRack(rack.id, {
+                                      pduDetails: { ...rack.pduDetails, pduId: e.target.value }
+                                    })}
+                                    className="w-full px-4 py-2.5 border border-gray-300 rounded-md focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
+                                  >
+                                    <option value="">Select PDU</option>
+                                    {pduIdOptions.map(option => (
+                                      <option key={option} value={option}>{option}</option>
+                                    ))}
+                                  </select>
+                                </div>
+
+                                <div>
+                                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                                    Comments
+                                  </label>
+                                  <textarea
+                                    value={rack.pduDetails?.comments || ''}
+                                    onChange={(e) => updateRack(rack.id, {
+                                      pduDetails: { ...rack.pduDetails, comments: e.target.value }
+                                    })}
+                                    className="w-full px-4 py-2.5 border border-gray-300 rounded-md focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 min-h-[100px]"
+                                    placeholder="Add any additional comments"
+                                  />
+                                </div>
+                              </div>
+                            </div>
+                          )}
+
+                          {rack.devices.rearDoorHeatExchanger && (
+                            <div className="pt-4 border-t border-gray-100">
+                              <h3 className="text-lg font-medium mb-4">Rear Door Heat Exchanger Details</h3>
+                              <div className="space-y-4">
+                                <div>
+                                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                                    Status
+                                  </label>
+                                  <select
+                                    value={rack.rdhxDetails?.status || ''}
+                                    onChange={(e) => updateRack(rack.id, {
+                                      rdhxDetails: { ...rack.rdhxDetails, status: e.target.value }
+                                    })}
+                                    className="w-full px-4 py-2.5 border border-gray-300 rounded-md focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
+                                  >
+                                    <option value="">Select status</option>
+                                    {rdhxStatusOptions.map(option => (
+                                      <option key={option} value={option}>{option}</option>
+                                    ))}
+                                  </select>
+                                </div>
+
+                                <div>
+                                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                                    Comments
+                                  </label>
+                                  <textarea
+                                    value={rack.rdhxDetails?.comments || ''}
+                                    onChange={(e) => updateRack(rack.id, {
+                                      rdhxDetails: { ...rack.rdhxDetails, comments: e.target.value }
                                     })}
                                     className="w-full px-4 py-2.5 border border-gray-300 rounded-md focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 min-h-[100px]"
                                     placeholder="Add any additional comments"
