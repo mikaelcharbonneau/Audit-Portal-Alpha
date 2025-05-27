@@ -53,6 +53,7 @@ const InspectionForm = () => {
   const [racks, setRacks] = useState<RackForm[]>([]);
   const [expandedRacks, setExpandedRacks] = useState<string[]>([]);
   const [walkThroughNumber, setWalkThroughNumber] = useState(42);
+  const [validationErrors, setValidationErrors] = useState<string[]>([]);
 
   useEffect(() => {
     const lastNumber = localStorage.getItem('lastWalkThroughNumber');
@@ -69,16 +70,55 @@ const InspectionForm = () => {
   const datahalls = datahallsByLocation[selectedLocation] || [];
   const availableRacks = selectedDataHall ? rackLocations[selectedDataHall] || [] : [];
 
+  const validateRack = (rack: RackForm): string[] => {
+    const errors: string[] = [];
+    
+    if (!rack.location) {
+      errors.push(`Issue #${racks.indexOf(rack) + 1}: Tile location is required`);
+    }
+
+    if (!rack.devices.powerSupplyUnit && !rack.devices.powerDistributionUnit && !rack.devices.rearDoorHeatExchanger) {
+      errors.push(`Issue #${racks.indexOf(rack) + 1}: At least one device must be selected`);
+    }
+
+    if (rack.devices.powerSupplyUnit) {
+      if (!rack.psuDetails?.status) {
+        errors.push(`Issue #${racks.indexOf(rack) + 1}: PSU status is required`);
+      }
+      if (!rack.psuDetails?.psuId) {
+        errors.push(`Issue #${racks.indexOf(rack) + 1}: PSU ID is required`);
+      }
+      if (!rack.psuDetails?.uHeight) {
+        errors.push(`Issue #${racks.indexOf(rack) + 1}: U-Height is required`);
+      }
+    }
+
+    if (rack.devices.powerDistributionUnit) {
+      if (!rack.pduDetails?.status) {
+        errors.push(`Issue #${racks.indexOf(rack) + 1}: PDU status is required`);
+      }
+      if (!rack.pduDetails?.pduId) {
+        errors.push(`Issue #${racks.indexOf(rack) + 1}: PDU ID is required`);
+      }
+    }
+
+    if (rack.devices.rearDoorHeatExchanger && !rack.rdhxDetails?.status) {
+      errors.push(`Issue #${racks.indexOf(rack) + 1}: RDHX status is required`);
+    }
+
+    return errors;
+  };
+
   const isFormValid = () => {
     if (!selectedDataHall) return false;
     if (hasIssues === null) return false;
     if (hasIssues === true) {
-      return racks.every(rack => 
-        rack.location && 
-        (rack.devices.powerSupplyUnit || 
-         rack.devices.powerDistributionUnit || 
-         rack.devices.rearDoorHeatExchanger)
-      );
+      const errors: string[] = [];
+      racks.forEach(rack => {
+        errors.push(...validateRack(rack));
+      });
+      setValidationErrors(errors);
+      return errors.length === 0;
     }
     return true;
   };
@@ -106,18 +146,24 @@ const InspectionForm = () => {
     );
   };
 
+  const removeRack = (rackId: string) => {
+    setRacks(racks.filter(rack => rack.id !== rackId));
+    setExpandedRacks(expandedRacks.filter(id => id !== rackId));
+    setValidationErrors([]);
+  };
+
   const updateRack = (rackId: string, updates: Partial<RackForm>) => {
     setRacks(racks.map(rack => 
       rack.id === rackId ? { ...rack, ...updates } : rack
     ));
-  };
-
-  const removeRack = (rackId: string) => {
-    setRacks(racks.filter(rack => rack.id !== rackId));
-    setExpandedRacks(expandedRacks.filter(id => id !== rackId));
+    setValidationErrors([]);
   };
 
   const handleSubmit = async () => {
+    if (!isFormValid()) {
+      return;
+    }
+
     setLoading(true);
     try {
       const { data, error } = await supabase
@@ -170,7 +216,7 @@ const InspectionForm = () => {
             
             <div className="relative mb-8">
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Select Data Hall
+                Select Data Hall *
               </label>
               <button
                 onClick={() => setShowDatahallDropdown(!showDatahallDropdown)}
@@ -200,9 +246,20 @@ const InspectionForm = () => {
               )}
             </div>
 
+            {validationErrors.length > 0 && (
+              <div className="mb-6 bg-red-50 border border-red-200 rounded-lg p-4">
+                <h3 className="text-red-700 font-medium mb-2">Please fix the following errors:</h3>
+                <ul className="list-disc list-inside text-red-600 text-sm">
+                  {validationErrors.map((error, index) => (
+                    <li key={index}>{error}</li>
+                  ))}
+                </ul>
+              </div>
+            )}
+
             <div className="border-b border-gray-200 pb-6 mb-6">
               <h2 className="text-lg font-medium mb-4">
-                Have you discovered any issues during the walkthrough?
+                Have you discovered any issues during the walkthrough? *
               </h2>
               <div className="flex gap-4">
                 <button
@@ -323,7 +380,7 @@ const InspectionForm = () => {
                               <div className="space-y-4">
                                 <div>
                                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                                    Status
+                                    Status *
                                   </label>
                                   <select
                                     value={rack.psuDetails?.status || ''}
@@ -341,7 +398,7 @@ const InspectionForm = () => {
 
                                 <div>
                                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                                    PSU ID
+                                    PSU ID *
                                   </label>
                                   <select
                                     value={rack.psuDetails?.psuId || ''}
@@ -359,7 +416,7 @@ const InspectionForm = () => {
 
                                 <div>
                                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                                    U-Height
+                                    U-Height *
                                   </label>
                                   <select
                                     value={rack.psuDetails?.uHeight || ''}
@@ -398,7 +455,7 @@ const InspectionForm = () => {
                               <div className="space-y-4">
                                 <div>
                                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                                    Status
+                                    Status *
                                   </label>
                                   <select
                                     value={rack.pduDetails?.status || ''}
@@ -416,7 +473,7 @@ const InspectionForm = () => {
 
                                 <div>
                                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                                    PDU ID
+                                    PDU ID *
                                   </label>
                                   <select
                                     value={rack.pduDetails?.pduId || ''}
@@ -455,7 +512,7 @@ const InspectionForm = () => {
                               <div className="space-y-4">
                                 <div>
                                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                                    Status
+                                    Status *
                                   </label>
                                   <select
                                     value={rack.rdhxDetails?.status || ''}
