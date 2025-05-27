@@ -11,11 +11,14 @@ export default defineConfig({
   },
   server: {
     watch: {
-      usePolling: true
+      usePolling: true,
+      interval: 1000,
     },
     hmr: {
+      host: 'localhost',
+      protocol: 'ws',
       clientPort: 443,
-      host: 'localhost'
+      timeout: 120000,
     },
     proxy: {
       '/api': {
