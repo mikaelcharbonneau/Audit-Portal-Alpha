@@ -5,6 +5,7 @@ import { ChevronDown, Server, Trash2 } from 'lucide-react';
 import { datahallsByLocation } from '../utils/locationMapping';
 import { rackLocations } from '../utils/rackLocations';
 import { supabase } from '../lib/supabaseClient';
+import { useAuth } from '../context/AuthContext';
 
 interface LocationState {
   selectedLocation?: string;
@@ -45,6 +46,7 @@ const rdhxStatusOptions = ['Healthy', 'Water Leak', 'Powered-Off', 'Active Alarm
 const InspectionForm = () => {
   const location = useLocation();
   const navigate = useNavigate();
+  const { user } = useAuth();
   const { selectedLocation } = (location.state as LocationState) || {};
   const [selectedDataHall, setSelectedDataHall] = useState<string>('');
   const [showDatahallDropdown, setShowDatahallDropdown] = useState(false);
@@ -52,14 +54,36 @@ const InspectionForm = () => {
   const [loading, setLoading] = useState(false);
   const [racks, setRacks] = useState<RackForm[]>([]);
   const [expandedRacks, setExpandedRacks] = useState<string[]>([]);
-  const [walkThroughNumber, setWalkThroughNumber] = useState(42);
+  const [walkThroughNumber, setWalkThroughNumber] = useState(1);
+  const [userFullName, setUserFullName] = useState('');
 
   useEffect(() => {
     const lastNumber = localStorage.getItem('lastWalkThroughNumber');
     if (lastNumber) {
-      setWalkThroughNumber(parseInt(lastNumber, 10));
+      setWalkThroughNumber(parseInt(lastNumber, 10) + 1);
     }
-  }, []);
+
+    if (user) {
+      fetchUserProfile();
+    }
+  }, [user]);
+
+  const fetchUserProfile = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('user_profiles')
+        .select('full_name')
+        .eq('user_id', user?.id)
+        .single();
+
+      if (error) throw error;
+      if (data) {
+        setUserFullName(data.full_name);
+      }
+    } catch (error) {
+      console.error('Error fetching user profile:', error);
+    }
+  };
 
   if (!selectedLocation) {
     navigate('/');
@@ -117,7 +141,6 @@ const InspectionForm = () => {
     setRacks(updatedRacks);
     setExpandedRacks(expandedRacks.filter(id => id !== rackId));
     
-    // If we're removing the last rack, reset hasIssues to null
     if (updatedRacks.length === 0) {
       setHasIssues(null);
     }
@@ -129,7 +152,13 @@ const InspectionForm = () => {
       const { data, error } = await supabase
         .from('AuditReports')
         .insert([{
-          UserEmail: 'user@example.com',
+          UserEmail: user?.email,
+          datacenter: selectedLocation,
+          datahall: selectedDataHall,
+          issues_reported: hasIssues ? racks.length : 0,
+          state: hasIssues ? (racks.length > 2 ? 'Critical' : 'Warning') : 'Healthy',
+          walkthrough_id: walkThroughNumber,
+          user_full_name: userFullName,
           ReportData: {
             location: selectedLocation,
             datahall: selectedDataHall,
@@ -143,8 +172,7 @@ const InspectionForm = () => {
 
       if (error) throw error;
 
-      const nextNumber = walkThroughNumber + 1;
-      localStorage.setItem('lastWalkThroughNumber', nextNumber.toString());
+      localStorage.setItem('lastWalkThroughNumber', walkThroughNumber.toString());
       
       navigate('/confirmation', { 
         state: { 
