@@ -100,3 +100,5 @@ const determineSeverity = (rack: RackForm): 'critical' | 'high' | 'medium' | 'lo
   
   return 'medium';
 };
+
+export default determineSeverity
