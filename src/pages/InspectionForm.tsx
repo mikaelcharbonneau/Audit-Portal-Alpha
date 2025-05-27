@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Box } from 'grommet';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { ChevronDown, Server, Trash2 } from 'lucide-react';
@@ -52,25 +52,16 @@ const InspectionForm = () => {
   const [loading, setLoading] = useState(false);
   const [racks, setRacks] = useState<RackForm[]>([]);
   const [expandedRacks, setExpandedRacks] = useState<string[]>([]);
-  const [walkThroughNumber, setWalkThroughNumber] = useState(42);
-  const [validationErrors, setValidationErrors] = useState<string[]>([]);
-
-  useEffect(() => {
+  const [walkThroughNumber, setWalkThroughNumber] = useState<number>(() => {
     const lastNumber = localStorage.getItem('lastWalkThroughNumber');
-    if (lastNumber) {
-      setWalkThroughNumber(parseInt(lastNumber, 10));
-    }
-  }, []);
-
-  if (!selectedLocation) {
-    navigate('/');
-    return null;
-  }
+    return lastNumber ? parseInt(lastNumber, 10) : 42;
+  });
+  const [validationErrors, setValidationErrors] = useState<string[]>([]);
 
   const datahalls = datahallsByLocation[selectedLocation] || [];
   const availableRacks = selectedDataHall ? rackLocations[selectedDataHall] || [] : [];
 
-  const validateRack = (rack: RackForm): string[] => {
+  const validateRack = useCallback((rack: RackForm): string[] => {
     const errors: string[] = [];
     
     if (!rack.location) {
@@ -107,9 +98,9 @@ const InspectionForm = () => {
     }
 
     return errors;
-  };
+  }, [racks]);
 
-  const isFormValid = () => {
+  const isFormValid = useCallback(() => {
     if (!selectedDataHall) return false;
     if (hasIssues === null) return false;
     if (hasIssues === true) {
@@ -117,11 +108,15 @@ const InspectionForm = () => {
       racks.forEach(rack => {
         errors.push(...validateRack(rack));
       });
-      setValidationErrors(errors);
       return errors.length === 0;
     }
     return true;
-  };
+  }, [selectedDataHall, hasIssues, racks, validateRack]);
+
+  if (!selectedLocation) {
+    navigate('/');
+    return null;
+  }
 
   const handleYesIssuesClick = () => {
     setHasIssues(true);
@@ -149,18 +144,22 @@ const InspectionForm = () => {
   const removeRack = (rackId: string) => {
     setRacks(racks.filter(rack => rack.id !== rackId));
     setExpandedRacks(expandedRacks.filter(id => id !== rackId));
-    setValidationErrors([]);
   };
 
   const updateRack = (rackId: string, updates: Partial<RackForm>) => {
     setRacks(racks.map(rack => 
       rack.id === rackId ? { ...rack, ...updates } : rack
     ));
-    setValidationErrors([]);
   };
 
   const handleSubmit = async () => {
-    if (!isFormValid()) {
+    const errors: string[] = [];
+    racks.forEach(rack => {
+      errors.push(...validateRack(rack));
+    });
+    setValidationErrors(errors);
+
+    if (errors.length > 0) {
       return;
     }
 
