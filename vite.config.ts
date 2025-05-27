@@ -10,11 +10,6 @@ export default defineConfig({
     },
   },
   server: {
-    hmr: {
-      timeout: 120000,
-      clientPort: 443,
-      protocol: 'wss'
-    },
     proxy: {
       '/api': {
         target: 'http://localhost:3001',
