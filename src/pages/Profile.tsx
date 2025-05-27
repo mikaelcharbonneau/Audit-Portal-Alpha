@@ -55,10 +55,31 @@ const Profile = () => {
         .from('user_profiles')
         .select('*')
         .eq('user_id', user?.id)
-        .single();
+        .maybeSingle();
 
       if (error) throw error;
-      setProfile(data);
+      
+      // If no profile exists, create one with default values
+      if (!data) {
+        const defaultProfile = {
+          user_id: user?.id,
+          full_name: '',
+          avatar_url: null,
+          phone: null,
+          department: 'Data Center Operations'
+        };
+
+        const { data: newProfile, error: createError } = await supabase
+          .from('user_profiles')
+          .insert(defaultProfile)
+          .select()
+          .single();
+
+        if (createError) throw createError;
+        setProfile(newProfile);
+      } else {
+        setProfile(data);
+      }
     } catch (error: any) {
       console.error('Error fetching profile:', error);
       setError('Failed to load profile');
@@ -88,17 +109,26 @@ const Profile = () => {
         .from('user_stats')
         .select('*')
         .eq('user_id', user?.id)
-        .single();
+        .maybeSingle();
 
-      if (error) {
-        if (error.code === 'PGRST116') {
-          // No stats found, use defaults
-          return;
-        }
-        throw error;
-      }
+      if (error) throw error;
+      
       if (data) {
         setStats(data);
+      } else {
+        // Create default stats if none exist
+        const defaultStats = {
+          user_id: user?.id,
+          walkthroughs_completed: 0,
+          issues_resolved: 0,
+          reports_generated: 0
+        };
+
+        const { error: createError } = await supabase
+          .from('user_stats')
+          .insert(defaultStats);
+
+        if (createError) throw createError;
       }
     } catch (error: any) {
       console.error('Error fetching stats:', error);
