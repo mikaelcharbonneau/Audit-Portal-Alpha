@@ -38,6 +38,7 @@ const Profile = () => {
   const [error, setError] = useState<string | null>(null);
   const [showEditModal, setShowEditModal] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [updateSuccess, setUpdateSuccess] = useState(false);
 
   useEffect(() => {
     if (user) {
@@ -72,7 +73,7 @@ const Profile = () => {
           .from('user_profiles')
           .upsert(defaultProfile)
           .select()
-          .single();
+          .maybeSingle();
 
         if (createError) throw createError;
         setProfile(newProfile);
@@ -137,6 +138,7 @@ const Profile = () => {
 
   const handleProfileUpdate = async (values: Partial<UserProfile>) => {
     try {
+      setError(null);
       const { error } = await supabase
         .from('user_profiles')
         .upsert({
@@ -149,6 +151,8 @@ const Profile = () => {
       
       await fetchUserProfile();
       setShowEditModal(false);
+      setUpdateSuccess(true);
+      setTimeout(() => setUpdateSuccess(false), 3000);
     } catch (error: any) {
       console.error('Error updating profile:', error);
       setError('Failed to update profile');
@@ -158,6 +162,7 @@ const Profile = () => {
   const handleAvatarUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     try {
       setUploading(true);
+      setError(null);
       const file = event.target.files?.[0];
       if (!file) return;
 
@@ -196,7 +201,7 @@ const Profile = () => {
 
   if (loading) {
     return (
-      <Box fill align="center\" justify="center\" pad="large">
+      <Box fill align="center" justify="center" pad="large">
         <Spinner size="medium" />
         <Box margin={{ top: 'medium' }}>
           <p className="text-gray-600">Loading profile...</p>
@@ -210,6 +215,12 @@ const Profile = () => {
       {error && (
         <div className="mb-6 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg">
           {error}
+        </div>
+      )}
+
+      {updateSuccess && (
+        <div className="mb-6 bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-lg">
+          Profile updated successfully!
         </div>
       )}
 
