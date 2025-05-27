@@ -59,7 +59,6 @@ const Profile = () => {
 
       if (error) throw error;
       
-      // If no profile exists, create one with default values
       if (!data) {
         const defaultProfile = {
           user_id: user?.id,
@@ -71,7 +70,7 @@ const Profile = () => {
 
         const { data: newProfile, error: createError } = await supabase
           .from('user_profiles')
-          .insert(defaultProfile)
+          .upsert(defaultProfile)
           .select()
           .single();
 
@@ -116,7 +115,6 @@ const Profile = () => {
       if (data) {
         setStats(data);
       } else {
-        // Create default stats if none exist
         const defaultStats = {
           user_id: user?.id,
           walkthroughs_completed: 0,
@@ -126,9 +124,10 @@ const Profile = () => {
 
         const { error: createError } = await supabase
           .from('user_stats')
-          .insert(defaultStats);
+          .upsert(defaultStats);
 
         if (createError) throw createError;
+        setStats(defaultStats);
       }
     } catch (error: any) {
       console.error('Error fetching stats:', error);
@@ -142,7 +141,8 @@ const Profile = () => {
         .from('user_profiles')
         .upsert({
           user_id: user?.id,
-          ...values
+          ...values,
+          updated_at: new Date().toISOString()
         });
 
       if (error) throw error;
@@ -196,7 +196,7 @@ const Profile = () => {
 
   if (loading) {
     return (
-      <Box fill align="center\" justify="center\" pad="large">
+      <Box fill align="center" justify="center" pad="large">
         <Spinner size="medium" />
         <Box margin={{ top: 'medium' }}>
           <p className="text-gray-600">Loading profile...</p>
