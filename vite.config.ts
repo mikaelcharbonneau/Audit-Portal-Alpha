@@ -14,11 +14,11 @@ export default defineConfig({
       usePolling: true,
       interval: 1000,
     },
+    host: true,
+    port: 5173,
     hmr: {
-      host: true,
-      protocol: 'ws',
-      port: 5173,
-      clientPort: 5173,
+      clientPort: 443,
+      path: 'ws',
       timeout: 120000,
     },
     proxy: {
