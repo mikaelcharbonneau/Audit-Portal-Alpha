@@ -10,6 +10,13 @@ export default defineConfig({
     },
   },
   server: {
+    watch: {
+      usePolling: true
+    },
+    hmr: {
+      clientPort: 443,
+      host: 'localhost'
+    },
     proxy: {
       '/api': {
         target: 'http://localhost:3001',
