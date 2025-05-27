@@ -75,7 +75,7 @@ const Incidents = () => {
 
   if (loading) {
     return (
-      <Box pad="medium" align="center" justify="center">
+      <Box pad="medium\" align="center\" justify="center">
         <Text>Loading incidents...</Text>
       </Box>
     );
