@@ -16,6 +16,10 @@ interface Inspection {
   state: 'Healthy' | 'Warning' | 'Critical';
   walkthrough_id: number;
   user_full_name: string;
+  ReportData: {
+    comments?: string;
+    [key: string]: any;
+  };
 }
 
 const Dashboard = () => {
@@ -168,6 +172,7 @@ const Dashboard = () => {
                 <th className="text-left px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Walkthrough ID</th>
                 <th className="text-left px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Technician</th>
                 <th className="text-left px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
+                <th className="text-left px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Comments</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-200">
@@ -194,6 +199,9 @@ const Dashboard = () => {
                   <td className="px-6 py-4 text-sm text-gray-900">#{inspection.walkthrough_id}</td>
                   <td className="px-6 py-4 text-sm text-gray-900">{inspection.user_full_name}</td>
                   <td className="px-6 py-4 text-sm text-gray-900">{format(new Date(inspection.Timestamp), 'MMM d, yyyy')}</td>
+                  <td className="px-6 py-4 text-sm text-gray-900">
+                    {inspection.ReportData?.comments || '-'}
+                  </td>
                 </tr>
               ))}
             </tbody>
