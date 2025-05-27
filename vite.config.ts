@@ -17,7 +17,8 @@ export default defineConfig({
     hmr: {
       host: 'localhost',
       protocol: 'ws',
-      clientPort: 443,
+      port: 5173,
+      clientPort: 5173,
       timeout: 120000,
     },
     proxy: {
