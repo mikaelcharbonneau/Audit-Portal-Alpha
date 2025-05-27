@@ -38,7 +38,7 @@ const Dashboard = () => {
         .from('user_profiles')
         .select('full_name')
         .eq('user_id', user?.id)
-        .single();
+        .maybeSingle();
 
       if (error) throw error;
       if (data) {
