@@ -69,15 +69,15 @@ const handleSubmit = async () => {
 const generateIncidentDescription = (rack: RackForm) => {
   const issues = [];
   
-  if (rack.devices.powerSupplyUnit && rack.psuDetails) {
+  if (rack.devices?.powerSupplyUnit && rack.psuDetails) {
     issues.push(`PSU ${rack.psuDetails.psuId} at U${rack.psuDetails.uHeight}: ${rack.psuDetails.status}`);
   }
   
-  if (rack.devices.powerDistributionUnit && rack.pduDetails) {
+  if (rack.devices?.powerDistributionUnit && rack.pduDetails) {
     issues.push(`PDU ${rack.pduDetails.pduId}: ${rack.pduDetails.status}`);
   }
   
-  if (rack.devices.rearDoorHeatExchanger && rack.rdhxDetails) {
+  if (rack.devices?.rearDoorHeatExchanger && rack.rdhxDetails) {
     issues.push(`RDHX: ${rack.rdhxDetails.status}`);
   }
 
@@ -86,19 +86,27 @@ const generateIncidentDescription = (rack: RackForm) => {
 
 // Helper function to determine incident severity
 const determineSeverity = (rack: RackForm): 'critical' | 'high' | 'medium' | 'low' => {
+  // Check if rack and devices exist
+  if (!rack?.devices) {
+    return 'medium'; // Default severity if no devices data
+  }
+
+  // Check PDU status - Critical severity
   if (rack.devices.powerDistributionUnit && rack.pduDetails?.status === 'Powered-Off') {
     return 'critical';
   }
   
+  // Check PSU status - High severity
   if (rack.devices.powerSupplyUnit && rack.psuDetails?.status === 'Powered-Off') {
     return 'high';
   }
   
+  // Check RDHX status - Critical severity for water leaks
   if (rack.devices.rearDoorHeatExchanger && rack.rdhxDetails?.status === 'Water Leak') {
     return 'critical';
   }
   
-  return 'medium';
+  return 'medium'; // Default severity if no critical issues found
 };
 
 export default determineSeverity
