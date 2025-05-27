@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Box } from 'grommet';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { ChevronDown, Server } from 'lucide-react';
+import { ChevronDown, Server, Trash2 } from 'lucide-react';
 import { datahallsByLocation } from '../utils/locationMapping';
 import { rackLocations } from '../utils/rackLocations';
 import { supabase } from '../lib/supabaseClient';
@@ -110,6 +110,11 @@ const InspectionForm = () => {
     setRacks(racks.map(rack => 
       rack.id === rackId ? { ...rack, ...updates } : rack
     ));
+  };
+
+  const removeRack = (rackId: string) => {
+    setRacks(racks.filter(rack => rack.id !== rackId));
+    setExpandedRacks(expandedRacks.filter(id => id !== rackId));
   };
 
   const handleSubmit = async () => {
@@ -232,18 +237,25 @@ const InspectionForm = () => {
                     key={rack.id}
                     className="bg-white rounded-lg shadow-sm mb-6 overflow-hidden border border-gray-200"
                   >
-                    <button
-                      onClick={() => toggleRackExpansion(rack.id)}
-                      className="w-full flex items-center justify-between p-4 text-left hover:bg-gray-50 transition-colors"
-                    >
-                      <div className="flex items-center gap-3">
+                    <div className="flex items-center justify-between p-4 bg-gray-50">
+                      <button
+                        onClick={() => toggleRackExpansion(rack.id)}
+                        className="flex items-center gap-3 hover:text-emerald-600"
+                      >
                         <Server size={20} className="text-gray-500" />
                         <span className="font-medium">Issue #{index + 1}</span>
-                      </div>
-                      <ChevronDown className={`w-4 h-4 text-gray-400 transition-transform ${
-                        expandedRacks.includes(rack.id) ? 'rotate-180' : ''
-                      }`} />
-                    </button>
+                        <ChevronDown className={`w-4 h-4 text-gray-400 transition-transform ${
+                          expandedRacks.includes(rack.id) ? 'rotate-180' : ''
+                        }`} />
+                      </button>
+                      <button
+                        onClick={() => removeRack(rack.id)}
+                        className="text-red-500 hover:text-red-600 p-2"
+                        title="Remove issue"
+                      >
+                        <Trash2 size={20} />
+                      </button>
+                    </div>
 
                     {expandedRacks.includes(rack.id) && (
                       <div className="p-6 border-t border-gray-100">
@@ -481,24 +493,26 @@ const InspectionForm = () => {
                   </div>
                 ))}
 
-                <button
-                  onClick={() => {
-                    const newRack: RackForm = {
-                      id: `rack-${Date.now()}`,
-                      location: '',
-                      devices: {
-                        powerSupplyUnit: false,
-                        powerDistributionUnit: false,
-                        rearDoorHeatExchanger: false
-                      }
-                    };
-                    setRacks([...racks, newRack]);
-                    setExpandedRacks([...expandedRacks, newRack.id]);
-                  }}
-                  className="w-full py-3 text-emerald-600 border border-emerald-200 rounded-md hover:bg-emerald-50 hover:border-emerald-300 transition-colors"
-                >
-                  Add Another Issue
-                </button>
+                <div className="flex gap-4">
+                  <button
+                    onClick={() => {
+                      const newRack: RackForm = {
+                        id: `rack-${Date.now()}`,
+                        location: '',
+                        devices: {
+                          powerSupplyUnit: false,
+                          powerDistributionUnit: false,
+                          rearDoorHeatExchanger: false
+                        }
+                      };
+                      setRacks([...racks, newRack]);
+                      setExpandedRacks([...expandedRacks, newRack.id]);
+                    }}
+                    className="flex-1 py-3 text-emerald-600 border border-emerald-200 rounded-md hover:bg-emerald-50 hover:border-emerald-300 transition-colors"
+                  >
+                    Add Another Issue
+                  </button>
+                </div>
               </div>
             )}
           </div>
