@@ -15,7 +15,7 @@ export default defineConfig({
       interval: 1000,
     },
     hmr: {
-      host: 'localhost',
+      host: true,
       protocol: 'ws',
       port: 5173,
       clientPort: 5173,
