@@ -4,6 +4,7 @@ import { ClipboardList, AlertTriangle, CheckCircle, ChevronDown } from 'lucide-r
 import { format } from 'date-fns';
 import { supabase } from '../lib/supabaseClient';
 import { useAuth } from '../context/AuthContext';
+import { locations } from '../utils/locationMapping';
 
 interface Inspection {
   Id: string;
@@ -97,7 +98,7 @@ const Dashboard = () => {
           
           {showLocationDropdown && (
             <div className="absolute right-0 mt-2 w-64 bg-white rounded-lg shadow-lg py-1 z-50">
-              {['Canada - Quebec', 'Norway - Enebakk', 'United States - Dallas'].map((location) => (
+              {locations.map((location) => (
                 <button
                   key={location}
                   onClick={() => handleLocationSelect(location)}
