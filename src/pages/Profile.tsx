@@ -196,7 +196,7 @@ const Profile = () => {
 
   if (loading) {
     return (
-      <Box fill align="center" justify="center" pad="large">
+      <Box fill align="center\" justify="center\" pad="large">
         <Spinner size="medium" />
         <Box margin={{ top: 'medium' }}>
           <p className="text-gray-600">Loading profile...</p>
