@@ -113,8 +113,14 @@ const InspectionForm = () => {
   };
 
   const removeRack = (rackId: string) => {
-    setRacks(racks.filter(rack => rack.id !== rackId));
+    const updatedRacks = racks.filter(rack => rack.id !== rackId);
+    setRacks(updatedRacks);
     setExpandedRacks(expandedRacks.filter(id => id !== rackId));
+    
+    // If we're removing the last rack, reset hasIssues to null
+    if (updatedRacks.length === 0) {
+      setHasIssues(null);
+    }
   };
 
   const handleSubmit = async () => {
