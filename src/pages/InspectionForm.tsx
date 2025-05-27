@@ -158,7 +158,7 @@ const InspectionForm = () => {
           issues_reported: hasIssues ? racks.length : 0,
           state: hasIssues ? (racks.length > 2 ? 'Critical' : 'Warning') : 'Healthy',
           walkthrough_id: walkThroughNumber,
-          user_full_name: userFullName,
+          user_full_name: userFullName || user?.email?.split('@')[0] || 'Unknown',
           ReportData: {
             location: selectedLocation,
             datahall: selectedDataHall,
