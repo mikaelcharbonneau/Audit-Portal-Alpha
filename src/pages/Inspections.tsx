@@ -8,12 +8,12 @@ interface Inspection {
   Id: string;
   UserEmail: string;
   Timestamp: string;
-  ReportData: {
-    datahall: string;
-    status: string;
-    isUrgent: boolean;
-    [key: string]: any;
-  };
+  datacenter: string;
+  datahall: string;
+  issues_reported: number;
+  state: 'Healthy' | 'Warning' | 'Critical';
+  walkthrough_id: number;
+  user_full_name: string;
 }
 
 const Inspections = () => {
@@ -28,10 +28,13 @@ const Inspections = () => {
 
   const fetchInspections = async () => {
     try {
-      const { data } = await supabase
+      const { data, error } = await supabase
         .from('AuditReports')
         .select('*')
-        .order('Timestamp', { ascending: false });
+        .order('Timestamp', { ascending: false })
+        .limit(20);
+
+      if (error) throw error;
       setInspections(data || []);
     } catch (error) {
       console.error('Error fetching inspections:', error);
@@ -41,8 +44,9 @@ const Inspections = () => {
   };
 
   const filteredInspections = inspections.filter(inspection =>
-    inspection.ReportData.datahall.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    inspection.UserEmail.toLowerCase().includes(searchTerm.toLowerCase())
+    inspection.datacenter?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    inspection.datahall?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    inspection.user_full_name?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   return (
@@ -70,8 +74,9 @@ const Inspections = () => {
         </div>
         <select className="border border-gray-200 rounded-lg px-4 py-2">
           <option>All Statuses</option>
-          <option>Completed</option>
-          <option>In Progress</option>
+          <option>Healthy</option>
+          <option>Warning</option>
+          <option>Critical</option>
         </select>
         <button className="border border-gray-200 rounded-lg px-4 py-2 flex items-center gap-2">
           <Filter className="w-5 h-5" />
@@ -79,31 +84,63 @@ const Inspections = () => {
         </button>
       </div>
 
-      <div className="grid gap-4">
-        {filteredInspections.map((inspection) => (
-          <div
-            key={inspection.Id}
-            className="bg-white rounded-lg p-4 shadow-sm hover:shadow-md transition-shadow cursor-pointer"
-            onClick={() => navigate(`/reports/${inspection.Id}`)}
-          >
-            <div className="flex items-center gap-2 mb-2">
-              <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                inspection.ReportData.status === 'completed' ? 'bg-emerald-100 text-emerald-800' :
-                inspection.ReportData.status === 'in-progress' ? 'bg-amber-100 text-amber-800' :
-                'bg-gray-100 text-gray-800'
-              }`}>
-                {inspection.ReportData.status}
-              </span>
-              <span className="text-sm text-gray-500">
-                {format(new Date(inspection.Timestamp), 'MMM d, yyyy')}
-              </span>
-            </div>
-            <p className="font-medium mb-1">{inspection.ReportData.datahall}</p>
-            <p className="text-sm text-gray-600">
-              {inspection.ReportData.isUrgent ? 'Issues reported' : 'No issues reported'}
-            </p>
-          </div>
-        ))}
+      <div className="bg-white rounded-lg shadow-sm overflow-hidden">
+        <div className="max-h-[calc(100vh-280px)] overflow-y-auto">
+          <table className="w-full">
+            <thead className="sticky top-0 bg-gray-50 border-b border-gray-200">
+              <tr>
+                <th className="text-left px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Datacenter</th>
+                <th className="text-left px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Data Hall</th>
+                <th className="text-left px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Issues Reported</th>
+                <th className="text-left px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">State</th>
+                <th className="text-left px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Walkthrough ID</th>
+                <th className="text-left px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Technician</th>
+                <th className="text-left px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-gray-200">
+              {loading ? (
+                <tr>
+                  <td colSpan={7} className="px-6 py-4 text-center text-gray-500">
+                    Loading inspections...
+                  </td>
+                </tr>
+              ) : filteredInspections.length === 0 ? (
+                <tr>
+                  <td colSpan={7} className="px-6 py-4 text-center text-gray-500">
+                    No inspections found
+                  </td>
+                </tr>
+              ) : (
+                filteredInspections.map((inspection) => (
+                  <tr 
+                    key={inspection.Id}
+                    className="hover:bg-gray-50 cursor-pointer"
+                    onClick={() => navigate(`/reports/${inspection.Id}`)}
+                  >
+                    <td className="px-6 py-4 text-sm text-gray-900">{inspection.datacenter}</td>
+                    <td className="px-6 py-4 text-sm text-gray-900">{inspection.datahall}</td>
+                    <td className="px-6 py-4 text-sm text-gray-900">{inspection.issues_reported}</td>
+                    <td className="px-6 py-4 text-sm">
+                      <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                        inspection.state === 'Healthy'
+                          ? 'bg-green-100 text-green-800'
+                          : inspection.state === 'Critical'
+                            ? 'bg-red-100 text-red-800'
+                            : 'bg-yellow-100 text-yellow-800'
+                      }`}>
+                        {inspection.state}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4 text-sm text-gray-900">#{inspection.walkthrough_id}</td>
+                    <td className="px-6 py-4 text-sm text-gray-900">{inspection.user_full_name}</td>
+                    <td className="px-6 py-4 text-sm text-gray-900">{format(new Date(inspection.Timestamp), 'MMM d, yyyy')}</td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
   );
