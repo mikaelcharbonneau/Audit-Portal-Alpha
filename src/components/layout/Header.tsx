@@ -40,28 +40,97 @@ const Header = () => {
         fill="horizontal"
         gap="small"
       >
-        {/* Logo and App Name Section */}
+        {/* Logo and App Name Section - Fixed width */}
         <Box 
           direction="row" 
           align="center"
-          gap="medium"
-          width={{ min: '200px' }}
+          gap="xlarge"
+          width="250"
+          flex={false}
         >
-          <Box width="32px" height="32px">
+          <Box width="32px" height="32px" flex={false}>
             <HPELogo height={32} />
           </Box>
-          <Text weight="bold" size="medium">
-            HPE Audit Portal
+          <Text 
+            weight="bold" 
+            color="text-strong" 
+            size="medium"
+          >
+            Walkthrough App
           </Text>
         </Box>
 
-        {/* Navigation Section */}
-        <Box flex="grow" align="center">
-          <Nav direction="row" gap="medium">
+        {/* Navigation Section - Centered */}
+        {size !== 'small' && (
+          <Box flex="grow" align="center" justify="center">
+            <Nav direction="row" gap="medium">
+              {navItems.map((item) => (
+                <Link 
+                  key={item.path} 
+                  to={item.path} 
+                  style={{ textDecoration: 'none' }}
+                >
+                  <Box
+                    direction="row"
+                    align="center"
+                    pad={{ horizontal: 'small', vertical: 'xsmall' }}
+                    background={isActive(item.path) ? { color: 'brand', opacity: 'weak' } : undefined}
+                    round="small"
+                    gap="xsmall"
+                  >
+                    {item.icon}
+                    <Text 
+                      color={isActive(item.path) ? 'brand' : 'text'} 
+                      weight={isActive(item.path) ? 'bold' : undefined}
+                      size="small"
+                    >
+                      {item.label}
+                    </Text>
+                  </Box>
+                </Link>
+              ))}
+            </Nav>
+          </Box>
+        )}
+
+        {/* Actions Section - Fixed width */}
+        <Box 
+          direction="row" 
+          align="center" 
+          gap="small"
+          width="250px"
+          flex={false}
+          justify="end"
+        >
+          <Button 
+            plain 
+            icon={<Bell size={20} />} 
+            a11yTitle="Notifications" 
+          />
+          <Menu
+            icon={<User size={20} />}
+            items={[
+              { label: 'Profile', onClick: () => navigate('/profile') },
+              { label: 'Sign Out', onClick: handleLogout }
+            ]}
+          />
+        </Box>
+      </Box>
+
+      {/* Mobile Navigation */}
+      {size === 'small' && (
+        <Box 
+          direction="row" 
+          gap="small" 
+          margin={{ top: 'small' }} 
+          justify="center"
+          overflow="auto"
+        >
+          <Nav direction="row" gap="small">
             {navItems.map((item) => (
               <Link 
                 key={item.path} 
-                to={item.path}
+                to={item.path} 
                 style={{ textDecoration: 'none' }}
               >
                 <Box
@@ -85,29 +154,7 @@ const Header = () => {
             ))}
           </Nav>
         </Box>
-
-        {/* Actions Section */}
-        <Box 
-          direction="row" 
-          align="center" 
-          gap="small"
-          width={{ min: '120px' }}
-          justify="end"
-        >
-          <Button 
-            icon={<Bell size={20} />} 
-            plain
-            a11yTitle="Notifications"
-          />
-          <Menu
-            icon={<User size={20} />}
-            items={[
-              { label: 'Profile', onClick: () => navigate('/profile') },
-              { label: 'Sign Out', onClick: handleLogout }
-            ]}
-          />
-        </Box>
-      </Box>
+      )}
     </GrommetHeader>
   );
 };
